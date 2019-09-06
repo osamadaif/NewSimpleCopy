@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/activity_margin"
+    tools:context=".EditorActivity"
+    android:background="@color/colorPrimaryLight"
+    >
+
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Title"
+            android:textColor="@color/colorAccent"
+            android:fontFamily="sans-serif-medium"
+            android:textSize="24sp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
+
+        <EditText
+            android:id="@+id/edit_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="25"
+            android:hint="@string/Enter_Title"
+            android:padding="5dp"
+            android:inputType="textCapWords"
+            android:background="@drawable/btn_edittext"
+
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="16dp"
+            android:text="@string/Number"
+            android:textColor="@color/colorAccent"
+            android:fontFamily="sans-serif-medium"
+            android:textSize="24sp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
+
+        <EditText
+            android:id="@+id/edit_number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="25"
+            android:padding="5dp"
+            android:hint="@string/Enter_Number"
+            android:inputType="number"
+            android:background="@drawable/btn_edittext"
+
+            />
+
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="16dp"
+        android:text="@string/Notes"
+        android:textColor="@color/colorAccent"
+        android:fontFamily="sans-serif-medium"
+        android:textSize="24sp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
+
+    <EditText
+        android:id="@+id/edit_notes"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="5dp"
+        android:hint="@string/Enter_Notes"
+        android:gravity="start"
+        android:textStyle="normal"
+        android:inputType="textMultiLine|textCapWords"
+        android:background="@drawable/btn_edittext"
+
+        />
+
+
+</LinearLayout>
