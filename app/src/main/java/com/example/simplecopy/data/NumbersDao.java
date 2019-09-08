@@ -16,7 +16,7 @@ public interface NumbersDao {
     @Query("SELECT * FROM numbers")
     LiveData<List<Numbers>> loadAllTasks();
 
-    @Query ("SELECT * FROM numbers WHERE title OR number LIKE :searchQuery")
+    @Query ("SELECT * FROM numbers WHERE title LIKE :searchQuery OR number LIKE :searchQuery")
     LiveData<List<Numbers>> searchFor (String searchQuery);
 
     @Insert

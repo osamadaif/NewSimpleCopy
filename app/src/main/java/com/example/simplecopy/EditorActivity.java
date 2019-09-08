@@ -106,7 +106,7 @@ public class EditorActivity extends AppCompatActivity
         String titleString = mTitleEditText.getText ( ).toString ( ).trim ( );
         String notesString = mNotesEditText.getText ( ).toString ( ).trim ( );
         String numbersString = mNumbersEditText.getText ( ).toString ( ).trim ( );
-        final int numbers = Integer.parseInt (numbersString);
+        final long numbers = Long.parseLong (numbersString);
 
         final Numbers numbers1 = new Numbers (titleString,numbers,notesString);
         AppExecutors.getInstance ().diskIO ().execute (new Runnable ( ) {
@@ -143,8 +143,8 @@ public class EditorActivity extends AppCompatActivity
         }
 
         mTitleEditText.setText(number.getTitle());
-        int numberEdit = number.getNumber();
-        String numberStr = Integer.toString (numberEdit);
+        long numberEdit = number.getNumber();
+        String numberStr = String.valueOf (numberEdit);
         mNumbersEditText.setText(numberStr);
         mNotesEditText.setText(number.getNote());
     }

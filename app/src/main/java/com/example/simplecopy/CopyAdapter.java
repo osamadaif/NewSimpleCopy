@@ -60,8 +60,8 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
             holder.mTitleTextView.setText (title);
             holder.setPosition (position);
 
-            int numberInt = numbers.getNumber ( );
-            String numberStr = String.valueOf (numberInt);
+            long numberLong = numbers.getNumber ( );
+            String numberStr = String.valueOf (numberLong);
 
             holder.mNumberTextView.setText (numberStr);
             //holder.container.setAnimation (AnimationUtils.loadAnimation (mContext, R.anim.fade_scale_animation));
@@ -122,8 +122,6 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
 
         @Override
         public void onClick(View v) {
-//            int elementId = mNumberList.get (mPosition).getId ( );
-//            mItemClickListener.onItemClickListener (elementId);
             if (getAdapterPosition ( ) != RecyclerView.NO_POSITION && mItemClickListener != null) {
                 mItemClickListener.onItemClickListener (mNumberList.get (mPosition));
             }
@@ -147,13 +145,17 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
     }
 
     public List<Numbers> getItems() {
-        return mNumberListFull;
+        return mNumberList;
     }
 
 
     public void setItems(List<Numbers> itemList) {
         mNumberList = itemList;
-        mNumberListFull.addAll(itemList);
+        notifyDataSetChanged ( );
+    }
+
+    public void setSearchItem(List<Numbers> newList) {
+        mNumberList = newList;
         notifyDataSetChanged ( );
     }
 

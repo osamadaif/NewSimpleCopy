@@ -57,7 +57,7 @@
             android:id="@+id/edit_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxLength="25"
+            android:maxLength="17"
             android:padding="5dp"
             android:hint="@string/Enter_Number"
             android:inputType="number"

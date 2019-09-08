@@ -26,7 +26,8 @@ public class CopyRepository {
     }
 
     public LiveData<List<Numbers>> searchQuery(String query){
-        return numbersDao.searchFor (query);
+
+        return numbersDao.searchFor ("%" + query + "%");
     }
 
     public void insert(Numbers numbers){

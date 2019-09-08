@@ -10,17 +10,17 @@ public class Numbers {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private String title;
-    private int number;
+    private long number;
     private String note;
 
     @Ignore
-    public Numbers(String title, int number, String note) {
+    public Numbers(String title, long number, String note) {
         this.title = title;
         this.number = number;
         this.note = note;
     }
 
-    public Numbers(int id, String title, int number, String note) {
+    public Numbers(int id, String title, long number, String note) {
         this.id = id;
         this.title = title;
         this.number = number;
@@ -43,11 +43,11 @@ public class Numbers {
         this.title = title;
     }
 
-    public int getNumber() {
+    public long getNumber() {
         return number;
     }
 
-    public void setNumber(int number) {
+    public void setNumber(long number) {
         this.number = number;
     }
 

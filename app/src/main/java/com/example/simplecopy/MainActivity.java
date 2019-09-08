@@ -6,15 +6,18 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import androidx.appcompat.widget.SearchView;
 import android.widget.Toast;
 
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -25,8 +28,11 @@ import com.example.simplecopy.data.AppDatabase;
 import com.example.simplecopy.data.Numbers;
 import com.example.simplecopy.widgets.RecyclerViewObserver;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.xeoh.android.texthighlighter.TextHighlighter;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemClickListener {
 
@@ -36,7 +42,6 @@ public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemC
     private MainViewModel mainViewModel;
     private AppDatabase mDB;
     View mEmptyView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,6 +99,8 @@ public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemC
         getMenuInflater ().inflate (R.menu.menu_home, menu);
         MenuItem item = menu.findItem (R.id.search);
         SearchView searchView = (SearchView)item.getActionView ();
+
+        final TextHighlighter textHighlighter = new TextHighlighter();
         searchView.setSubmitButtonEnabled (true);
         searchView.setOnQueryTextListener (new SearchView.OnQueryTextListener ( ) {
             @Override
@@ -104,25 +111,41 @@ public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemC
 
             @Override
             public boolean onQueryTextChange(String newText) {
+
                 getResults (newText);
-                return true;
+                textHighlighter.setForegroundColor (Color.parseColor ("#F9AA33"))
+                        .addTarget (findViewById (R.id.title))
+                        .highlight (newText,TextHighlighter.BASE_MATCHER);
+                textHighlighter.addTarget(findViewById(R.id.number))
+                        .invalidate(TextHighlighter.BASE_MATCHER);
+                return false;
             }
 
-            private void getResults (String newText){
-                String queryText = "%" + newText + "%";
-                mainViewModel.searchQuery (queryText)
+            private void getResults (final String newText){
+//                 final Set<String> VALUES = new HashSet<String>();
+//                if (VALUES.contains (newText)){
+//                    newText = String.valueOf (newText);
+//                }
+
+
+                mainViewModel.searchQuery (newText)
                         .observe (MainActivity.this, new Observer<List<Numbers>> ( ) {
                     @Override
                     public void onChanged(List<Numbers> numbers) {
                         if (numbers == null) return;
-                        mAdapter = new CopyAdapter(MainActivity.this, MainActivity.this);
-                        mAdapter.setItems (numbers);
+
+
+
+                        mAdapter.setSearchItem (numbers);
                     }
                 });
+
+
             }
         });
         return true;
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -193,8 +216,8 @@ public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemC
     @Override
     public void onItemClickListener(Numbers numbers) {
 
-        int numberInt = numbers.getNumber ( );
-        String numberStr = String.valueOf (numberInt);
+        long numberLong = numbers.getNumber ( );
+        String numberStr = String.valueOf (numberLong);
 
         ClipboardManager clipboard = (ClipboardManager) getSystemService (Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText ("TextView",numberStr);
