@@ -6,10 +6,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,7 +14,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -28,11 +24,9 @@ import com.example.simplecopy.data.AppDatabase;
 import com.example.simplecopy.data.Numbers;
 import com.example.simplecopy.widgets.RecyclerViewObserver;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.xeoh.android.texthighlighter.TextHighlighter;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+
 
 public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemClickListener {
 
@@ -100,8 +94,6 @@ public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemC
         MenuItem item = menu.findItem (R.id.search);
         SearchView searchView = (SearchView)item.getActionView ();
 
-        final TextHighlighter textHighlighter = new TextHighlighter();
-        searchView.setSubmitButtonEnabled (true);
         searchView.setOnQueryTextListener (new SearchView.OnQueryTextListener ( ) {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -113,19 +105,11 @@ public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemC
             public boolean onQueryTextChange(String newText) {
 
                 getResults (newText);
-                textHighlighter.setForegroundColor (Color.parseColor ("#F9AA33"))
-                        .addTarget (findViewById (R.id.title))
-                        .highlight (newText,TextHighlighter.BASE_MATCHER);
-                textHighlighter.addTarget(findViewById(R.id.number))
-                        .invalidate(TextHighlighter.BASE_MATCHER);
+
                 return false;
             }
 
             private void getResults (final String newText){
-//                 final Set<String> VALUES = new HashSet<String>();
-//                if (VALUES.contains (newText)){
-//                    newText = String.valueOf (newText);
-//                }
 
 
                 mainViewModel.searchQuery (newText)
@@ -133,10 +117,7 @@ public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemC
                     @Override
                     public void onChanged(List<Numbers> numbers) {
                         if (numbers == null) return;
-
-
-
-                        mAdapter.setSearchItem (numbers);
+                        mAdapter.setSearchItem (numbers,newText);
                     }
                 });
 

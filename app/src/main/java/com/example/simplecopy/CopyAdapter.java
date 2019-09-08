@@ -1,20 +1,16 @@
 package com.example.simplecopy;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
+
 import android.content.Context;
-import android.content.Intent;
+import android.graphics.Color;
+import android.text.Spannable;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
-import android.widget.Button;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,15 +19,16 @@ import com.example.simplecopy.data.Numbers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder> {
 
     private static final String TAG = CopyAdapter.class.getSimpleName ( );
 
     private List<Numbers> mNumberList;
-    private List<Numbers> mNumberListFull = new ArrayList<> ();
     private Context mContext;
     private ItemClickListener mItemClickListener;
+    private String searchString="";
 
 
     public CopyAdapter(Context context, ItemClickListener listener) {
@@ -65,7 +62,37 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
 
             holder.mNumberTextView.setText (numberStr);
             //holder.container.setAnimation (AnimationUtils.loadAnimation (mContext, R.anim.fade_scale_animation));
+        String sTitle = title.toLowerCase (Locale.getDefault ());
+        if (sTitle.contains (searchString)){
+            int startPos = sTitle.indexOf(searchString);
+            int endPos = startPos + searchString.length();
 
+            Spannable spanString = Spannable.Factory.getInstance().newSpannable(holder.mTitleTextView.getText());
+            spanString.setSpan(new ForegroundColorSpan (Color.parseColor ("#F9AA33")), startPos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            holder.mTitleTextView.setText(spanString);
+
+        }
+
+        String sNumber = numberStr.toLowerCase (Locale.getDefault ());
+        if (sNumber.contains (searchString)){
+            int startPos = sNumber.indexOf(searchString);
+            int endPos = startPos + searchString.length();
+
+            Spannable spanString = Spannable.Factory.getInstance().newSpannable(holder.mNumberTextView.getText());
+            spanString.setSpan(new ForegroundColorSpan (Color.parseColor ("#F9AA33")), startPos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            holder.mNumberTextView.setText(spanString);
+
+        }
+
+    }
+
+    public void setSearchItem(List<Numbers> newList, String searchString) {
+        this.searchString=searchString;
+        mNumberList = new ArrayList<> ();
+        mNumberList.addAll (newList);
+        notifyDataSetChanged ( );
     }
 
 
