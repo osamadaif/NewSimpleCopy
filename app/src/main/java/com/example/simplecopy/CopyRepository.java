@@ -21,12 +21,15 @@ public class CopyRepository {
         numbers = numbersDao.loadAllTasks ();
     }
 
+//    public int insertFavorite (int value, int id){
+//       return numbersDao.insertFavorite (value, id);
+//    }
+
     public LiveData<List<Numbers>> getAllNumbers(){
         return numbers;
     }
 
     public LiveData<List<Numbers>> searchQuery(String query){
-
         return numbersDao.searchFor ("%" + query + "%");
     }
 
@@ -40,7 +43,6 @@ public class CopyRepository {
     }
 
     public void delete(Numbers numbers){
-
         new deleteNumberAsyncTask (numbersDao).execute (numbers);
 
     }

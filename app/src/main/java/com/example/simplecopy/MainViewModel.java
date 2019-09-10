@@ -30,6 +30,10 @@ public class MainViewModel extends AndroidViewModel {
         return numbers;
     }
 
+//    public int insertFavorite (int value, int id){
+//        return repository.insertFavorite (value ,id);
+//    }
+
     public void insert(Numbers numbers){
         repository.insert (numbers);
     }

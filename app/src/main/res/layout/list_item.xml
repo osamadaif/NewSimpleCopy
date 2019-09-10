@@ -14,7 +14,40 @@
         android:orientation="horizontal"
         android:background="@drawable/background_layout"
         android:padding="8dp"
-        android:layout_margin="3pt">
+        android:layout_margin="2pt">
+
+        <CheckBox
+            android:layout_width="0dp"
+            android:layout_height="15pt"
+            android:id="@+id/btn_fav"
+            android:layout_weight=".15"
+            android:layout_gravity="center"
+            android:button="@null"
+            android:soundEffectsEnabled="true"
+
+            android:background="@drawable/checkbox_selector"
+            />
+
+<!--        <ImageView-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="15pt"-->
+<!--            android:id="@+id/btn_favs"-->
+<!--            android:layout_weight=".2"-->
+<!--            android:layout_gravity="center"-->
+<!--            android:src="@drawable/star_border"-->
+<!--            />-->
+
+<!--        <com.like.LikeButton-->
+<!--            app:icon_type="Star"-->
+<!--            android:id="@+id/star_button"-->
+<!--            app:icon_size="25dp"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="15pt"-->
+<!--            android:layout_weight=".2"-->
+<!--            app:like_drawable="@drawable/ic_star"-->
+<!--            app:unlike_drawable="@drawable/star_border"-->
+<!--            android:layout_gravity="center"-->
+<!--            app:is_enabled="true"/>-->
 
 
         <LinearLayout

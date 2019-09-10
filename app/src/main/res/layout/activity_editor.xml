@@ -18,7 +18,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/Title"
+            android:text="@string/Name"
             android:textColor="@color/colorAccent"
             android:fontFamily="sans-serif-medium"
             android:textSize="24sp"
@@ -29,7 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxLength="25"
-            android:hint="@string/Enter_Title"
+            android:hint="@string/Enter_Name"
             android:padding="5dp"
             android:inputType="textCapWords"
             android:background="@drawable/btn_edittext"

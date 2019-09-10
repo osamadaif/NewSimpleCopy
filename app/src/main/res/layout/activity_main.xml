@@ -27,8 +27,12 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_margin="@dimen/fab_margin"
+        android:layout_marginRight="36dp"
+        android:layout_marginBottom="16dp"
         android:src="@drawable/ic_add_black_24dp" />
+
+<!--    android:layout_margin="@dimen/fab_margin"-->
+<!--    app:backgroundTint="@color/colorPrimary"-->
 
     <include
         android:id="@+id/empty_layout"

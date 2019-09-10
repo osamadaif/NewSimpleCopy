@@ -12,6 +12,7 @@ public class Numbers {
     private String title;
     private long number;
     private String note;
+    private int favorite;
 
     @Ignore
     public Numbers(String title, long number, String note) {
@@ -20,11 +21,12 @@ public class Numbers {
         this.note = note;
     }
 
-    public Numbers(int id, String title, long number, String note) {
+    public Numbers(int id, String title, long number, String note, int favorite) {
         this.id = id;
         this.title = title;
         this.number = number;
         this.note = note;
+        this.favorite = favorite;
     }
 
     public int getId() {
@@ -53,6 +55,14 @@ public class Numbers {
 
     public String getNote() {
         return note;
+    }
+
+    public int getFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(int favorite) {
+        this.favorite = favorite;
     }
 
     public void setNote(String note) {

@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.SearchView;
@@ -86,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemC
 
         DividerItemDecoration decoration = new DividerItemDecoration(getApplicationContext(), DividerItemDecoration.VERTICAL);
         mNumbersList.addItemDecoration(decoration);
+
     }
 
     @Override
@@ -103,15 +106,11 @@ public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemC
 
             @Override
             public boolean onQueryTextChange(String newText) {
-
                 getResults (newText);
-
                 return false;
             }
 
             private void getResults (final String newText){
-
-
                 mainViewModel.searchQuery (newText)
                         .observe (MainActivity.this, new Observer<List<Numbers>> ( ) {
                     @Override
@@ -120,8 +119,6 @@ public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemC
                         mAdapter.setSearchItem (numbers,newText);
                     }
                 });
-
-
             }
         });
         return true;
@@ -219,6 +216,8 @@ public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemC
         showDeleteConfirmationDialog (numbers);
 
     }
+
+
 
     public void addSomeNumber(View view) {
         Intent intent = new Intent(MainActivity.this, EditorActivity.class);

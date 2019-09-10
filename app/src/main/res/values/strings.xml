@@ -2,8 +2,8 @@
     <string name="app_name">Simple Copy</string>
     <string name="empty_view_title_text">ADD SOME NUMBERS</string>
     <string name="NoThing_To_Show">NoThing To Show</string>
-    <string name="Title">Title</string>
-    <string name="Enter_Title">Enter Title</string>
+    <string name="Name">Name</string>
+    <string name="Enter_Name">Enter Name</string>
     <string name="Number">Number</string>
     <string name="Enter_Number">Enter Number</string>
     <string name="Notes">Notes</string>

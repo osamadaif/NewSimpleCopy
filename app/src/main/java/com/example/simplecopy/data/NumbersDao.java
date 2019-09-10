@@ -13,7 +13,7 @@ import java.util.List;
 @Dao
 public interface NumbersDao {
 
-    @Query("SELECT * FROM numbers")
+    @Query("SELECT * FROM numbers ORDER BY favorite")
     LiveData<List<Numbers>> loadAllTasks();
 
     @Query ("SELECT * FROM numbers WHERE title LIKE :searchQuery OR number LIKE :searchQuery")
@@ -33,5 +33,11 @@ public interface NumbersDao {
 
     @Query ("SELECT * FROM numbers WHERE id = :id")
     LiveData<Numbers> loadNumberById(int id);
+
+    @Query("UPDATE numbers SET favorite= :value WHERE id = :itemId")
+    void insertFavorite(int value, int itemId);
+
+//    @Query ("SELECT 1 FROM numbers WHERE id = :itemId")
+//    int isFavorite (int itemId);
 
 }
