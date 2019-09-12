@@ -12,19 +12,16 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.simplecopy.data.AppDatabase;
 import com.example.simplecopy.data.Numbers;
-import com.example.simplecopy.data.NumbersDao;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,9 +35,6 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
     private Context mContext;
     private ItemClickListener mItemClickListener;
     private String searchString="";
-    private MainViewModel mainViewModel;
-    private boolean mClickedFav = false;
-    private int lastSelectedPosition = -1;
     private AppDatabase mDB;
 
 
@@ -75,14 +69,8 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
 
             holder.mNumberTextView.setText (numberStr);
 
+
         mDB = AppDatabase.getInstance (mContext.getApplicationContext ( ));
-
-
-        mainViewModel = ViewModelProviders.of ((FragmentActivity) mContext).get (MainViewModel.class);
-
-
-
-
 
         // Spannable HighLight Work
         String sTitle = title.toLowerCase (Locale.getDefault ());
@@ -107,80 +95,56 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
             holder.mNumberTextView.setText(spanString);
         }
 
+        if (numbers.getFavorite () == 0){
+            holder.mFavorite.setImageResource (R.drawable.star_border);
+        }
+        else if (numbers.getFavorite () == 1){
+            holder.mFavorite.setImageResource (R.drawable.ic_star);
+        }
+
+
+
         // Favorite system
-
-//        if (mainViewModel.isFavorite (mNumberList.get (position).getId ( )) == 1)
-//            holder.mFavorite.setImageResource (R.drawable.ic_star);
-//        else
-//            holder.mFavorite.setImageResource (R.drawable.star_border);
-
-//        AppExecutors.getInstance ().diskIO ().execute (new Runnable ( ) {
-//            @Override
-//            public void run() {
-//
-//
-//            }
-//        });
-
         holder.mFavorite.setOnClickListener (new View.OnClickListener ( ) {
+
             @Override
             public void onClick(View v) {
                 AppExecutors.getInstance ().diskIO ().execute (new Runnable ( ) {
                     @Override
                     public void run() {
+                        //final int favorite = getFav (numbers);
                 if (mItemClickListener != null){
-                    if (numbers.getFavorite () == 0){
-                        //Toast.makeText (mContext, "checked", Toast.LENGTH_SHORT).show ( );
-                        
-                        holder.mFavorite.setChecked (true);
-                        //mainViewModel.insertFavorite (1, mNumberList.get (position).getId ( ));
 
+                    if (numbers.getFavorite () == 0){
+                        //holder.mFavorite.setChecked (true);
                         mDB.numbersDao ().insertFavorite (1, mNumberList.get (position).getId ( ));
+                        Log.d (TAG, "numbers checked ");
 
                     } else if (numbers.getFavorite () == 1){
-                        //Toast.makeText (mContext, "unChecked", Toast.LENGTH_SHORT).show ( );
-
-                        holder.mFavorite.setChecked (false);
-                        //mainViewModel.insertFavorite (0, mNumberList.get (position).getId ( ));
+                        //holder.mFavorite.setChecked (false);
                         mDB.numbersDao ().insertFavorite (0, mNumberList.get (position).getId ( ));
+                        Log.d (TAG, "numbers unchecked ");
                     }
-                }
+                }AppExecutors.getInstance ().mainThread ().execute (new Runnable ( ) {
+                            @Override
+                            public void run() {
+                                notifyDataSetChanged ();
+
+                            }
+                        });
+
                     }
+
                 });
-
-
             }
+
         });
 
-
-
-
-
-       // final int favorite = numbers.getFavorite ();
-
-//        holder.mFavorite.setOnLikeListener (new OnLikeListener ( ) {
-//            @Override
-//            public void liked(LikeButton likeButton) {
-//                if (mainViewModel.isFavorite (position) != 1){
-//                    addToFavorite(mainViewModel.isFavorite (position));
-//                }
-//
-//            }
-//
-//            @Override
-//            public void unLiked(LikeButton likeButton) {
-//
-//                if ( holder.mFavorite.isLiked ()){
-//                    holder.mFavorite.setLiked(false);
-//                }
-//            }
-//        });
-
-        LayoutAnimationController animationController = AnimationUtils.loadLayoutAnimation (mContext, R.anim.layout_fall_down);
-
-        holder.container.setLayoutAnimation (animationController);
+//        LayoutAnimationController animationController = AnimationUtils.loadLayoutAnimation (mContext, R.anim.layout_fall_down);
+//        holder.container.setLayoutAnimation (animationController);
 
         //holder.container.setAnimation (AnimationUtils.loadAnimation (mContext, R.anim.item_fall_down));
+
     }
 
 
@@ -201,13 +165,12 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
     }
 
 
-
     class CopyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener  {
         TextView mTitleTextView;
         TextView mNumberTextView;
         ImageView mEdit_btn;
         ImageView mDelete_btn;
-        CheckBox mFavorite;
+        ImageView mFavorite;
 
         private int mPosition;
         LinearLayout container;
@@ -237,19 +200,10 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
                         mItemClickListener.onNumberDelete (mNumberList.get (mPosition));
                     }
 
+
                 }
             });
 
-//            mFavorite.setOnClickListener (new View.OnClickListener ( ) {
-//                @Override
-//                public void onClick(View v) {
-//                    if (getAdapterPosition ( ) != RecyclerView.NO_POSITION && mItemClickListener != null) {
-//                        int elementId = mNumberList.get (mPosition).getId ( );
-//                        mItemClickListener.onNumberFav (elementId);
-//                    }
-//
-//                }
-//            });
             itemView.setOnClickListener (this);
 
         }
@@ -276,8 +230,6 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
 
         void onNumberDelete(Numbers numbers);
 
-        //void onNumberFav(int id);
-
     }
 
     public List<Numbers> getItems() {
@@ -289,11 +241,5 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
         mNumberList = itemList;
         notifyDataSetChanged ( );
     }
-
-    public void setSearchItem(List<Numbers> newList) {
-        mNumberList = newList;
-        notifyDataSetChanged ( );
-    }
-
 
 }

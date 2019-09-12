@@ -103,10 +103,21 @@ public class EditorActivity extends AppCompatActivity
 
     // get user input from editor and save new data into database
     private void insertData() {
+        if (mTitleEditText.getText ( ) == null || mTitleEditText.getText ( ).length () == 0){
+            mTitleEditText.setError (getString (R.string.Please_insert_name));
+            return;
+        }
         String titleString = mTitleEditText.getText ( ).toString ( ).trim ( );
-        String notesString = mNotesEditText.getText ( ).toString ( ).trim ( );
+
+        if (mNumbersEditText.getText ( ) == null || mNumbersEditText.getText ( ).length () == 0){
+            mNumbersEditText.setError (getString (R.string.Please_insert_number));
+            return;
+        }
         String numbersString = mNumbersEditText.getText ( ).toString ( ).trim ( );
         final long numbers = Long.parseLong (numbersString);
+
+        String notesString = mNotesEditText.getText ( ).toString ( ).trim ( );
+
 
         final Numbers numbers1 = new Numbers (titleString,numbers,notesString);
         AppExecutors.getInstance ().diskIO ().execute (new Runnable ( ) {

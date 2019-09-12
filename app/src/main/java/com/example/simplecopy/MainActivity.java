@@ -10,8 +10,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AnimationUtils;
-import android.view.animation.LayoutAnimationController;
+
 import android.widget.Toast;
 
 import androidx.appcompat.widget.SearchView;
@@ -30,8 +29,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.List;
 
 
+
 public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemClickListener {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
     // Member variables for the adapter and RecyclerView
     private RecyclerViewObserver mNumbersList;
     private CopyAdapter mAdapter;
@@ -46,6 +47,11 @@ public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemC
         mainViewModel = ViewModelProviders.of (this).get (MainViewModel.class);
 
         setUpRecycleView ();
+        mDB = AppDatabase.getInstance (getApplicationContext ());
+        setupViewModel ( );
+
+
+
         // Setup FAB to open EditorActivity
         FloatingActionButton fab =  findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -57,8 +63,7 @@ public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemC
         });
 
 
-        mDB = AppDatabase.getInstance (getApplicationContext ());
-        setupViewModel ( );
+
 
 
     }
@@ -84,7 +89,10 @@ public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemC
         mNumbersList.setLayoutManager (layoutManager);
         mNumbersList.showIfEmpty(mEmptyView);
         mAdapter = new CopyAdapter(this, this);
+
         mNumbersList.setAdapter (mAdapter);
+        //((DefaultItemAnimator) mNumbersList.getItemAnimator()).setSupportsChangeAnimations(true);
+
 
         DividerItemDecoration decoration = new DividerItemDecoration(getApplicationContext(), DividerItemDecoration.VERTICAL);
         mNumbersList.addItemDecoration(decoration);
@@ -145,6 +153,8 @@ public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemC
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked the "Delete" button, so delete the Number.
                 mainViewModel.delete (numbers);
+                mAdapter.notifyItemRemoved (id);
+
                 Toast.makeText (MainActivity.this, getString (R.string.Deleted), Toast.LENGTH_SHORT).show ( );
 
             }
@@ -219,8 +229,10 @@ public class MainActivity extends AppCompatActivity implements CopyAdapter.ItemC
 
 
 
+
     public void addSomeNumber(View view) {
         Intent intent = new Intent(MainActivity.this, EditorActivity.class);
         startActivity(intent);
     }
+
 }

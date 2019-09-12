@@ -14,11 +14,17 @@ public class Numbers {
     private String note;
     private int favorite;
 
+
     @Ignore
     public Numbers(String title, long number, String note) {
         this.title = title;
         this.number = number;
         this.note = note;
+    }
+
+    @Ignore
+    public Numbers(int favorite) {
+        this.favorite = favorite;
     }
 
     public Numbers(int id, String title, long number, String note, int favorite) {
@@ -68,6 +74,8 @@ public class Numbers {
     public void setNote(String note) {
         this.note = note;
     }
+
+
 
 
 }

@@ -32,4 +32,6 @@
     <string name="editor_delete_Numbers_failed">Error with deleting</string>
     <string name="delete_all_dialog_msg">Delete All Number?</string>
     <string name="Copied">Number Is Copied</string>
+    <string name="Please_insert_name">Please insert a name</string>
+    <string name="Please_insert_number">Please insert a number</string>
 </resources>

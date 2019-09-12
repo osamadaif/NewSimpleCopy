@@ -21,9 +21,6 @@ public class CopyRepository {
         numbers = numbersDao.loadAllTasks ();
     }
 
-//    public int insertFavorite (int value, int id){
-//       return numbersDao.insertFavorite (value, id);
-//    }
 
     public LiveData<List<Numbers>> getAllNumbers(){
         return numbers;
