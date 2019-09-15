@@ -55,7 +55,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                android:textColor="@color/colorPrimaryDark"
+                android:textColor="@color/colorPrimaryLight"
                 android:gravity="left"
                 android:hint="@string/empty_view_title_text"
                 android:layout_marginBottom="4dp"
@@ -67,7 +67,7 @@
                 android:fontFamily="sans-serif"
                 android:hint="@string/empty_view_title_text"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="@color/colorPrimaryDark"
+                android:textColor="@color/colorPrimaryLight"
                 android:gravity="left"
                 />
         </LinearLayout>
@@ -94,6 +94,7 @@
 
         <!--</LinearLayout>-->
     </LinearLayout>
+
 
 
 </LinearLayout>

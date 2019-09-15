@@ -1,4 +1,4 @@
-package com.example.simplecopy;
+package com.example.simplecopy.ViewModeler;
 
 import android.app.Application;
 
@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
+import com.example.simplecopy.CopyRepository;
 import com.example.simplecopy.data.Numbers;
 
 import java.util.List;

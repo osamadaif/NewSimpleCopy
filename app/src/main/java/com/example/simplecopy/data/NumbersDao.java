@@ -37,7 +37,11 @@ public interface NumbersDao {
     @Query("UPDATE numbers SET favorite= :value WHERE id = :itemId")
     void insertFavorite(int value, int itemId);
 
-//    @Query ("SELECT 1 FROM numbers WHERE id = :itemId")
-//    int isFavorite (int itemId);
+    @Query("UPDATE numbers SET daily = :value WHERE id = :itemId")
+    void insertDaily(int value, int itemId);
+
+    @Query("UPDATE numbers SET done = :value WHERE id = :itemId")
+    void insertIfDone(int value, int itemId);
+
 
 }

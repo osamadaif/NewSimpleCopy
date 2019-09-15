@@ -1,4 +1,4 @@
-package com.example.simplecopy;
+package com.example.simplecopy.ViewModeler;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
@@ -19,6 +19,6 @@ public class EditorViewModelFactory extends ViewModelProvider.NewInstanceFactory
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new  EditorViewModel(mDb, mNumberId);
+        return (T) new EditorViewModel (mDb, mNumberId);
     }
 }

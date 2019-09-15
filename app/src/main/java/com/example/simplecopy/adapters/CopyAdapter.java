@@ -1,4 +1,4 @@
-package com.example.simplecopy;
+package com.example.simplecopy.adapters;
 
 
 import android.content.Context;
@@ -9,10 +9,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
-import android.view.animation.LayoutAnimationController;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -20,6 +16,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.simplecopy.AppExecutors;
+import com.example.simplecopy.R;
 import com.example.simplecopy.data.AppDatabase;
 import com.example.simplecopy.data.Numbers;
 
@@ -41,11 +39,7 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
     public CopyAdapter(Context context, ItemClickListener listener) {
         mContext = context;
         this.mItemClickListener = listener;
-
-
     }
-
-
 
     @Override
     public CopyAdapter.CopyViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
@@ -60,15 +54,12 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
     public void onBindViewHolder(@NonNull final CopyAdapter.CopyViewHolder holder, final int position) {
         final Numbers numbers = mNumberList.get (position);
 
-            String title = numbers.getTitle ( );
-            holder.mTitleTextView.setText (title);
-            holder.setPosition (position);
-
-            long numberLong = numbers.getNumber ( );
-            String numberStr = String.valueOf (numberLong);
-
-            holder.mNumberTextView.setText (numberStr);
-
+        String title = numbers.getTitle ( );
+        holder.mTitleTextView.setText (title);
+        holder.setPosition (position);
+        long numberLong = numbers.getNumber ( );
+        String numberStr = String.valueOf (numberLong);
+        holder.mNumberTextView.setText (numberStr);
 
         mDB = AppDatabase.getInstance (mContext.getApplicationContext ( ));
 
@@ -95,6 +86,9 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
             holder.mNumberTextView.setText(spanString);
         }
 
+
+        // Favorite system
+
         if (numbers.getFavorite () == 0){
             holder.mFavorite.setImageResource (R.drawable.star_border);
         }
@@ -102,9 +96,6 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
             holder.mFavorite.setImageResource (R.drawable.ic_star);
         }
 
-
-
-        // Favorite system
         holder.mFavorite.setOnClickListener (new View.OnClickListener ( ) {
 
             @Override
@@ -116,12 +107,10 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
                 if (mItemClickListener != null){
 
                     if (numbers.getFavorite () == 0){
-                        //holder.mFavorite.setChecked (true);
                         mDB.numbersDao ().insertFavorite (1, mNumberList.get (position).getId ( ));
                         Log.d (TAG, "numbers checked ");
 
                     } else if (numbers.getFavorite () == 1){
-                        //holder.mFavorite.setChecked (false);
                         mDB.numbersDao ().insertFavorite (0, mNumberList.get (position).getId ( ));
                         Log.d (TAG, "numbers unchecked ");
                     }
@@ -199,21 +188,16 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
                     if (getAdapterPosition ( ) != RecyclerView.NO_POSITION && mItemClickListener != null) {
                         mItemClickListener.onNumberDelete (mNumberList.get (mPosition));
                     }
-
-
                 }
             });
 
             itemView.setOnClickListener (this);
-
         }
 
         @Override
         public void onClick(View v) {
             if (getAdapterPosition ( ) != RecyclerView.NO_POSITION && mItemClickListener != null) {
                 mItemClickListener.onItemClickListener (mNumberList.get (mPosition));
-
-
             }
         }
 
@@ -225,11 +209,8 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
 
     public interface ItemClickListener {
         void onItemClickListener(Numbers numbers);
-
         void onNumberEdit(int itemId);
-
         void onNumberDelete(Numbers numbers);
-
     }
 
     public List<Numbers> getItems() {

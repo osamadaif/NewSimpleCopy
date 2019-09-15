@@ -1,10 +1,14 @@
 <resources>
     <string name="app_name">Simple Copy</string>
     <string name="empty_view_title_text">ADD SOME NUMBERS</string>
+    <string name="number_title_text">0</string>
+    <string name="number_title_text2">0000000</string>
     <string name="NoThing_To_Show">NoThing To Show</string>
     <string name="Name">Name</string>
     <string name="Enter_Name">Enter Name</string>
     <string name="Number">Number</string>
+    <string name="Daily_Wallet">Daily Wallet</string>
+
     <string name="Enter_Number">Enter Number</string>
     <string name="Notes">Notes</string>
     <string name="Enter_Notes">Enter Notes</string>
@@ -34,4 +38,16 @@
     <string name="Copied">Number Is Copied</string>
     <string name="Please_insert_name">Please insert a name</string>
     <string name="Please_insert_number">Please insert a number</string>
+
+    <string name="pref_lang_label">Choose Language</string>
+    <string name="English">English</string>
+    <string name="Arabic">Arabic</string>
+
+    <string name="pref_lang_Key" translatable="false">Language</string>
+    <string name="pref_lang_English_value" translatable="false">english</string>
+    <string name="pref_lang_Arabic_value" translatable="false">arabic</string>
+
+
+    <string name="enter">Enter</string>
+    <string name="clear">Clear</string>
 </resources>

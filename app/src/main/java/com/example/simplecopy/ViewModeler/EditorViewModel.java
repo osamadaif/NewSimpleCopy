@@ -1,4 +1,4 @@
-package com.example.simplecopy;
+package com.example.simplecopy.ViewModeler;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;

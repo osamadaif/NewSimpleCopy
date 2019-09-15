@@ -21,7 +21,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:28.0.0'
-
+    implementation 'com.google.android.material:material:1.1.0-alpha10'
 
 
     // Add FAB dependency
@@ -32,6 +32,7 @@ dependencies {
 
     // ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-extensions:2.1.0"
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     annotationProcessor "androidx.lifecycle:lifecycle-compiler:2.1.0"
 
     implementation 'androidx.appcompat:appcompat:1.1.0'
@@ -46,8 +47,8 @@ dependencies {
     // Add RecyclerView dependency; must match SDK version
     implementation 'androidx.recyclerview:recyclerview:1.1.0-beta04'
 
-    // fav Button
-    implementation 'com.github.jd-alexander:LikeButton:0.2.3'
+    // shared preference
+    implementation "androidx.preference:preference:1.1.0"
 
 
     testImplementation 'junit:junit:4.12'

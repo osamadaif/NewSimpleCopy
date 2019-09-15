@@ -13,6 +13,8 @@ public class Numbers {
     private long number;
     private String note;
     private int favorite;
+    private int daily;
+    private int done;
 
 
     @Ignore
@@ -23,8 +25,9 @@ public class Numbers {
     }
 
     @Ignore
-    public Numbers(int favorite) {
-        this.favorite = favorite;
+    public Numbers(int done, int daily) {
+        this.done = done;
+        this.daily = daily;
     }
 
     public Numbers(int id, String title, long number, String note, int favorite) {
@@ -75,7 +78,19 @@ public class Numbers {
         this.note = note;
     }
 
+    public int getDaily() {
+        return daily;
+    }
 
+    public void setDaily(int daily) {
+        this.daily = daily;
+    }
 
+    public int getDone() {
+        return done;
+    }
 
+    public void setDone(int done) {
+        this.done = done;
+    }
 }

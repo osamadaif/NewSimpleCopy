@@ -14,7 +14,6 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:background="@color/colorPrimaryLight"
-        android:onClick="addSomeNumber"
         android:fontFamily="sans-serif"
         android:padding="16dp"
         android:visibility="visible"

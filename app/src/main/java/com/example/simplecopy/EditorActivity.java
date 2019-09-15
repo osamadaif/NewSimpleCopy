@@ -8,24 +8,25 @@ import android.content.Intent;
 
 import android.os.Bundle;
 
+import android.text.Html;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.NavUtils;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.example.simplecopy.ViewModeler.EditorViewModel;
+import com.example.simplecopy.ViewModeler.EditorViewModelFactory;
 import com.example.simplecopy.data.AppDatabase;
 import com.example.simplecopy.data.Numbers;
-
-import java.util.ArrayList;
 
 
 public class EditorActivity extends AppCompatActivity
@@ -34,15 +35,15 @@ public class EditorActivity extends AppCompatActivity
 
     public static final String EXTRA_NUMBER_ID = "extraTaskId";
     private static final int DEFAULT_NUMBER_ID = -1;
-
     public static final String INSTANCE_NUMBER_ID = "instanceTaskId";
+    private int mNumberId = DEFAULT_NUMBER_ID;
 
     private EditText mTitleEditText;
     private EditText mNumbersEditText;
     private EditText mNotesEditText;
     private AppDatabase mDb;
 
-    private int mNumberId = DEFAULT_NUMBER_ID;
+    Toolbar toolbar;
 
 
 
@@ -64,8 +65,10 @@ public class EditorActivity extends AppCompatActivity
         setContentView (R.layout.activity_editor);
 
         // all views that we will need to read user input from
-        initViews();
+        toolbar = findViewById (R.id.toolbar2);
+        setSupportActionBar (toolbar);
 
+        initViews();
 
         mDb = AppDatabase.getInstance (getApplicationContext ());
 
@@ -76,6 +79,7 @@ public class EditorActivity extends AppCompatActivity
         Intent intent = getIntent ( );
         if (intent != null && intent.hasExtra(EXTRA_NUMBER_ID)){
             setTitle (getString (R.string.editor_activity_title_edit_number));
+            getSupportActionBar().setTitle(Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.editor_activity_title_edit_number) + "</font>"));
             if (mNumberId == DEFAULT_NUMBER_ID){
 
                 mNumberId = intent.getIntExtra(EXTRA_NUMBER_ID, DEFAULT_NUMBER_ID);
@@ -93,29 +97,31 @@ public class EditorActivity extends AppCompatActivity
         }
         else {
             setTitle (getString (R.string.editor_activity_title_new_number));
+            getSupportActionBar().setTitle(Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.editor_activity_title_new_number) + "</font>"));
+
         }
 
         mTitleEditText.setOnTouchListener (mTouchListener);
         mNumbersEditText.setOnTouchListener (mTouchListener);
         mNotesEditText.setOnTouchListener (mTouchListener);
-
     }
 
     // get user input from editor and save new data into database
     private void insertData() {
-        if (mTitleEditText.getText ( ) == null || mTitleEditText.getText ( ).length () == 0){
+        if (mTitleEditText.getText ( ) == null || mTitleEditText.getText ( ).length () == 0)
+        {
             mTitleEditText.setError (getString (R.string.Please_insert_name));
             return;
         }
         String titleString = mTitleEditText.getText ( ).toString ( ).trim ( );
 
-        if (mNumbersEditText.getText ( ) == null || mNumbersEditText.getText ( ).length () == 0){
+        if (mNumbersEditText.getText ( ) == null || mNumbersEditText.getText ( ).length () == 0)
+        {
             mNumbersEditText.setError (getString (R.string.Please_insert_number));
             return;
         }
         String numbersString = mNumbersEditText.getText ( ).toString ( ).trim ( );
         final long numbers = Long.parseLong (numbersString);
-
         String notesString = mNotesEditText.getText ( ).toString ( ).trim ( );
 
 
@@ -130,16 +136,12 @@ public class EditorActivity extends AppCompatActivity
                     numbers1.setId (mNumberId);
                     mDb.numbersDao ().updateTask (numbers1);
                 }
-
                 // Exit activity
                 finish ( );
             }
         });
         Toast.makeText (this, getString (R.string.Saved), Toast.LENGTH_SHORT).show ( );
-
-
     }
-
 
     private void initViews() {
         mTitleEditText = findViewById (R.id.edit_title);
@@ -160,15 +162,11 @@ public class EditorActivity extends AppCompatActivity
         mNotesEditText.setText(number.getNote());
     }
 
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater ( ).inflate (R.menu.menu_editor, menu);
         return true;
     }
-
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -176,9 +174,7 @@ public class EditorActivity extends AppCompatActivity
             case R.id.save:
                 // Save Data
                 insertData ( );
-
                 return true;
-
 
             case android.R.id.home:
                 // If the number hasn't changed, continue with navigating up to parent activity
@@ -203,7 +199,6 @@ public class EditorActivity extends AppCompatActivity
                 // Show a dialog that notifies the user they have unsaved changes
                 showUnsavedChangesDialog (discardButtonClickListener);
                 return true;
-
         }
         return super.onOptionsItemSelected (item);
     }
@@ -215,7 +210,6 @@ public class EditorActivity extends AppCompatActivity
             super.onBackPressed ( );
             return;
         }
-
         // Otherwise if there are unsaved changes, setup a dialog to warn the user.
         // Create a click listener to handle the user confirming that changes should be discarded.
         DialogInterface.OnClickListener discardButtonClickListener =
@@ -226,13 +220,9 @@ public class EditorActivity extends AppCompatActivity
                         finish ( );
                     }
                 };
-
         // Show dialog that there are unsaved changes
         showUnsavedChangesDialog (discardButtonClickListener);
     }
-
-
-
 
     private void showUnsavedChangesDialog(DialogInterface.OnClickListener discardButtonClickListener) {
         // Create an AlertDialog.Builder and set the message, and click listeners

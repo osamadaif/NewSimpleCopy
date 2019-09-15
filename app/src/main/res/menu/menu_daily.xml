@@ -5,20 +5,10 @@
     tools:context=".MainActivity">
 
     <item
-        android:id="@+id/search"
+        android:id="@+id/searchDaily"
         android:title="@string/Search"
         android:icon="@drawable/ic_search"
         app:showAsAction="ifRoom|collapseActionView"
         app:actionViewClass="androidx.appcompat.widget.SearchView"/>
-
-    <item
-        android:id="@+id/deletall"
-        android:title="@string/DeleteAll"
-        app:showAsAction="never"/>
-    <item
-        android:id="@+id/settings"
-        android:title="@string/Settings"
-        android:icon="@drawable/ic_settings"
-        app:showAsAction="never"/>
 
 </menu>

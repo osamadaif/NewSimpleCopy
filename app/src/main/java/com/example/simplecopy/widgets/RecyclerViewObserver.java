@@ -85,9 +85,6 @@ public class RecyclerViewObserver extends RecyclerView {
         mObserver.onChanged ();
     }
 
-//    public void hideIfEmpty(View ...views) {
-//        mNonEmptyViews = Arrays.asList (views);
-//    }
 
     public void showIfEmpty(View ...emptyViews) {
         mEmptyViews = Arrays.asList (emptyViews);

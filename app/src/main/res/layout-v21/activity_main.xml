@@ -24,6 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
+            android:theme="@android:style/ThemeOverlay.Material.Dark.ActionBar"
 
             >
 
@@ -35,7 +36,6 @@
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:tabTextAppearance="@style/MyCustomTabLayout"
         android:background="@color/colorPrimary"
         app:tabTextColor="@color/clolrWhite"
         android:minHeight="?attr/actionBarSize"

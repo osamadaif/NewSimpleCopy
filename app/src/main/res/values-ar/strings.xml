@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Simple Copy</string>
+    <string name="Arabic">العربية</string>
+    <string name="Copied">تم نسخ الرقم</string>
+    <string name="DeleteAll">حذف الكل</string>
+    <string name="Deleted">تم الحذف</string>
+    <string name="English">الانجليزية</string>
+    <string name="Enter_Name">ادخل الاسم</string>
+    <string name="Enter_Notes">ملاحظات</string>
+    <string name="Enter_Number">ادخل الرقم</string>
+    <string name="Error_With_Saving">خطأ فى الحفظ</string>
+    <string name="Error_With_Update">خطأ فى التحديث</string>
+    <string name="Name">الاسم</string>
+    <string name="NoThing_To_Show">لا يوجد اى رقم</string>
+    <string name="Notes">ملاحظات</string>
+    <string name="Number">الرقم</string>
+    <string name="Please_insert_name">من فضلك ادخل الاسم</string>
+    <string name="Please_insert_number">من فضلك ادخل الرقم</string>
+    <string name="Save">حفظ</string>
+    <string name="Saved">تم الحفظ</string>
+    <string name="Search">بحث</string>
+    <string name="Settings">أعدادات</string>
+    <string name="Updated">تم التحديث</string>
+    <string name="cancel">الغاء</string>
+    <string name="clear">مسح</string>
+    <string name="delete">حذف</string>
+    <string name="delete_all_dialog_msg">هل انت متأكد من انك تريد حذف جميع الارقام؟</string>
+    <string name="delete_dialog_msg">هل انت متأكد من انك تريد حذف الرقم؟</string>
+    <string name="discard">الخروج</string>
+    <string name="edit_img">تعديل</string>
+    <string name="editor_activity_title_edit_number">تعديل الرقم</string>
+    <string name="editor_activity_title_new_number">أضافة رقم جديد</string>
+    <string name="editor_delete_Number_failed">حدث خطأ فى الحذف</string>
+    <string name="editor_delete_Number_successful">تم حذف الرقم</string>
+    <string name="editor_delete_Numbers_failed">حدث خطأ فى الحذف</string>
+    <string name="editor_delete_Numbers_successful">تم حذف الرقم</string>
+    <string name="empty_view_title_text">أضافة رقم جديد</string>
+    <string name="keep_editing">أستكمال التعديلات</string>
+    <string name="number_title_text">0</string>
+    <string name="number_title_text2">0000000</string>
+    <string name="pref_lang_label">أختار اللغة</string>
+    <string name="unsaved_changes_dialog_msg">ألغاء التعديل و الرجوع لللصفحة الرئيسية؟</string>
+    <string name="enter">أدخال</string>
+    <string name="Daily_Wallet">الرصيد اليومى</string>
+</resources>
