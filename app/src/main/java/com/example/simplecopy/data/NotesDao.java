@@ -13,10 +13,10 @@ import java.util.List;
 @Dao
 public interface NotesDao {
     @Query("SELECT * FROM notes ORDER BY favorite DESC")
-    LiveData<List<Numbers>> loadAllTasks();
+    LiveData<List<NotesData>> loadAllTasks();
 
-    @Query ("SELECT * FROM notes WHERE title LIKE :searchQuery LIKE :searchQuery")
-    LiveData<List<Numbers>> searchFor (String searchQuery);
+    @Query ("SELECT * FROM notes WHERE title LIKE :searchQuery")
+    LiveData<List<NotesData>> searchFor (String searchQuery);
 
     @Insert
     void insertTask(NotesData notesData);
@@ -28,10 +28,10 @@ public interface NotesDao {
     void deleteTask(NotesData notesData);
 
     @Query ("DELETE FROM notes")
-    void deleteAllNumbers();
+    void deleteAllNotes();
 
     @Query ("SELECT * FROM notes WHERE id = :id")
-    LiveData<Numbers> loadNumberById(int id);
+    LiveData<NotesData> loadNoteById(int id);
 
     @Query("UPDATE notes SET favorite= :value WHERE id = :itemId")
     void insertFavorite(int value, int itemId);

@@ -1,13 +1,16 @@
 <resources>
-    <string name="app_name">Simple Copy</string>
+    <string name="app_name">Copy Note</string>
     <string name="empty_view_title_text">ADD SOME NUMBERS</string>
+    <string name="empty_view_note_text">ADD SOME NOTES</string>
     <string name="number_title_text">0</string>
     <string name="number_title_text2">0000000</string>
     <string name="NoThing_To_Show">NoThing To Show</string>
     <string name="Name">Name</string>
+    <string name="Title">Title</string>
     <string name="Enter_Name">Enter Name</string>
-    <string name="Number">Number</string>
-    <string name="Daily_Wallet">Daily Wallet</string>
+    <string name="Enter_Title">Enter Title</string>
+    <string name="Numbers">Numbers</string>
+    <string name="Daily_Wallet">Collector</string>
 
     <string name="Enter_Number">Enter Number</string>
     <string name="Notes">Notes</string>
@@ -23,6 +26,8 @@
     <string name="Updated">Updated</string>
     <string name="editor_activity_title_new_number">Add a New Number</string>
     <string name="editor_activity_title_edit_number">Edit Number</string>
+    <string name="editor_activity_title_new_note">Add a New Note</string>
+    <string name="editor_activity_title_edit_note">Edit Note</string>
     <string name="edit_img">Edit</string>
     <string name="unsaved_changes_dialog_msg">Discard your changes and quit editing?</string>
     <string name="discard">Discard</string>
@@ -30,14 +35,18 @@
     <string name="editor_delete_Number_successful">Number deleted</string>
     <string name="editor_delete_Number_failed">Error with deleting</string>
     <string name="delete_dialog_msg">Delete this Number?</string>
+    <string name="delete_note_dialog_msg">Delete this Note?</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="editor_delete_Numbers_successful">Number deleted</string>
     <string name="editor_delete_Numbers_failed">Error with deleting</string>
     <string name="delete_all_dialog_msg">Delete All Number?</string>
+    <string name="delete_all_notes_dialog_msg">Delete All Notes?</string>
     <string name="Copied">Number Is Copied</string>
+    <string name="Note_Copied">Note Is Copied</string>
     <string name="Please_insert_name">Please insert a name</string>
     <string name="Please_insert_number">Please insert a number</string>
+    <string name="Please_insert_note">Please insert a note</string>
 
     <string name="pref_lang_label">Choose Language</string>
     <string name="English">English</string>
@@ -48,6 +57,9 @@
     <string name="pref_lang_Arabic_value" translatable="false">arabic</string>
 
 
-    <string name="enter">Enter</string>
+    <string name="enter">Add</string>
     <string name="clear">Clear</string>
+    <string name="notes">Notes</string>
+    <string name="number">Number</string>
+    <string name="value">Value</string>
 </resources>

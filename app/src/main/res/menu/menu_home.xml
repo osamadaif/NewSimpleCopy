@@ -15,10 +15,10 @@
         android:id="@+id/deletall"
         android:title="@string/DeleteAll"
         app:showAsAction="never"/>
-    <item
-        android:id="@+id/settings"
-        android:title="@string/Settings"
-        android:icon="@drawable/ic_settings"
-        app:showAsAction="never"/>
+<!--    <item-->
+<!--        android:id="@+id/settings"-->
+<!--        android:title="@string/Settings"-->
+<!--        android:icon="@drawable/ic_settings"-->
+<!--        app:showAsAction="never"/>-->
 
 </menu>

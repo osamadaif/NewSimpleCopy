@@ -15,25 +15,32 @@ public class MainViewModel extends AndroidViewModel {
 
     private CopyRepository repository;
     private LiveData<List<Numbers>> numbers;
+    private LiveData<List<Numbers>> numbersDaily;
 
     public MainViewModel(@NonNull Application application) {
         super (application);
 
         repository = new CopyRepository (application);
         numbers = repository.getAllNumbers ();
+        numbersDaily = repository.getDailyFirst ();
     }
 
     public LiveData<List<Numbers>> searchQuery(String query){
         return repository.searchQuery (query);
     }
 
+    public LiveData<List<Numbers>> searchQueryByDaily(String query){
+        return repository.searchQueryByDaily (query);
+    }
+
     public LiveData<List<Numbers>> getNumbers() {
         return numbers;
     }
 
-//    public int insertFavorite (int value, int id){
-//        return repository.insertFavorite (value ,id);
-//    }
+    public LiveData<List<Numbers>> getDailyFirst() {
+        return numbersDaily;
+    }
+
 
     public void insert(Numbers numbers){
         repository.insert (numbers);

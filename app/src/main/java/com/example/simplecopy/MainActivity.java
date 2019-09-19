@@ -41,7 +41,8 @@ public class MainActivity extends AppCompatActivity  {
 
     private void setupViewPager(ViewPager viewPager){
         viewPagerAdapter adapter = new viewPagerAdapter (getSupportFragmentManager ());
-        adapter.AddFragment (new CopyNumberList (), getResources ().getString (R.string.Number));
+        adapter.AddFragment (new CopyNoteList (), getString(R.string.notes));
+        adapter.AddFragment (new CopyNumberList (), getResources ().getString (R.string.Numbers));
         adapter.AddFragment (new Daily_Wallet (), getResources ().getString (R.string.Daily_Wallet));
 
         viewPager.setAdapter (adapter);

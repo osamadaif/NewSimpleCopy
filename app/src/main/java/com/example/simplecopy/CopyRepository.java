@@ -14,11 +14,13 @@ import java.util.List;
 public class CopyRepository {
     private NumbersDao numbersDao;
     private LiveData<List<Numbers>> numbers;
+    private LiveData<List<Numbers>> numbersDaily;
 
     public CopyRepository( Context context) {
         AppDatabase database = AppDatabase.getInstance (context);
         numbersDao = database.numbersDao ();
         numbers = numbersDao.loadAllTasks ();
+        numbersDaily = numbersDao.loadAllByDaily ();
     }
 
 
@@ -26,8 +28,15 @@ public class CopyRepository {
         return numbers;
     }
 
+    public LiveData<List<Numbers>> getDailyFirst(){
+        return numbersDaily;
+    }
+
     public LiveData<List<Numbers>> searchQuery(String query){
         return numbersDao.searchFor ("%" + query + "%");
+    }
+    public LiveData<List<Numbers>> searchQueryByDaily(String query){
+        return numbersDao.searchForByDaily ("%" + query + "%");
     }
 
     public void insert(Numbers numbers){

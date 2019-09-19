@@ -26,6 +26,7 @@ import com.example.simplecopy.data.AppDatabase;
 import com.example.simplecopy.data.Numbers;
 
 import java.util.List;
+import java.util.Objects;
 
 
 public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemClickListener {
@@ -52,7 +53,7 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
 
 
 
-        new ItemTouchHelper (new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+        new ItemTouchHelper (new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT ) {
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
                 return false;
@@ -113,7 +114,7 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
     private void setupViewModel() {
         MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
 
-        viewModel.getNumbers ().observe ( this, new Observer<List<Numbers>> ( ) {
+        viewModel.getDailyFirst ().observe ( this, new Observer<List<Numbers>> ( ) {
             @Override
             public void onChanged(List<Numbers> numbersList1) {
                 mAdapter.setItems (numbersList1);
@@ -136,14 +137,16 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate (R.menu.menu_daily, menu);
 
-        MenuItem item = menu.findItem (R.id.searchDaily);
+        final MenuItem item = menu.findItem (R.id.searchDaily);
         SearchView searchView = (SearchView)item.getActionView ();
+
+
 
         searchView.setOnQueryTextListener (new SearchView.OnQueryTextListener ( ) {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 getResults (query);
-                return true;
+                return false;
             }
 
             @Override
@@ -152,19 +155,36 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
                 return false;
             }
 
+
+
             private void getResults (final String newText){
-                mainViewModel.searchQuery (newText)
-                        .observe (getActivity (), new Observer<List<Numbers>> ( ) {
+                mainViewModel.searchQueryByDaily (newText)
+                        .observe (Objects.requireNonNull (getActivity ( )), new Observer<List<Numbers>> ( ) {
                             @Override
                             public void onChanged(List<Numbers> numbers) {
-                                if (numbers == null) return;
-                                mAdapter.setSearchItem (numbers,newText);
+                                if (newText.length () == 0){
+                                    mAdapter.setSearchItem (numbers);
+                                }else{
+                                    mAdapter.setSearchItem (numbers,newText);
+                                }
+
                             }
                         });
             }
         });
 
+//        searchView.setOnQueryTextFocusChangeListener (new View.OnFocusChangeListener ( ) {
+//            @Override
+//            public void onFocusChange(View v, boolean hasFocus) {
+//                if (!hasFocus){
+//                    item.collapseActionView ();
+//                    getResults (query);
+//
+//                }
+//            }
+//        });
 
+        //searchView.clearFocus ();
 
         //super.onCreateOptionsMenu (menu,inflater);
     }
@@ -172,6 +192,15 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
 
     @Override
     public void onNumberSubmit(int itemId) {
+//        mAdapter.notifyItemMoved (itemId, mNumbersList.getAdapter ().getItemCount ());
+//        mNumbersList.smoothScrollToPosition (itemId);
+
+    }
+
+    @Override
+    public void onNumberClear(int itemId) {
+//        mAdapter.notifyItemMoved (itemId, mNumbersList.getAdapter ().getItemCount ());
+//        mNumbersList.smoothScrollToPosition (itemId);
 
     }
 }
