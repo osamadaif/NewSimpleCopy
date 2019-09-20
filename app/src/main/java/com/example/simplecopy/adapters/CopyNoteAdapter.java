@@ -156,6 +156,14 @@ public class CopyNoteAdapter extends RecyclerView.Adapter<CopyNoteAdapter.CopyVi
         return mNumberList.size ( );
     }
 
+    @Override
+    public long getItemId(int position) {
+        if (position < mNumberList.size ()){
+            return  mNumberList.get (position).getId ();
+        }
+        return RecyclerView.NO_ID;
+    }
+
 
     class CopyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener  {
         TextView mTitleTextView;

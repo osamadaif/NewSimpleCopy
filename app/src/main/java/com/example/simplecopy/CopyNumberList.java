@@ -15,6 +15,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -119,7 +120,7 @@ public class CopyNumberList extends Fragment implements CopyAdapter.ItemClickLis
             @Override
             public boolean onQueryTextSubmit(String query) {
                 getResults (query);
-                return true;
+                return false;
             }
 
             @Override
@@ -143,6 +144,8 @@ public class CopyNumberList extends Fragment implements CopyAdapter.ItemClickLis
                             }
                         });
             }
+
+
         });
         //super.onCreateOptionsMenu (menu,inflater);
     }
@@ -166,19 +169,16 @@ public class CopyNumberList extends Fragment implements CopyAdapter.ItemClickLis
     public void setUpRecycleView(){
         mNumbersList = view.findViewById (R.id.recycle_list);
         mEmptyView = view.findViewById (R.id.empty_layout);
-        mNumbersList.setHasFixedSize (true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager (getActivity ());
         mNumbersList.setLayoutManager (layoutManager);
-
-        mAdapter = new CopyAdapter(getActivity (), this);
-
-        mNumbersList.setAdapter (mAdapter);
-        mNumbersList.showIfEmpty(mEmptyView);
-        //((DefaultItemAnimator) mNumbersList.getItemAnimator()).setSupportsChangeAnimations(true);
-
-
         DividerItemDecoration decoration = new DividerItemDecoration(getActivity (), DividerItemDecoration.VERTICAL);
         mNumbersList.addItemDecoration(decoration);
+        mNumbersList.setItemAnimator (new DefaultItemAnimator ());
+        mNumbersList.showIfEmpty(mEmptyView);
+        mNumbersList.setHasFixedSize (true);
+        mAdapter = new CopyAdapter(getActivity (), this);
+        mAdapter.setHasStableIds (true);
+        mNumbersList.setAdapter (mAdapter);
 
     }
 
@@ -237,8 +237,7 @@ public class CopyNumberList extends Fragment implements CopyAdapter.ItemClickLis
     @Override
     public void onItemClickListener(Numbers numbers) {
 
-        long numberLong = numbers.getNumber ( );
-        String numberStr = String.valueOf (numberLong);
+        String numberStr = numbers.getNumber ( );
 
         ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService (Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText ("TextView",numberStr);

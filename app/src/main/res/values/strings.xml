@@ -35,6 +35,7 @@
     <string name="editor_delete_Number_successful">Number deleted</string>
     <string name="editor_delete_Number_failed">Error with deleting</string>
     <string name="delete_dialog_msg">Delete this Number?</string>
+    <string name="clear_dialog_msg">Clear this Value?</string>
     <string name="delete_note_dialog_msg">Delete this Note?</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>

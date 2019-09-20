@@ -10,7 +10,7 @@ public class Numbers {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private String title;
-    private long number;
+    private String number;
     private String note;
     private int favorite;
     private int daily;
@@ -18,7 +18,7 @@ public class Numbers {
 
 
     @Ignore
-    public Numbers(String title, long number, String note) {
+    public Numbers(String title, String number, String note) {
         this.title = title;
         this.number = number;
         this.note = note;
@@ -30,7 +30,7 @@ public class Numbers {
         this.daily = daily;
     }
 
-    public Numbers(int id, String title, long number, String note, int favorite) {
+    public Numbers(int id, String title, String number, String note, int favorite) {
         this.id = id;
         this.title = title;
         this.number = number;
@@ -54,11 +54,11 @@ public class Numbers {
         this.title = title;
     }
 
-    public long getNumber() {
+    public String getNumber() {
         return number;
     }
 
-    public void setNumber(long number) {
+    public void setNumber(String number) {
         this.number = number;
     }
 

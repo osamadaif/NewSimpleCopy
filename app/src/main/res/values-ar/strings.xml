@@ -33,6 +33,7 @@
     <string name="delete_all_dialog_msg">هل انت متأكد من حذف كل الارقام ؟</string>
     <string name="delete_all_notes_dialog_msg">هل انت متأكد من حذف كل الملاحظات ؟</string>
     <string name="delete_dialog_msg">هل انت متأكد من حذف هذا الرقم ؟</string>
+    <string name="clear_dialog_msg">هل انت متأكد من مسح القيمة ؟</string>
     <string name="delete_note_dialog_msg">هل انت متأكد من حذف هذه الملاحظة ؟</string>
     <string name="discard">تجاهل</string>
     <string name="edit_img">تعديل</string>

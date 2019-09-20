@@ -57,8 +57,7 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
         String title = numbers.getTitle ( );
         holder.mTitleTextView.setText (title);
         holder.setPosition (position);
-        long numberLong = numbers.getNumber ( );
-        String numberStr = String.valueOf (numberLong);
+        String numberStr = numbers.getNumber ( );
         holder.mNumberTextView.setText (numberStr);
 
         mDB = AppDatabase.getInstance (mContext.getApplicationContext ( ));
@@ -158,6 +157,13 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
         return mNumberList.size ( );
     }
 
+    @Override
+    public long getItemId(int position) {
+        if (position < mNumberList.size ()){
+            return  mNumberList.get (position).getId ();
+        }
+        return RecyclerView.NO_ID;
+    }
 
     class CopyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener  {
         TextView mTitleTextView;

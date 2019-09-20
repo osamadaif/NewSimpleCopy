@@ -1,6 +1,8 @@
 package com.example.simplecopy.adapters;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.text.Spannable;
@@ -12,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatEditText;
@@ -68,32 +71,56 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
         holder.mClear_btn.setOnClickListener (new View.OnClickListener ( ) {
             @Override
             public void onClick(View v) {
-                AppExecutors.getInstance ().diskIO ().execute (new Runnable ( ) {
-                    @Override
-                    public void run() {
+                if (mItemClickListener != null ){
+                    if (numbers.getDaily () == 0 || holder.mNumberTextView.getText ( ) == "0")
+                    {
+                        return;
+                    }
+                AlertDialog.Builder builder = new AlertDialog.Builder (mContext);
+                builder.setMessage (R.string.clear_dialog_msg);
+                builder.setPositiveButton (R.string.clear, new DialogInterface.OnClickListener ( ) {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User clicked the "Delete" button, so delete the Number.
+                        AppExecutors.getInstance ().diskIO ().execute (new Runnable ( ) {
+                            @Override
+                            public void run() {
 
-                        if (mItemClickListener != null ){
-                            if (holder.mNumberTextView.getText ( ) == null || holder.mNumberTextView.getText ( ).length () == 0)
-                            {
-                                return;
+
+                                    final int dailyNumber = 0;
+                                    mDB.numbersDao ().insertDaily (dailyNumber, mNumberList.get (position).getId () );
+                                    AppExecutors.getInstance ().mainThread ().execute (new Runnable ( ) {
+                                        @Override
+                                        public void run() {
+                                            notifyDataSetChanged ();
+
+                                        }
+                                    });
+
+
+
+
+
                             }
-                            final int dailyNumber = 0;
-                            mDB.numbersDao ().insertDaily (dailyNumber, mNumberList.get (position).getId () );
-                            AppExecutors.getInstance ().mainThread ().execute (new Runnable ( ) {
-                                @Override
-                                public void run() {
-                                    notifyDataSetChanged ();
 
-                                }
-                            });
-                        }
-
-
-
+                        });
 
                     }
-
                 });
+                builder.setNegativeButton (R.string.cancel, new DialogInterface.OnClickListener ( ) {
+                    public void onClick(DialogInterface dialog, int id) {
+
+                        if (dialog != null) {
+                            dialog.dismiss ( );
+                        }
+                    }
+                });
+
+                // Create and show the AlertDialog
+                AlertDialog alertDialog = builder.create ( );
+                alertDialog.show ( );
+
+                }
+
             }
         });
 
@@ -190,6 +217,14 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
         return mNumberList.size ( );
     }
 
+    @Override
+    public long getItemId(int position) {
+        if (position < mNumberList.size ()){
+            return  mNumberList.get (position).getId ();
+        }
+        return RecyclerView.NO_ID;
+    }
+
     class DailyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView mTitleTextView;
         TextView mNumberTextView;
@@ -267,4 +302,5 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
         mNumberList = itemList;
         notifyDataSetChanged ( );
     }
+
 }

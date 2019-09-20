@@ -120,8 +120,8 @@ public class EditorActivity extends AppCompatActivity
             mNumbersEditText.setError (getString (R.string.Please_insert_number));
             return;
         }
-        String numbersString = mNumbersEditText.getText ( ).toString ( ).trim ( );
-        final long numbers = Long.parseLong (numbersString);
+        String numbers = mNumbersEditText.getText ( ).toString ( ).trim ( );
+
         String notesString = mNotesEditText.getText ( ).toString ( ).trim ( );
 
 
@@ -156,9 +156,7 @@ public class EditorActivity extends AppCompatActivity
         }
 
         mTitleEditText.setText(number.getTitle());
-        long numberEdit = number.getNumber();
-        String numberStr = String.valueOf (numberEdit);
-        mNumbersEditText.setText(numberStr);
+        mNumbersEditText.setText(number.getNumber());
         mNotesEditText.setText(number.getNote());
     }
 

@@ -8,11 +8,13 @@ import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -67,9 +69,9 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
                     @Override
                     public void run() {
 
-                        int position = viewHolder.getAdapterPosition();
+                        final int position = viewHolder.getAdapterPosition();
                         //final Numbers numbers = mNumber.get (position);
-                        List<Numbers> number = mAdapter.getItems ();
+                        final List<Numbers> number = mAdapter.getItems ();
 
                         if (number.get(position).getDone () == 0){
                         mDB.numbersDao ().insertIfDone (1, number.get (position).getId ());
@@ -81,6 +83,8 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
                             @Override
                             public void run() {
                                 mAdapter.notifyDataSetChanged ();
+
+                                //mNumbersList.getLayoutManager ().smoothScrollToPosition ();
 
                             }
                         });
@@ -101,6 +105,7 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager (getActivity ());
         mNumbersList.setLayoutManager (layoutManager);
         mAdapter = new DailyRecyclerAdapter(getActivity (), this);
+        mAdapter.setHasStableIds (true);
 
         mNumbersList.setAdapter (mAdapter);
         //((DefaultItemAnimator) mNumbersList.getItemAnimator()).setSupportsChangeAnimations(true);
@@ -108,6 +113,7 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
 
         DividerItemDecoration decoration = new DividerItemDecoration(getActivity (), DividerItemDecoration.VERTICAL);
         mNumbersList.addItemDecoration(decoration);
+        mNumbersList.setItemAnimator (new DefaultItemAnimator ());
 
     }
 
@@ -146,6 +152,7 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
             @Override
             public boolean onQueryTextSubmit(String query) {
                 getResults (query);
+
                 return false;
             }
 

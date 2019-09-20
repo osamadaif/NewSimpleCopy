@@ -22,6 +22,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -118,7 +119,7 @@ public class CopyNoteList extends Fragment implements CopyNoteAdapter.ItemClickL
             @Override
             public boolean onQueryTextSubmit(String query) {
                 getResults (query);
-                return true;
+                return false;
             }
 
             @Override
@@ -159,20 +160,16 @@ public class CopyNoteList extends Fragment implements CopyNoteAdapter.ItemClickL
     public void setUpRecycleView(){
         mNumbersList = view.findViewById (R.id.recycle_note);
         mEmptyView = view.findViewById (R.id.empty_notes_layout);
-        mNumbersList.setHasFixedSize (true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager (getActivity ());
         mNumbersList.setLayoutManager (layoutManager);
-
-        mAdapter = new CopyNoteAdapter(getActivity (), this);
-
-        mNumbersList.setAdapter (mAdapter);
-        mNumbersList.showIfEmpty(mEmptyView);
-        //((DefaultItemAnimator) mNumbersList.getItemAnimator()).setSupportsChangeAnimations(true);
-
-
         DividerItemDecoration decoration = new DividerItemDecoration(getActivity (), DividerItemDecoration.VERTICAL);
         mNumbersList.addItemDecoration(decoration);
-
+        mNumbersList.setItemAnimator (new DefaultItemAnimator ());
+        mNumbersList.showIfEmpty(mEmptyView);
+        mNumbersList.setHasFixedSize (true);
+        mAdapter = new CopyNoteAdapter(getActivity (), this);
+        mAdapter.setHasStableIds (true);
+        mNumbersList.setAdapter (mAdapter);
     }
 
     private void showDeleteConfirmationDialog(final NotesData notesData) {
