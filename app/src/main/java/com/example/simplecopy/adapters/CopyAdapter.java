@@ -44,7 +44,7 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
     @Override
     public CopyAdapter.CopyViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
 
-        View view = LayoutInflater.from (mContext)
+        View view = LayoutInflater.from (viewGroup.getContext())
                 .inflate (R.layout.list_item, viewGroup,false);
             return new CopyViewHolder (view);
 

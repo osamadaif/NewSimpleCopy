@@ -26,6 +26,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -37,22 +38,23 @@ import com.example.simplecopy.widgets.RecyclerViewObserver;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
+import java.util.Objects;
 
 
 public class CopyNumberList extends Fragment implements CopyAdapter.ItemClickListener {
     View view;
 
     // Member variables for the adapter and RecyclerView
-    private RecyclerViewObserver mNumbersList;
+    private RecyclerView mNumbersList;
     private CopyAdapter mAdapter;
     private MainViewModel mainViewModel;
     private AppDatabase mDB;
     View mEmptyView;
     Button empty_btn;
+    private FloatingActionButton fab;
 
-
+    // Required empty public constructor
     public CopyNumberList() {
-        // Required empty public constructor
     }
 
     @Override
@@ -60,21 +62,12 @@ public class CopyNumberList extends Fragment implements CopyAdapter.ItemClickLis
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate (R.layout.fragment_copy_number_list, container, false);
+        fab =  getActivity ().findViewById(R.id.fab);
         setUpRecycleView ();
         mainViewModel = ViewModelProviders.of (this).get (MainViewModel.class);
         mDB = AppDatabase.getInstance (getContext ());
 
         setupViewModel ( );
-
-        // Setup FAB to open EditorActivity
-        FloatingActionButton fab =  view.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getActivity (), EditorActivity.class);
-                startActivity(intent);
-            }
-        });
 
         empty_btn = view.findViewById (R.id.btn_empty_title);
         empty_btn.setOnClickListener (new View.OnClickListener ( ) {
@@ -93,7 +86,16 @@ public class CopyNumberList extends Fragment implements CopyAdapter.ItemClickLis
         viewModel.getNumbers ().observe ( this, new Observer<List<Numbers>> ( ) {
             @Override
             public void onChanged(List<Numbers> numbersList1) {
-                mAdapter.setItems (numbersList1);
+                if (numbersList1.isEmpty ()){
+                    mNumbersList.setVisibility (View.GONE);
+                    mEmptyView.setVisibility (View.VISIBLE);
+
+                }else {
+                    mNumbersList.setVisibility (View.VISIBLE);
+                    mEmptyView.setVisibility (View.GONE);
+                    mAdapter.setItems (numbersList1);
+                }
+
             }
         });
     }
@@ -112,14 +114,15 @@ public class CopyNumberList extends Fragment implements CopyAdapter.ItemClickLis
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate (R.menu.menu_home, menu);
-
         MenuItem item = menu.findItem (R.id.search);
         SearchView searchView = (SearchView)item.getActionView ();
+        searchView.setActivated (true);
+        searchView.setQueryHint (getString (R.string.Search));
+        //searchView.clearFocus ();
 
         searchView.setOnQueryTextListener (new SearchView.OnQueryTextListener ( ) {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                getResults (query);
                 return false;
             }
 
@@ -135,19 +138,13 @@ public class CopyNumberList extends Fragment implements CopyAdapter.ItemClickLis
                         .observe (getActivity (), new Observer<List<Numbers>> ( ) {
                             @Override
                             public void onChanged(List<Numbers> numbers) {
-                                if (newText.length () == 0){
-                                    mAdapter.setSearchItem (numbers);
-                                }else{
+                                if (numbers == null) return;
                                     mAdapter.setSearchItem (numbers,newText);
-                                }
 
                             }
                         });
             }
-
-
         });
-        //super.onCreateOptionsMenu (menu,inflater);
     }
 
     @Override
@@ -171,14 +168,29 @@ public class CopyNumberList extends Fragment implements CopyAdapter.ItemClickLis
         mEmptyView = view.findViewById (R.id.empty_layout);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager (getActivity ());
         mNumbersList.setLayoutManager (layoutManager);
-        DividerItemDecoration decoration = new DividerItemDecoration(getActivity (), DividerItemDecoration.VERTICAL);
-        mNumbersList.addItemDecoration(decoration);
+        //DividerItemDecoration decoration = new DividerItemDecoration(getActivity (), DividerItemDecoration.VERTICAL);
+        mNumbersList.addItemDecoration(new DividerItemDecoration (Objects.requireNonNull (getContext ( )), 0));
         mNumbersList.setItemAnimator (new DefaultItemAnimator ());
-        mNumbersList.showIfEmpty(mEmptyView);
+        //mNumbersList.showIfEmpty(mEmptyView);
         mNumbersList.setHasFixedSize (true);
         mAdapter = new CopyAdapter(getActivity (), this);
         mAdapter.setHasStableIds (true);
         mNumbersList.setAdapter (mAdapter);
+        mNumbersList.addOnScrollListener (new RecyclerView.OnScrollListener ( ) {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                if (dy<0 && !fab.isShown())
+                    fab.show();
+                else if(dy>0 && fab.isShown())
+                    fab.hide();
+            }
+        });
 
     }
 

@@ -4,6 +4,8 @@
     <color name="colorPrimaryDark">#232F34</color>
     <color name="colorPrimaryLight">#4A6572</color>
     <color name="colorAccent">#F9AA33</color>
+    <color name="colorAccent_transparent">#66F9AA33</color>
+
     <color name="clolrOffWhite">#FFFBE6</color>
     <color name="clolrWhite">#FFFFFF</color>
     <color name="gray">#d4d3d3</color>

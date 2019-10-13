@@ -21,12 +21,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 
 import com.example.simplecopy.ViewModeler.MainViewModel;
 import com.example.simplecopy.adapters.DailyRecyclerAdapter;
 import com.example.simplecopy.data.AppDatabase;
 import com.example.simplecopy.data.Numbers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,14 +36,13 @@ import java.util.Objects;
 public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemClickListener {
     View view;
 
-    private List<Numbers> mNumber;
     private MainViewModel mainViewModel;
     private RecyclerView mNumbersList;
     private DailyRecyclerAdapter mAdapter;
     private AppDatabase mDB;
 
+    // Required empty public constructor
     public Daily_Wallet() {
-        // Required empty public constructor
     }
 
 
@@ -52,8 +53,21 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
         view = inflater.inflate (R.layout.fragment_daily__wallet, container, false);
         mainViewModel = ViewModelProviders.of (this).get (MainViewModel.class);
         setUpRecycleView ();
+        mDB = AppDatabase.getInstance (getContext ());
+        setupViewModel ( );
+        return view;
+    }
 
-
+    public void setUpRecycleView(){
+        mNumbersList = view.findViewById (R.id.recycle_daily_list);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager (getActivity ());
+        mNumbersList.setLayoutManager (layoutManager);
+        mNumbersList.addItemDecoration(new DividerItemDecoration (Objects.requireNonNull (getContext ( )), 0));
+        mNumbersList.setItemAnimator (new DefaultItemAnimator ());
+        mNumbersList.setHasFixedSize (true);
+        mAdapter = new DailyRecyclerAdapter(getActivity (), this);
+        //mAdapter.setHasStableIds (true);
+        mNumbersList.setAdapter (mAdapter);
 
         new ItemTouchHelper (new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT ) {
             @Override
@@ -64,7 +78,7 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
             // Called when a user swipes left or right on a ViewHolder
             @Override
             public void onSwiped(final RecyclerView.ViewHolder viewHolder, int swipeDir) {
-                // Here is where you'll implement swipe to delete
+                // Here is where you'll implement swipe to set is done
                 AppExecutors.getInstance().diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
@@ -74,7 +88,7 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
                         final List<Numbers> number = mAdapter.getItems ();
 
                         if (number.get(position).getDone () == 0){
-                        mDB.numbersDao ().insertIfDone (1, number.get (position).getId ());
+                            mDB.numbersDao ().insertIfDone (1, number.get (position).getId ());
 
                         } else if (number.get(position).getDone () == 1){
                             mDB.numbersDao ().insertIfDone (0, number.get (position).getId ());
@@ -83,9 +97,6 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
                             @Override
                             public void run() {
                                 mAdapter.notifyDataSetChanged ();
-
-                                //mNumbersList.getLayoutManager ().smoothScrollToPosition ();
-
                             }
                         });
                     }
@@ -94,28 +105,8 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
             }
         }).attachToRecyclerView(mNumbersList);
 
-        mDB = AppDatabase.getInstance (getContext ());
-        setupViewModel ( );
-        return view;
     }
 
-    public void setUpRecycleView(){
-        mNumbersList = view.findViewById (R.id.recycle_daily_list);
-        mNumbersList.setHasFixedSize (true);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager (getActivity ());
-        mNumbersList.setLayoutManager (layoutManager);
-        mAdapter = new DailyRecyclerAdapter(getActivity (), this);
-        mAdapter.setHasStableIds (true);
-
-        mNumbersList.setAdapter (mAdapter);
-        //((DefaultItemAnimator) mNumbersList.getItemAnimator()).setSupportsChangeAnimations(true);
-
-
-        DividerItemDecoration decoration = new DividerItemDecoration(getActivity (), DividerItemDecoration.VERTICAL);
-        mNumbersList.addItemDecoration(decoration);
-        mNumbersList.setItemAnimator (new DefaultItemAnimator ());
-
-    }
 
     private void setupViewModel() {
         MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
@@ -142,17 +133,14 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate (R.menu.menu_daily, menu);
-
         final MenuItem item = menu.findItem (R.id.searchDaily);
         SearchView searchView = (SearchView)item.getActionView ();
-
-
-
+        searchView.setActivated (true);
+        searchView.setQueryHint (getString (R.string.Search));
+        //searchView.clearFocus ();
         searchView.setOnQueryTextListener (new SearchView.OnQueryTextListener ( ) {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                getResults (query);
-
                 return false;
             }
 
@@ -162,19 +150,17 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
                 return false;
             }
 
-
-
             private void getResults (final String newText){
+//                newText = newText.toLowerCase();
+//                List<Numbers> newList = new ArrayList<> ();
+
                 mainViewModel.searchQueryByDaily (newText)
                         .observe (Objects.requireNonNull (getActivity ( )), new Observer<List<Numbers>> ( ) {
                             @Override
                             public void onChanged(List<Numbers> numbers) {
-                                if (newText.length () == 0){
-                                    mAdapter.setSearchItem (numbers);
-                                }else{
-                                    mAdapter.setSearchItem (numbers,newText);
-                                }
 
+                                if (numbers == null)return;
+                                     mAdapter.setSearchItem (numbers,newText);
                             }
                         });
             }

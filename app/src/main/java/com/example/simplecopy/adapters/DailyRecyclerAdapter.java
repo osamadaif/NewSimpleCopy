@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.text.Spannable;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
@@ -12,6 +13,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Filter;
+import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,13 +30,15 @@ import com.example.simplecopy.data.AppDatabase;
 import com.example.simplecopy.data.Numbers;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdapter.DailyViewHolder> {
+public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdapter.DailyViewHolder>   {
     private static final String TAG = DailyRecyclerAdapter.class.getSimpleName ( );
 
     private List<Numbers> mNumberList;
+    //private List<Numbers> mFilteredNumberList= new ArrayList<> ();
     private Context mContext;
     private ItemClickListener mItemClickListener;
     private String searchString="";
@@ -41,6 +47,7 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
     public DailyRecyclerAdapter(Context context, ItemClickListener listener) {
         mContext = context;
         this.mItemClickListener = listener;
+        //mNumberListFull = new ArrayList<> (mNumberList);
     }
 
     @NonNull
@@ -96,10 +103,6 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
                                         }
                                     });
 
-
-
-
-
                             }
 
                         });
@@ -124,22 +127,33 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
             }
         });
 
-
-
-
-
-
         // Spannable HighLight Work
+
         String sTitle = title.toLowerCase (Locale.getDefault ());
-        if (sTitle.contains (searchString)){
+        if (searchString != null && !searchString.isEmpty () && sTitle.contains (searchString )){
+            Log.d (TAG,"searchString != null");
             int startPos = sTitle.indexOf(searchString);
             int endPos = startPos + searchString.length();
 
-            Spannable spanString = Spannable.Factory.getInstance().newSpannable(holder.mTitleTextView.getText());
-            spanString.setSpan(new ForegroundColorSpan (Color.parseColor ("#F9AA33")), startPos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            if (startPos != -1){
+                Log.d (TAG,"start pos != -1");
+                Spannable spanString = Spannable.Factory.getInstance().newSpannable(holder.mTitleTextView.getText());
+                spanString.setSpan(new ForegroundColorSpan (Color.parseColor ("#F9AA33")), startPos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-            holder.mTitleTextView.setText(spanString);
+                holder.mTitleTextView.setText(spanString);
+            } else {
+                Log.d (TAG,"start pos == -1");
+                holder.mTitleTextView.setText (title);
+                //holder.mTitleTextView.setTextColor(Color.parseColor ("#4A6572"));
+            }
+
         }
+        else {
+            Log.d (TAG,"searchString == null");
+            holder.mTitleTextView.setText (title);
+            //holder.mTitleTextView.setTextColor(Color.parseColor ("#4A6572"));
+        }
+
 
         String sNumber = numberStr.toLowerCase (Locale.getDefault ());
         if (sNumber.contains (searchString)){
@@ -194,6 +208,59 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
             }
         });
 
+        holder.mMinus_btn.setOnClickListener (new View.OnClickListener ( ) {
+            @Override
+            public void onClick(View v) {
+                AppExecutors.getInstance ().diskIO ().execute (new Runnable ( ) {
+                    @Override
+                    public void run() {
+                        //final int favorite = getFav (numbers);
+                        if (mItemClickListener != null){
+                            if (holder.mAddNumber.getText ( ) == null || holder.mAddNumber.getText ( ).length () == 0)
+                            {
+                                return;
+                            }
+                            int oldDaily = numbers.getDaily ( );
+                            String numbersString = holder.mAddNumber.getText ().toString ().trim ();
+                            final int dailyNumber = Integer.parseInt (numbersString);
+                            //final Numbers numbers1 = new Numbers (titleString,dailyNumber);
+
+                            int finalDaily = oldDaily - dailyNumber;
+                            if (finalDaily <= 0){
+                                AppExecutors.getInstance ().mainThread ().execute (new Runnable ( ) {
+                                    @Override
+                                    public void run() {
+                                        holder.mAddNumber.setError ("invalid value");
+
+                                    }
+                                });
+
+                            } else {
+
+                            mDB.numbersDao ().insertDaily (finalDaily, mNumberList.get (position).getId () );
+                            //Toast.makeText (this, getString (R.string.Saved), Toast.LENGTH_SHORT).show ( );
+
+                            AppExecutors.getInstance ().mainThread ().execute (new Runnable ( ) {
+                                @Override
+                                public void run() {
+                                    holder.mAddNumber.setText ("");
+                                    notifyDataSetChanged ();
+
+                                }
+                            });
+                            }
+                        }
+
+
+
+
+                    }
+
+                });
+
+            }
+        });
+
         if (numbers.getDone () == 1){
             holder.mTitleTextView.setPaintFlags (holder.mTitleTextView.getPaintFlags ()| Paint.STRIKE_THRU_TEXT_FLAG);
             holder.mTitleTextView.setTextColor (mContext.getResources().getColor (R.color.red));
@@ -217,18 +284,21 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
         return mNumberList.size ( );
     }
 
-    @Override
-    public long getItemId(int position) {
-        if (position < mNumberList.size ()){
-            return  mNumberList.get (position).getId ();
-        }
-        return RecyclerView.NO_ID;
-    }
+//    @Override
+//    public long getItemId(int position) {
+//        if (position < mNumberList.size ()){
+//            return  mNumberList.get (position).getId ();
+//        }
+//        return RecyclerView.NO_ID;
+//    }
+
+
 
     class DailyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView mTitleTextView;
         TextView mNumberTextView;
-        Button mEnter_btn;
+        ImageView mEnter_btn;
+        ImageView mMinus_btn;
         Button mClear_btn;
         AppCompatEditText mAddNumber;
 
@@ -241,6 +311,7 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
              mTitleTextView = itemView.findViewById (R.id.title_daily);
              mNumberTextView = itemView.findViewById (R.id.number_daily);
              mEnter_btn = itemView.findViewById (R.id.btn_Enter);
+             mMinus_btn = itemView.findViewById (R.id.btn_minus);
              mAddNumber = itemView.findViewById (R.id.edit_daily);
              mClear_btn = itemView.findViewById (R.id.clear);
              mAddNumber.setMaxWidth(7);
@@ -275,9 +346,10 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
     }
 
     public void setSearchItem(List<Numbers> newList, String searchString) {
-        this.searchString=searchString;
+
         mNumberList = new ArrayList<> ();
         mNumberList.addAll (newList);
+        this.searchString=searchString;
         notifyDataSetChanged ( );
     }
 
@@ -287,6 +359,48 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
         notifyDataSetChanged ( );
     }
 
+//    @Override
+//    public Filter getFilter() {
+//        return filter;
+//    }
+//
+//    private Filter filter = new Filter ( ) {
+//        @Override
+//        protected FilterResults performFiltering(CharSequence constraint) {
+//            List<Numbers> filteredList = new ArrayList<> ();
+//
+//            if (constraint == null || constraint.length () == 0){
+//                filteredList.addAll(mFilteredNumberList);
+//            }else {
+//                String filterPattern = constraint.toString ().toLowerCase ().trim ();
+//
+//                for (Numbers number : mFilteredNumberList){
+//                    if (number.getTitle ().toLowerCase ().contains (filterPattern)){
+//
+////                        int startPos = filterPattern.indexOf(constraint.toString ());
+////                        int endPos = startPos + constraint.length();
+////
+////                        Spannable spanString = Spannable.Factory.getInstance().newSpannable(holder.mTitleTextView.getText());
+////                        spanString.setSpan(new ForegroundColorSpan (Color.parseColor ("#F9AA33")), startPos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+////
+////                        holder.mTitleTextView.setText(spanString);
+//                        filteredList.add (number);
+//                    }
+//                }
+//            }
+//            FilterResults filterResults = new FilterResults ();
+//            filterResults.values = filteredList;
+//            return filterResults;
+//        }
+//
+//        @Override
+//        protected void publishResults(CharSequence constraint, FilterResults results) {
+//            mNumberList.clear ();
+//            mNumberList.addAll((List <Numbers>) results.values);
+//            notifyDataSetChanged ();
+//        }
+//    };
+
 
     public interface ItemClickListener {
         void onNumberSubmit(int itemId);
@@ -295,11 +409,14 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
     }
 
     public List<Numbers> getItems() {
+        //mNumberListFull = new ArrayList<> (mNumberList);
         return mNumberList;
     }
 
     public void setItems(List<Numbers> itemList) {
+       // mNumberListFull = itemList;
         mNumberList = itemList;
+        //mFilteredNumberList.addAll(mNumberList);
         notifyDataSetChanged ( );
     }
 

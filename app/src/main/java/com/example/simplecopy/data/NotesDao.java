@@ -15,7 +15,7 @@ public interface NotesDao {
     @Query("SELECT * FROM notes ORDER BY favorite DESC")
     LiveData<List<NotesData>> loadAllTasks();
 
-    @Query ("SELECT * FROM notes WHERE title LIKE :searchQuery")
+    @Query ("SELECT * FROM notes WHERE title LIKE :searchQuery ORDER BY favorite DESC")
     LiveData<List<NotesData>> searchFor (String searchQuery);
 
     @Insert

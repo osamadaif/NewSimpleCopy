@@ -1,20 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@color/gray"
+    android:layout_marginTop="4dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginStart="8dp"
+    app:cardElevation="3dp"
+    app:cardCornerRadius="10dp"
+
+    android:theme="@style/Theme.MaterialComponents.Light"
+
     >
+    <!--    app:cardUseCompatPadding="true"-->
+<!--    android:background="@color/gray"-->
 
     <LinearLayout
         android:id="@+id/container"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:orientation="horizontal"
-        android:background="@drawable/background_layout"
-        android:padding="8dp"
-        android:layout_margin="2pt">
+        android:padding="8dp">
 
 
         <ImageView
@@ -26,18 +33,6 @@
             android:src="@drawable/star_border"
             />
 
-<!--        <com.like.LikeButton-->
-<!--            app:icon_type="Star"-->
-<!--            android:id="@+id/star_button"-->
-<!--            app:icon_size="25dp"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="15pt"-->
-<!--            android:layout_weight=".2"-->
-<!--            app:like_drawable="@drawable/ic_star"-->
-<!--            app:unlike_drawable="@drawable/star_border"-->
-<!--            android:layout_gravity="center"-->
-<!--            app:is_enabled="true"/>-->
-
 
         <LinearLayout
 
@@ -46,7 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:padding="8dp"
+            android:padding="4dp"
             >
 
             <TextView
@@ -58,7 +53,6 @@
                 android:textColor="@color/colorPrimaryLight"
                 android:gravity="left"
                 android:hint="@string/empty_view_title_text"
-                android:layout_marginBottom="4dp"
                 />
             <TextView
                 android:id="@+id/number"
@@ -97,4 +91,4 @@
 
 
 
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

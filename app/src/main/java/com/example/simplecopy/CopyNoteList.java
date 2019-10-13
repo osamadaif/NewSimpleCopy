@@ -13,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -38,22 +39,23 @@ import com.example.simplecopy.widgets.RecyclerViewObserver;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
+import java.util.Objects;
 
 
 public class CopyNoteList extends Fragment implements CopyNoteAdapter.ItemClickListener {
     View view;
 
     // Member variables for the adapter and RecyclerView
-    private RecyclerViewObserver mNumbersList;
+    private RecyclerView mNumbersList;
     private CopyNoteAdapter mAdapter;
     private MainNotesViewModel mainViewModel;
     private AppDatabase mDB;
     View mEmptyView;
     Button empty_btn;
+    private FloatingActionButton fab;
 
-
+    // Required empty public constructor
     public CopyNoteList() {
-        // Required empty public constructor
     }
 
     @Override
@@ -61,21 +63,12 @@ public class CopyNoteList extends Fragment implements CopyNoteAdapter.ItemClickL
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate (R.layout.copy_notes_fragment, container, false);
+        fab =  getActivity ().findViewById(R.id.fab);
         setUpRecycleView ();
         mainViewModel = ViewModelProviders.of (this).get (MainNotesViewModel.class);
         mDB = AppDatabase.getInstance (getContext ());
 
         setupViewModel ( );
-
-        // Setup FAB to open EditorActivity
-        FloatingActionButton fab =  view.findViewById(R.id.fab_note);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getActivity (), NoteEditorActivity.class);
-                startActivity(intent);
-            }
-        });
 
         empty_btn = view.findViewById (R.id.btn_empty_note);
         empty_btn.setOnClickListener (new View.OnClickListener ( ) {
@@ -94,7 +87,17 @@ public class CopyNoteList extends Fragment implements CopyNoteAdapter.ItemClickL
         viewModel.getNotes ().observe ( this, new Observer<List<NotesData>> ( ) {
             @Override
             public void onChanged(List<NotesData> notesDataList1) {
-                mAdapter.setItems (notesDataList1);
+                if (!notesDataList1.isEmpty ()){
+                    mNumbersList.setVisibility (View.VISIBLE);
+                    mEmptyView.setVisibility (View.GONE);
+                    mAdapter.setItems (notesDataList1);
+
+                }else {
+
+                    mNumbersList.setVisibility (View.GONE);
+                    mEmptyView.setVisibility (View.VISIBLE);
+                }
+
             }
         });
     }
@@ -115,16 +118,20 @@ public class CopyNoteList extends Fragment implements CopyNoteAdapter.ItemClickL
         inflater.inflate (R.menu.menu_home, menu);
         MenuItem item = menu.findItem (R.id.search);
         SearchView searchView = (SearchView)item.getActionView ();
+        searchView.setActivated (true);
+        searchView.setQueryHint (getString (R.string.Search));
+        //searchView.clearFocus ();
         searchView.setOnQueryTextListener (new SearchView.OnQueryTextListener ( ) {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                getResults (query);
+
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 getResults (newText);
+
                 return false;
             }
 
@@ -137,6 +144,7 @@ public class CopyNoteList extends Fragment implements CopyNoteAdapter.ItemClickL
                                 mAdapter.setSearchItem (notesData,newText);
                             }
                         });
+
             }
         });
     }
@@ -162,14 +170,29 @@ public class CopyNoteList extends Fragment implements CopyNoteAdapter.ItemClickL
         mEmptyView = view.findViewById (R.id.empty_notes_layout);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager (getActivity ());
         mNumbersList.setLayoutManager (layoutManager);
-        DividerItemDecoration decoration = new DividerItemDecoration(getActivity (), DividerItemDecoration.VERTICAL);
-        mNumbersList.addItemDecoration(decoration);
+        mNumbersList.addItemDecoration(new DividerItemDecoration (Objects.requireNonNull (getContext ( )), 0));
         mNumbersList.setItemAnimator (new DefaultItemAnimator ());
-        mNumbersList.showIfEmpty(mEmptyView);
+        //mNumbersList.showIfEmpty(mEmptyView);
         mNumbersList.setHasFixedSize (true);
         mAdapter = new CopyNoteAdapter(getActivity (), this);
         mAdapter.setHasStableIds (true);
         mNumbersList.setAdapter (mAdapter);
+
+        mNumbersList.addOnScrollListener (new RecyclerView.OnScrollListener ( ) {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                if (dy<0 && !fab.isShown())
+                    fab.show();
+                else if(dy>0 && fab.isShown())
+                    fab.hide();
+            }
+        });
     }
 
     private void showDeleteConfirmationDialog(final NotesData notesData) {
