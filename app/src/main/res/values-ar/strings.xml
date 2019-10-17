@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Copy Note</string>
+    <string name="app_name">الدفتر</string>
     <string name="Arabic">العربية</string>
     <string name="Copied">تم نسخ الرقم</string>
-    <string name="Daily_Wallet">التحصيل</string>
+    <string name="Daily_Wallet">الميزانية</string>
     <string name="DeleteAll">حذف الكل</string>
     <string name="Deleted">تم الحذف</string>
     <string name="English">الانجليزية</string>
@@ -56,4 +56,5 @@
     <string name="pref_lang_label">اختار اللغة</string>
     <string name="unsaved_changes_dialog_msg">هل تريد الخروج بدون الحفظ ؟</string>
     <string name="value">القيمة</string>
+    <string name="Press_back_again">اضغط مرة اخرى للخروج</string>
 </resources>

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +20,9 @@ import com.google.android.material.tabs.TabLayout;
 public class MainActivity extends AppCompatActivity  {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    private long backPressedTime;
+    private Toast backToast;
 
     TabLayout tabLayout;
     AppBarLayout appBarLayout;
@@ -92,8 +96,6 @@ public class MainActivity extends AppCompatActivity  {
             }
         });
 
-
-
     }
 
     private void setupViewPager(ViewPager viewPager){
@@ -105,4 +107,20 @@ public class MainActivity extends AppCompatActivity  {
         viewPager.setAdapter (adapter);
     }
 
+    @Override
+    public void onBackPressed() {
+
+
+        if (backPressedTime + 2000 > System.currentTimeMillis ()){
+            backToast.cancel ();
+            super.onBackPressed ( );
+            return;
+        } else {
+            backToast = Toast.makeText (getBaseContext (), getResources ().getString (R.string.Press_back_again), Toast.LENGTH_SHORT);
+            backToast.show ();
+        }
+        backPressedTime = System.currentTimeMillis ();
+
+
+    }
 }

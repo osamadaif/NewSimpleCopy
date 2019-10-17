@@ -1,5 +1,6 @@
 package com.example.simplecopy;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -87,12 +88,13 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
                         //final Numbers numbers = mNumber.get (position);
                         final List<Numbers> number = mAdapter.getItems ();
 
+                        if (number.get (position).getDaily () != 0){
                         if (number.get(position).getDone () == 0){
                             mDB.numbersDao ().insertIfDone (1, number.get (position).getId ());
 
                         } else if (number.get(position).getDone () == 1){
                             mDB.numbersDao ().insertIfDone (0, number.get (position).getId ());
-                        }
+                        }}
                         AppExecutors.getInstance().mainThread ().execute (new Runnable ( ) {
                             @Override
                             public void run() {
@@ -180,6 +182,18 @@ public class Daily_Wallet extends Fragment implements DailyRecyclerAdapter.ItemC
         //searchView.clearFocus ();
 
         //super.onCreateOptionsMenu (menu,inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+//        switch (item.getItemId ()){
+//
+//            case R.id.settings_daily:
+//                Intent StartSettingActivity = new Intent (getActivity (),SettingsActivity.class);
+//                startActivity (StartSettingActivity);
+//                return true;
+//        }
+        return super.onOptionsItemSelected (item);
     }
 
 

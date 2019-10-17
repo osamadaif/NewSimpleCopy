@@ -8,7 +8,6 @@ import androidx.core.app.NavUtils;
 import android.os.Bundle;
 import android.text.Html;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.google.android.material.appbar.AppBarLayout;
 
@@ -25,13 +24,13 @@ public class SettingsActivity extends AppCompatActivity {
         setupActionBar ();
 
 
-        if (findViewById (R.id.fragment_container) != null){
-            if (savedInstanceState != null){
-                return;
-
-                //getFragmentManager ( ).beginTransaction ( ).add (R.id.fragment_container, SettingsFragment()).commit ();
-            }
-        }
+//        if (findViewById (R.id.fragment_container) != null){
+//            if (savedInstanceState != null){
+//                return;
+//
+//                //getFragmentManager ( ).beginTransaction ( ).add (R.id.fragment_container, SettingsFragment()).commit ();
+//            }
+//        }
 
 
 

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Copy Note</string>
+    <string name="app_name">El Daftar</string>
     <string name="empty_view_title_text">ADD SOME NUMBERS</string>
     <string name="empty_view_note_text">ADD SOME NOTES</string>
     <string name="number_title_text">0</string>
@@ -10,7 +10,7 @@
     <string name="Enter_Name">Enter Name</string>
     <string name="Enter_Title">Enter Title</string>
     <string name="Numbers">Numbers</string>
-    <string name="Daily_Wallet">Collector</string>
+    <string name="Daily_Wallet">Balance</string>
 
     <string name="Enter_Number">Enter Number</string>
     <string name="Notes">Notes</string>
@@ -48,6 +48,7 @@
     <string name="Please_insert_name">Please insert a name</string>
     <string name="Please_insert_number">Please insert a number</string>
     <string name="Please_insert_note">Please insert a note</string>
+    <string name="Press_back_again">Press back again to exit</string>
 
     <string name="pref_lang_label">Choose Language</string>
     <string name="English">English</string>

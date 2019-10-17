@@ -1,7 +1,7 @@
 package com.example.simplecopy;
 
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -217,8 +217,8 @@ public class NoteEditorActivity extends AppCompatActivity
         // for the positive and negative buttons on the dialog.
         AlertDialog.Builder builder = new AlertDialog.Builder (this);
         builder.setMessage (R.string.unsaved_changes_dialog_msg);
-        builder.setNeutralButton (R.string.discard, discardButtonClickListener);
-        builder.setPositiveButton (R.string.Save, new DialogInterface.OnClickListener ( ) {
+        builder.setPositiveButton (R.string.discard, discardButtonClickListener);
+        builder.setNeutralButton (R.string.Save, new DialogInterface.OnClickListener ( ) {
             public void onClick(DialogInterface dialog, int id) {
                 //save data
                 insertData ( );

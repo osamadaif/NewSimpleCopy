@@ -5,16 +5,19 @@
     tools:context=".MainActivity">
 
     <item
+        android:id="@+id/deletall"
+        android:title="@string/DeleteAll"
+        android:icon="@drawable/delete_all"
+        app:showAsAction="ifRoom"/>
+
+    <item
         android:id="@+id/search"
         android:title="@string/Search"
         android:icon="@drawable/ic_search"
         app:showAsAction="ifRoom|collapseActionView"
         app:actionViewClass="androidx.appcompat.widget.SearchView"/>
 
-    <item
-        android:id="@+id/deletall"
-        android:title="@string/DeleteAll"
-        app:showAsAction="never"/>
+
 <!--    <item-->
 <!--        android:id="@+id/settings"-->
 <!--        android:title="@string/Settings"-->

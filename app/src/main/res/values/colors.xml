@@ -11,6 +11,7 @@
     <color name="gray">#d4d3d3</color>
     <color name="red">#f94733</color>
     <color name="black">#000</color>
+    <color name="splash_back">#dee4e8</color>
 
 
 </resources>
