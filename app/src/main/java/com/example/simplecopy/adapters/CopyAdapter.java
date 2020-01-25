@@ -16,10 +16,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.simplecopy.AppExecutors;
+import com.example.simplecopy.utils.AppExecutors;
 import com.example.simplecopy.R;
-import com.example.simplecopy.data.AppDatabase;
-import com.example.simplecopy.data.Numbers;
+import com.example.simplecopy.data.local.database.AppDatabase;
+import com.example.simplecopy.data.model.Numbers;
 
 import java.util.ArrayList;
 import java.util.List;

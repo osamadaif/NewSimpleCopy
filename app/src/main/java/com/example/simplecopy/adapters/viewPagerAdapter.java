@@ -6,8 +6,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
-import com.example.simplecopy.CopyNumberList;
-import com.example.simplecopy.Daily_Wallet;
+import com.example.simplecopy.ui.fragment.MainNumbers.Numbers.NumberListFragment;
+import com.example.simplecopy.ui.fragment.MainNumbers.Daily.DailyWalletListFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +23,8 @@ public class viewPagerAdapter extends FragmentPagerAdapter {
     @NonNull
     @Override
     public Fragment getItem(int position) {
-        if (fragmentList.get (position).equals (0) )return new CopyNumberList ();
-        if (fragmentList.get (position).equals (1) )return new Daily_Wallet ();
+        if (fragmentList.get (position).equals (0) )return new NumberListFragment ();
+        if (fragmentList.get (position).equals (1) )return new DailyWalletListFragment ();
         return fragmentList.get (position);
     }
 

@@ -16,33 +16,32 @@
         android:background="@color/colorPrimaryLight"
         android:fontFamily="sans-serif"
         android:padding="16dp"
-        android:visibility="visible"
         android:text="@string/empty_view_title_text"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:textColor="@color/colorAccent" />
+        android:textColor="@color/colorAccent"
+        android:visibility="visible" />
 
-<!--    <TextView-->
-<!--        android:id="@+id/text_empty_title"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_centerInParent="true"-->
-<!--        android:layout_below="@id/text_empty_title"-->
-<!--        android:fontFamily="sans-serif"-->
-<!--        android:padding="16dp"-->
-<!--        android:visibility="visible"-->
-<!--        android:text="@string/NoThing_To_Show"-->
-<!--        android:textAppearance="@style/TextAppearance.AppCompat.Large"-->
-<!--        android:textColor="@color/colorPrimaryDark" />-->
+    <!--    <TextView-->
+    <!--        android:id="@+id/text_empty_title"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_centerInParent="true"-->
+    <!--        android:layout_below="@id/text_empty_title"-->
+    <!--        android:fontFamily="sans-serif"-->
+    <!--        android:padding="16dp"-->
+    <!--        android:visibility="visible"-->
+    <!--        android:text="@string/NoThing_To_Show"-->
+    <!--        android:textAppearance="@style/TextAppearance.AppCompat.Large"-->
+    <!--        android:textColor="@color/colorPrimaryDark" />-->
 
     <ImageView
         android:id="@+id/no_data_pic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
         android:layout_above="@id/btn_empty_title"
-        android:src="@drawable/no_data"
-        android:contentDescription="@string/app_name"/>
-
+        android:layout_centerInParent="true"
+        android:contentDescription="@string/app_name"
+        android:src="@drawable/no_data" />
 
 
 </RelativeLayout>

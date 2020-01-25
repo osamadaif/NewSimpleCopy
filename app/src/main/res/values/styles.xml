@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
@@ -45,9 +45,7 @@
         <item name="android:textAllCaps">false</item>
     </style>
 
-    <style name="AppTheme.PreferenceThemeOverlay" parent="@style/PreferenceThemeOverlay">
-        <item name="android:layout">@layout/activity_settings</item>
-    </style>
+
 
 
     <!-- To change the hint color  -->
@@ -63,7 +61,19 @@
     <item name="android:textColor">@color/colorAccent</item>
     </style>
 
+    <style name="line_box" parent="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:color">@color/colorPrimary</item>
+        <item name="hintTextColor">@color/colorAccent</item>
+        <item name="boxStrokeColor">@color/colorPrimaryLight</item>
+        <item name="boxStrokeWidth">2dp</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+        <item name="android:radius">5dp</item>
+    </style>
 
+    <style name="HintText" parent="TextAppearance.Design.Hint">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/colorAccent</item>
+    </style>
 
     <style name="AlertDialogTheme" parent="ThemeOverlay.AppCompat.Dialog.Alert">
         <item name="buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
 import android.text.Spannable;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
@@ -13,24 +12,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatEditText;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.simplecopy.AppExecutors;
+import com.example.simplecopy.utils.AppExecutors;
 import com.example.simplecopy.R;
-import com.example.simplecopy.data.AppDatabase;
-import com.example.simplecopy.data.Numbers;
+import com.example.simplecopy.data.local.database.AppDatabase;
+import com.example.simplecopy.data.model.Numbers;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -300,7 +295,7 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
         ImageView mEnter_btn;
         ImageView mMinus_btn;
         Button mClear_btn;
-        AppCompatEditText mAddNumber;
+        TextInputEditText mAddNumber;
 
         private int mPosition;
         LinearLayout container;
