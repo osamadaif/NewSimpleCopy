@@ -3,7 +3,6 @@ package com.example.simplecopy.utils;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.res.Resources;
@@ -14,6 +13,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -22,9 +23,8 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.DatePicker;
-import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.widget.NestedScrollView;
@@ -35,13 +35,13 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.simplecopy.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 public class HelperMethods {
-    private static ProgressDialog checkDialog;
+    public static ProgressDialog progressDialog;
     public static AlertDialog alertDialog;
     static ConnectivityManager cm;
     public static void replaceFragment(FragmentManager getChildFragmentManager, int id, Fragment fragment) {
@@ -117,12 +117,12 @@ public class HelperMethods {
     public static void showProgressDialog(Activity activity, String title) {
         try {
 
-            checkDialog = new ProgressDialog (activity);
-            checkDialog.setMessage (title);
-            checkDialog.setIndeterminate (false);
-            checkDialog.setCancelable (false);
+            progressDialog = new ProgressDialog (activity);
+            progressDialog.setMessage (title);
+            progressDialog.setIndeterminate (false);
+            progressDialog.setCancelable (false);
 
-            checkDialog.show ( );
+            progressDialog.show ( );
 
         } catch (Exception e) {
 
@@ -132,7 +132,7 @@ public class HelperMethods {
     public static void dismissProgressDialog() {
         try {
 
-            checkDialog.dismiss ( );
+            progressDialog.dismiss ( );
 
         } catch (Exception e) {
 
@@ -318,5 +318,35 @@ public class HelperMethods {
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
         return isConnected;
+    }
+
+    public static void onCreateErrorToast(Activity activity, String toastTitle) {
+        LayoutInflater inflater = activity.getLayoutInflater();
+
+        int layout_id = R.layout.toast_error;
+
+        View layout = inflater.inflate(layout_id,
+                (ViewGroup) activity.findViewById(R.id.toast_layout_root));
+
+        TextView text = layout.findViewById(R.id.toast_tv_text);
+        text.setText(toastTitle);
+
+        Toast toast = new Toast(activity);
+        toast.setGravity(Gravity.CENTER_VERTICAL | Gravity.BOTTOM, 0, 100);
+        toast.setDuration(Toast.LENGTH_LONG);
+        toast.setView(layout);
+        toast.show();
+    }
+
+    public static boolean validationConfirmPassword(Activity activity, TextInputEditText password, TextInputEditText confirmPassword) {
+
+        if (password.getText ().toString().equals(confirmPassword.getText().toString())) {
+            return true;
+        } else {
+            confirmPassword.setError(activity.getString(R.string.invalid_confirm_password));
+            confirmPassword.setFocusable (true);
+            return false;
+        }
+
     }
 }

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "107293982911",
+    "firebase_url": "https://el-daftar.firebaseio.com",
+    "project_id": "el-daftar",
+    "storage_bucket": "el-daftar.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:107293982911:android:cc45f79b5f1a9ead72c60a",
+        "android_client_info": {
+          "package_name": "com.osama.daif.eldaftar"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "107293982911-aqf6q25ipgp52gi4j0n514jueag32c4l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.osama.daif.eldaftar",
+            "certificate_hash": "0210890fbea4a4c02c1edc2dd91b1f5561aed73d"
+          }
+        },
+        {
+          "client_id": "107293982911-s6d9nfp4fe477uc2512lbpd9vk2e3hua.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsun1nycSxvn2h_3Y2K6XtGjtX0ixDzQs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "107293982911-s6d9nfp4fe477uc2512lbpd9vk2e3hua.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

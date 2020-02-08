@@ -11,10 +11,15 @@
         app:showAsAction="ifRoom|collapseActionView"
         app:actionViewClass="androidx.appcompat.widget.SearchView"/>
 
-<!--    <item-->
-<!--        android:id="@+id/settings_daily"-->
-<!--        android:title="@string/Settings"-->
-<!--        android:icon="@drawable/ic_settings"-->
-<!--        app:showAsAction="never"/>-->
+    <item
+        android:id="@+id/settings_daily"
+        android:title="@string/Settings"
+        android:icon="@drawable/ic_settings"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/logout_daily"
+        android:title="@string/logout"
+        app:showAsAction="never"/>
 
 </menu>

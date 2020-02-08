@@ -12,6 +12,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.example.simplecopy.ui.activity.NoteEditor.NoteEditorActivity;
 import com.example.simplecopy.ui.activity.NumberEditor.NumberEditorActivity;
+import com.example.simplecopy.ui.activity.user.UserActivity;
 import com.example.simplecopy.ui.fragment.Notes.NoteListFragment;
 import com.example.simplecopy.ui.fragment.MainNumbers.Numbers.NumberListFragment;
 import com.example.simplecopy.ui.fragment.MainNumbers.Daily.DailyWalletListFragment;
@@ -20,6 +21,8 @@ import com.example.simplecopy.adapters.viewPagerAdapter;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 
 public class MainActivity extends AppCompatActivity  {
@@ -35,10 +38,12 @@ public class MainActivity extends AppCompatActivity  {
     Toolbar toolbar;
     private FloatingActionButton fab;
 
+    //FireBase auth
+    FirebaseAuth firebaseAuth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
         tabLayout = findViewById (R.id.tabLayout);
         appBarLayout = findViewById (R.id.appbar_id);
@@ -46,6 +51,9 @@ public class MainActivity extends AppCompatActivity  {
         toolbar = findViewById (R.id.toolbar);
         setSupportActionBar (toolbar);
         getSupportActionBar().setTitle(Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.app_name) + "</font>"));
+
+        firebaseAuth = FirebaseAuth.getInstance ();
+        invalidateOptionsMenu();
 
         setupViewPager (viewPager);
         tabLayout.setupWithViewPager (viewPager);
@@ -100,7 +108,6 @@ public class MainActivity extends AppCompatActivity  {
 
             }
         });
-
     }
 
     private void setupViewPager(ViewPager viewPager){
@@ -112,10 +119,25 @@ public class MainActivity extends AppCompatActivity  {
         viewPager.setAdapter (adapter);
     }
 
+//    @Override
+//    protected void onStart() {
+//        checkUserStatus ();
+//        super.onStart ( );
+//    }
+//
+//    private void checkUserStatus(){
+//        FirebaseUser user = firebaseAuth.getCurrentUser ();
+//        if (user != null){
+//            //user is signed in stay here
+//        } else {
+//            //user not signed in, go to login activity
+//            startActivity (new Intent (MainActivity.this, UserActivity.class));
+//            finish ();
+//        }
+//    }
+
     @Override
     public void onBackPressed() {
-
-
         if (backPressedTime + 2000 > System.currentTimeMillis ()){
             backToast.cancel ();
             super.onBackPressed ( );
@@ -125,7 +147,5 @@ public class MainActivity extends AppCompatActivity  {
             backToast.show ();
         }
         backPressedTime = System.currentTimeMillis ();
-
-
     }
 }

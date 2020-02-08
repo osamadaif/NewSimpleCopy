@@ -35,8 +35,8 @@
                 android:layout_weight="2"
                 android:layout_gravity="center"
                 android:fontFamily="sans-serif-medium"
-                android:gravity="left"
-                android:hint="@string/empty_view_title_text"
+                android:gravity="start"
+                android:textAlignment="viewStart"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
                 android:textColor="@color/colorPrimaryLight" />
 

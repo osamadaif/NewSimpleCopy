@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatEditText;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.simplecopy.utils.AppExecutors;
@@ -295,7 +296,7 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
         ImageView mEnter_btn;
         ImageView mMinus_btn;
         Button mClear_btn;
-        TextInputEditText mAddNumber;
+        AppCompatEditText mAddNumber;
 
         private int mPosition;
         LinearLayout container;

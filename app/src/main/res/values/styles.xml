@@ -62,7 +62,7 @@
     </style>
 
     <style name="line_box" parent="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <item name="android:color">@color/colorPrimary</item>
+        <item name="android:color">@color/colorPrimaryLight</item>
         <item name="hintTextColor">@color/colorAccent</item>
         <item name="boxStrokeColor">@color/colorPrimaryLight</item>
         <item name="boxStrokeWidth">2dp</item>

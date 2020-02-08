@@ -1,9 +1,12 @@
 package com.example.simplecopy.ui.fragment.MainNumbers.Daily;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -21,12 +24,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.simplecopy.ui.activity.user.UserActivity;
 import com.example.simplecopy.utils.AppExecutors;
 import com.example.simplecopy.R;
 import com.example.simplecopy.ui.fragment.MainNumbers.MainViewModel;
 import com.example.simplecopy.adapters.DailyRecyclerAdapter;
 import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.Numbers;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.List;
 import java.util.Objects;
@@ -39,6 +45,9 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
     private RecyclerView mNumbersList;
     private DailyRecyclerAdapter mAdapter;
     private AppDatabase mDB;
+    //FireBase auth
+    private FirebaseAuth firebaseAuth;
+    private FirebaseUser user;
 
     // Required empty public constructor
     public DailyWalletListFragment() {
@@ -53,6 +62,8 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
         mainViewModel = ViewModelProviders.of (this).get (MainViewModel.class);
         setUpRecycleView ();
         mDB = AppDatabase.getInstance (getContext ());
+        firebaseAuth = FirebaseAuth.getInstance ();
+        user = firebaseAuth.getCurrentUser ();
         setupViewModel ( );
         return view;
     }
@@ -165,35 +176,60 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
                         });
             }
         });
-
-//        searchView.setOnQueryTextFocusChangeListener (new View.OnFocusChangeListener ( ) {
-//            @Override
-//            public void onFocusChange(View v, boolean hasFocus) {
-//                if (!hasFocus){
-//                    item.collapseActionView ();
-//                    getResults (query);
-//
-//                }
-//            }
-//        });
-
-        //searchView.clearFocus ();
-
-        //super.onCreateOptionsMenu (menu,inflater);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId ()){
-//
-//            case R.id.settings_daily:
-//                Intent StartSettingActivity = new Intent (getActivity (),SettingsActivity.class);
-//                startActivity (StartSettingActivity);
-//                return true;
-//        }
+        switch (item.getItemId ()){
+            case R.id.settings_daily:
+
+                return true;
+            case R.id.logout_daily:
+                if (user != null){
+                    showLogoutDialog ();
+                } else {
+                    startActivity (new Intent (getActivity (), UserActivity.class));
+                }
+        }
         return super.onOptionsItemSelected (item);
     }
 
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        MenuItem item = menu.findItem (R.id.logout_daily);
+
+        if (user != null){
+            item.setTitle (getResources ().getString (R.string.logout));
+        } else {
+            item.setTitle (getResources ().getString (R.string.login));
+        }
+        super.onPrepareOptionsMenu (menu);
+    }
+
+    private void showLogoutDialog() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder (getActivity ());
+        builder.setMessage (R.string.logout_dialog_msg);
+        builder.setPositiveButton (R.string.logout, new DialogInterface.OnClickListener ( ) {
+            public void onClick(DialogInterface dialog, int id) {
+                firebaseAuth.signOut ();
+                startActivity (new Intent (getActivity (), UserActivity.class));
+                getActivity ().finish ();
+            }
+        });
+        builder.setNegativeButton (R.string.cancel, new DialogInterface.OnClickListener ( ) {
+            public void onClick(DialogInterface dialog, int id) {
+
+                if (dialog != null) {
+                    dialog.dismiss ( );
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create ( );
+        alertDialog.show ( );
+    }
 
     @Override
     public void onNumberSubmit(int itemId) {

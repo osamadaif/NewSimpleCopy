@@ -43,6 +43,7 @@
     <string name="editor_delete_Numbers_failed">Error with deleting</string>
     <string name="delete_all_dialog_msg">Delete All Number?</string>
     <string name="delete_all_notes_dialog_msg">Delete All Notes?</string>
+    <string name="logout_dialog_msg">Are you sure you want to logout?</string>
     <string name="Copied">Number Is Copied</string>
     <string name="Note_Copied">Note Is Copied</string>
     <string name="Please_insert_name">Please insert a name</string>
@@ -64,4 +65,23 @@
     <string name="notes">Notes</string>
     <string name="number">Number</string>
     <string name="value">Value</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="login">Login</string>
+    <string name="new_user">New user?</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="phone">phone</string>
+    <string name="phone_or_email">Phone/Email</string>
+    <string name="skip">Skip</string>
+    <string name="invalid_email">Invalid Email</string>
+    <string name="Password_length">Password length at least 6 characters</string>
+    <string name="authentication_failed">Authentication failed.</string>
+    <string name="wait">Please wait....</string>
+    <string name="error_inter_net">No internet connection</string>
+    <string name="registered">Registered....</string>
+    <string name="invalid_confirm_password">Confirm password not match</string>
+    <string name="logout">logout</string>
+
 </resources>

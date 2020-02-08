@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import com.example.simplecopy.R;
 import com.example.simplecopy.ui.activity.MainActivity;
+import com.example.simplecopy.ui.activity.user.UserActivity;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -21,7 +22,7 @@ public class SplashScreen extends AppCompatActivity {
         new Timer ().schedule (new TimerTask ( ) {
             @Override
             public void run() {
-                startActivity (new Intent (getApplicationContext (), MainActivity.class));
+                startActivity (new Intent (getApplicationContext (), UserActivity.class));
             }
         }, 1000);
     }

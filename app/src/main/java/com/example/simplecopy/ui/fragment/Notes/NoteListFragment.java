@@ -32,7 +32,10 @@ import com.example.simplecopy.adapters.CopyNoteAdapter;
 import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.NotesData;
 import com.example.simplecopy.ui.activity.NoteEditor.NoteEditorActivity;
+import com.example.simplecopy.ui.activity.user.UserActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.List;
 import java.util.Objects;
@@ -49,6 +52,9 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
     View mEmptyView;
     Button empty_btn;
     private FloatingActionButton fab;
+    //FireBase auth
+    private FirebaseAuth firebaseAuth;
+    private FirebaseUser user;
 
     // Required empty public constructor
     public NoteListFragment() {
@@ -63,6 +69,8 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         setUpRecycleView ();
         mainViewModel = ViewModelProviders.of (this).get (NotesViewModel.class);
         mDB = AppDatabase.getInstance (getContext ());
+        firebaseAuth = FirebaseAuth.getInstance ();
+        user = firebaseAuth.getCurrentUser ();
 
         setupViewModel ( );
 
@@ -109,6 +117,36 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         super.onCreate (savedInstanceState);
     }
 
+    public void setUpRecycleView(){
+        mNumbersList = view.findViewById (R.id.recycle_note);
+        mEmptyView = view.findViewById (R.id.empty_notes_layout);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager (getActivity ());
+        mNumbersList.setLayoutManager (layoutManager);
+        mNumbersList.addItemDecoration(new DividerItemDecoration (Objects.requireNonNull (getContext ( )), 0));
+        mNumbersList.setItemAnimator (new DefaultItemAnimator ());
+        //mNumbersList.showIfEmpty(mEmptyView);
+        mNumbersList.setHasFixedSize (true);
+        mAdapter = new CopyNoteAdapter(getActivity (), this);
+        mAdapter.setHasStableIds (true);
+        mNumbersList.setAdapter (mAdapter);
+
+        mNumbersList.addOnScrollListener (new RecyclerView.OnScrollListener ( ) {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                if (dy<0 && !fab.isShown())
+                    fab.show();
+                else if(dy>0 && fab.isShown())
+                    fab.hide();
+            }
+        });
+    }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate (R.menu.menu_home, menu);
@@ -152,56 +190,46 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
             case R.id.deletall:
                 // delete all data
                 showDeleteAllConfirmationDialog ( );
-//                break;
-//            case R.id.settings:
+                break;
+            case R.id.settings:
 //                Intent StartSettingActivity = new Intent (getActivity (),SettingsActivity.class);
 //                startActivity (StartSettingActivity);
+                break;
+            case R.id.logout:
+                if (user != null){
+                    showLogoutDialog ();
+                } else {
+                    startActivity (new Intent (getActivity (), UserActivity.class));
+                }
                 return true;
         }
         return super.onOptionsItemSelected (item);
     }
 
-    public void setUpRecycleView(){
-        mNumbersList = view.findViewById (R.id.recycle_note);
-        mEmptyView = view.findViewById (R.id.empty_notes_layout);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager (getActivity ());
-        mNumbersList.setLayoutManager (layoutManager);
-        mNumbersList.addItemDecoration(new DividerItemDecoration (Objects.requireNonNull (getContext ( )), 0));
-        mNumbersList.setItemAnimator (new DefaultItemAnimator ());
-        //mNumbersList.showIfEmpty(mEmptyView);
-        mNumbersList.setHasFixedSize (true);
-        mAdapter = new CopyNoteAdapter(getActivity (), this);
-        mAdapter.setHasStableIds (true);
-        mNumbersList.setAdapter (mAdapter);
-
-        mNumbersList.addOnScrollListener (new RecyclerView.OnScrollListener ( ) {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                if (dy<0 && !fab.isShown())
-                    fab.show();
-                else if(dy>0 && fab.isShown())
-                    fab.hide();
-            }
-        });
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        MenuItem item = menu.findItem (R.id.logout);
+        if (user != null){
+            item.setTitle (getResources ().getString (R.string.logout));
+        } else {
+            item.setTitle (getResources ().getString (R.string.login));
+        }
+        super.onPrepareOptionsMenu (menu);
     }
 
-    private void showDeleteConfirmationDialog(final NotesData notesData) {
+
+
+
+
+    private void showDeleteAllConfirmationDialog() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder (getActivity ());
-        builder.setMessage (R.string.delete_note_dialog_msg);
+        builder.setMessage (R.string.delete_all_notes_dialog_msg);
         builder.setPositiveButton (R.string.delete, new DialogInterface.OnClickListener ( ) {
             public void onClick(DialogInterface dialog, int id) {
-                // User clicked the "Delete" button, so delete the Number.
-                mainViewModel.delete (notesData);
-
+                // User clicked the "Delete" button, so delete the number.
+                mainViewModel.deleteAllNumbers ();
                 Toast.makeText (getActivity (), getString (R.string.Deleted), Toast.LENGTH_SHORT).show ( );
-
             }
         });
         builder.setNegativeButton (R.string.cancel, new DialogInterface.OnClickListener ( ) {
@@ -218,15 +246,15 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         alertDialog.show ( );
     }
 
-    private void showDeleteAllConfirmationDialog() {
+    private void showLogoutDialog() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder (getActivity ());
-        builder.setMessage (R.string.delete_all_notes_dialog_msg);
-        builder.setPositiveButton (R.string.delete, new DialogInterface.OnClickListener ( ) {
+        builder.setMessage (R.string.logout_dialog_msg);
+        builder.setPositiveButton (R.string.logout, new DialogInterface.OnClickListener ( ) {
             public void onClick(DialogInterface dialog, int id) {
-                // User clicked the "Delete" button, so delete the number.
-                mainViewModel.deleteAllNumbers ();
-                Toast.makeText (getActivity (), getString (R.string.Deleted), Toast.LENGTH_SHORT).show ( );
+                firebaseAuth.signOut ();
+                startActivity (new Intent (getActivity (), UserActivity.class));
+                getActivity ().finish ();
             }
         });
         builder.setNegativeButton (R.string.cancel, new DialogInterface.OnClickListener ( ) {
@@ -267,6 +295,33 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
     public void onNoteDelete(NotesData notesData) {
         showDeleteConfirmationDialog (notesData);
 
+    }
+
+    private void showDeleteConfirmationDialog(final NotesData notesData) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder (getActivity ());
+        builder.setMessage (R.string.delete_note_dialog_msg);
+        builder.setPositiveButton (R.string.delete, new DialogInterface.OnClickListener ( ) {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Delete" button, so delete the Number.
+                mainViewModel.delete (notesData);
+
+                Toast.makeText (getActivity (), getString (R.string.Deleted), Toast.LENGTH_SHORT).show ( );
+
+            }
+        });
+        builder.setNegativeButton (R.string.cancel, new DialogInterface.OnClickListener ( ) {
+            public void onClick(DialogInterface dialog, int id) {
+
+                if (dialog != null) {
+                    dialog.dismiss ( );
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create ( );
+        alertDialog.show ( );
     }
 
     public void addSomeNumber(View view) {

@@ -8,7 +8,7 @@
         android:id="@+id/deletall"
         android:title="@string/DeleteAll"
         android:icon="@drawable/delete_all"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="never"/>
 
     <item
         android:id="@+id/search"
@@ -16,6 +16,16 @@
         android:icon="@drawable/ic_search"
         app:showAsAction="ifRoom|collapseActionView"
         app:actionViewClass="androidx.appcompat.widget.SearchView"/>
+
+    <item
+        android:id="@+id/settings"
+        android:title="@string/Settings"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/logout"
+        android:title="@string/logout"
+        app:showAsAction="never"/>
+
 
 
 <!--    <item-->
