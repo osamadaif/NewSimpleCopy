@@ -272,7 +272,6 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
 
     @Override
     public void onItemClickListener(Numbers numbers) {
-
         String numberStr = numbers.getNumber ( );
 
         ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService (Context.CLIPBOARD_SERVICE);

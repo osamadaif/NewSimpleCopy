@@ -68,6 +68,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-database:19.2.1'
     implementation 'com.google.firebase:firebase-auth:19.2.0'
 
+    //Google sign in library
+    implementation 'com.google.android.gms:play-services-auth:17.0.0'
+
     // ButterKnife dependency
     implementation 'com.jakewharton:butterknife:10.2.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.0'

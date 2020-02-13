@@ -1,5 +1,8 @@
 package com.example.simplecopy.ui.fragment.MainNumbers.Daily;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,6 +26,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.simplecopy.ui.activity.user.UserActivity;
 import com.example.simplecopy.utils.AppExecutors;
@@ -229,6 +233,16 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
         // Create and show the AlertDialog
         AlertDialog alertDialog = builder.create ( );
         alertDialog.show ( );
+    }
+
+    @Override
+    public void onItemClickListener(Numbers numbers) {
+        String numberStr = numbers.getNumber ( );
+
+        ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService (Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText ("TextView",numberStr);
+        clipboard.setPrimaryClip (clip);
+        Toast.makeText (getActivity (), getString (R.string.Copied), Toast.LENGTH_SHORT).show ( );
     }
 
     @Override

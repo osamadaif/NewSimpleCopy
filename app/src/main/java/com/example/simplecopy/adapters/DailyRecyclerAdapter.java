@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -165,6 +166,11 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
         holder.mEnter_btn.setOnClickListener (new View.OnClickListener ( ) {
             @Override
             public void onClick(View v) {
+                InputMethodManager imm = (InputMethodManager)mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                assert imm != null;
+                imm.hideSoftInputFromWindow(holder.mEnter_btn.getWindowToken(), 0);
+                holder.mAddNumber.setFocusable(false);
+                holder.mAddNumber.setFocusableInTouchMode(true);
                 AppExecutors.getInstance ().diskIO ().execute (new Runnable ( ) {
                     @Override
                     public void run() {
@@ -207,6 +213,11 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
         holder.mMinus_btn.setOnClickListener (new View.OnClickListener ( ) {
             @Override
             public void onClick(View v) {
+                InputMethodManager imm = (InputMethodManager)mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                assert imm != null;
+                imm.hideSoftInputFromWindow(holder.mEnter_btn.getWindowToken(), 0);
+                holder.mAddNumber.setFocusable(false);
+                holder.mAddNumber.setFocusableInTouchMode(true);
                 AppExecutors.getInstance ().diskIO ().execute (new Runnable ( ) {
                     @Override
                     public void run() {
@@ -328,12 +339,15 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
                      mItemClickListener.onNumberClear (elementId);
                  }
              });
+             itemView.setOnClickListener (this);
 
          }
 
          @Override
         public void onClick(View v) {
-
+             if (getAdapterPosition ( ) != RecyclerView.NO_POSITION && mItemClickListener != null) {
+                 mItemClickListener.onItemClickListener (mNumberList.get (mPosition));
+             }
         }
 
         public void setPosition(int position) {
@@ -399,6 +413,7 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
 
 
     public interface ItemClickListener {
+        void onItemClickListener(Numbers numbers);
         void onNumberSubmit(int itemId);
         void onNumberClear(int itemId);
 
