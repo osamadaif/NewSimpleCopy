@@ -199,14 +199,8 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
                                 }
                             });
                         }
-
-
-
-
                     }
-
                 });
-
             }
         });
 
@@ -237,7 +231,7 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
                                 AppExecutors.getInstance ().mainThread ().execute (new Runnable ( ) {
                                     @Override
                                     public void run() {
-                                        holder.mAddNumber.setError ("invalid value");
+                                        holder.mAddNumber.setError (mContext.getResources ( ).getString (R.string.invalid_value));
 
                                     }
                                 });
@@ -252,19 +246,12 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
                                 public void run() {
                                     holder.mAddNumber.setText ("");
                                     notifyDataSetChanged ();
-
                                 }
                             });
                             }
                         }
-
-
-
-
                     }
-
                 });
-
             }
         });
 

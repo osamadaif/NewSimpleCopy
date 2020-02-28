@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager.widget.ViewPager;
 
+import com.example.simplecopy.data.local.prefs.SharedPreferencesManger;
 import com.example.simplecopy.ui.activity.NoteEditor.NoteEditorActivity;
 import com.example.simplecopy.ui.activity.NumberEditor.NumberEditorActivity;
 import com.example.simplecopy.ui.activity.user.UserActivity;
@@ -18,6 +19,7 @@ import com.example.simplecopy.ui.fragment.MainNumbers.Numbers.NumberListFragment
 import com.example.simplecopy.ui.fragment.MainNumbers.Daily.DailyWalletListFragment;
 import com.example.simplecopy.R;
 import com.example.simplecopy.adapters.viewPagerAdapter;
+import com.example.simplecopy.utils.HelperMethods;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity  {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        HelperMethods.changeLang(this, SharedPreferencesManger.onLoadLang(this));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         tabLayout = findViewById (R.id.tabLayout);

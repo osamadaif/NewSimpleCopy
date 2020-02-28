@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import com.example.simplecopy.R;
 import com.example.simplecopy.ui.activity.MainActivity;
+import com.example.simplecopy.ui.activity.SettingsActivity;
 import com.example.simplecopy.ui.activity.user.UserActivity;
 import com.example.simplecopy.ui.fragment.MainNumbers.MainViewModel;
 import com.example.simplecopy.adapters.CopyAdapter;
@@ -125,7 +126,7 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager (getActivity ());
         mNumbersList.setLayoutManager (layoutManager);
         //DividerItemDecoration decoration = new DividerItemDecoration(getActivity (), DividerItemDecoration.VERTICAL);
-        mNumbersList.addItemDecoration(new DividerItemDecoration (Objects.requireNonNull (getContext ( )), 0));
+//        mNumbersList.addItemDecoration(new DividerItemDecoration (Objects.requireNonNull (getContext ( )), 0));
         mNumbersList.setItemAnimator (new DefaultItemAnimator ());
         //mNumbersList.showIfEmpty(mEmptyView);
         mNumbersList.setHasFixedSize (true);
@@ -195,8 +196,8 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
                 showDeleteAllConfirmationDialog ( );
                 break;
             case R.id.settings:
-//                Intent StartSettingActivity = new Intent (getActivity (),SettingsActivity.class);
-//                startActivity (StartSettingActivity);
+                startActivity (new Intent (getActivity (), SettingsActivity.class));
+                getActivity ().finish ();
                 break;
             case R.id.logout:
                 if (user != null){

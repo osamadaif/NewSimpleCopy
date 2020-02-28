@@ -26,9 +26,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
+import com.example.simplecopy.ui.activity.NumberEditor.NumberEditorActivity;
+import com.example.simplecopy.ui.activity.SettingsActivity;
 import com.example.simplecopy.ui.activity.user.UserActivity;
+import com.example.simplecopy.ui.fragment.MainNumbers.Numbers.NumberListFragment;
 import com.example.simplecopy.utils.AppExecutors;
 import com.example.simplecopy.R;
 import com.example.simplecopy.ui.fragment.MainNumbers.MainViewModel;
@@ -53,6 +57,9 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
 
+    private View mEmptyView;
+    Button empty_btn;
+
     // Required empty public constructor
     public DailyWalletListFragment() {
     }
@@ -69,14 +76,22 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
         firebaseAuth = FirebaseAuth.getInstance ();
         user = firebaseAuth.getCurrentUser ();
         setupViewModel ( );
+        empty_btn = view.findViewById (R.id.btn_empty_title);
+        empty_btn.setOnClickListener (new View.OnClickListener ( ) {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getActivity (), NumberEditorActivity.class));
+            }
+        });
         return view;
     }
 
     public void setUpRecycleView(){
         mNumbersList = view.findViewById (R.id.recycle_daily_list);
+        mEmptyView = view.findViewById (R.id.empty_layout_daily);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager (getActivity ());
         mNumbersList.setLayoutManager (layoutManager);
-        mNumbersList.addItemDecoration(new DividerItemDecoration (Objects.requireNonNull (getContext ( )), 0));
+//        mNumbersList.addItemDecoration(new DividerItemDecoration (Objects.requireNonNull (getContext ( )), 0));
         mNumbersList.setItemAnimator (new DefaultItemAnimator ());
         mNumbersList.setHasFixedSize (true);
         mAdapter = new DailyRecyclerAdapter(getActivity (), this);
@@ -129,7 +144,15 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
         viewModel.getDailyFirst ().observe ( this, new Observer<List<Numbers>> ( ) {
             @Override
             public void onChanged(List<Numbers> numbersList1) {
-                mAdapter.setItems (numbersList1);
+                if (numbersList1.isEmpty ()){
+                    mNumbersList.setVisibility (View.GONE);
+                    mEmptyView.setVisibility (View.VISIBLE);
+
+                }else {
+                    mNumbersList.setVisibility (View.VISIBLE);
+                    mEmptyView.setVisibility (View.GONE);
+                    mAdapter.setItems (numbersList1);
+                }
             }
         });
     }
@@ -186,7 +209,8 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId ()){
             case R.id.settings_daily:
-
+                startActivity (new Intent (getActivity (), SettingsActivity.class));
+                getActivity ().finish ();
                 return true;
             case R.id.logout_daily:
                 if (user != null){

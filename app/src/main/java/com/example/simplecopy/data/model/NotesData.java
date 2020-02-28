@@ -19,6 +19,13 @@ public class NotesData {
         this.note = note;
     }
 
+    @Ignore
+    public NotesData(String title, String note,int favorite) {
+        this.title = title;
+        this.note = note;
+        this.favorite = favorite;
+    }
+
 
     public NotesData(int id, String title, String note, int favorite) {
         this.id = id;

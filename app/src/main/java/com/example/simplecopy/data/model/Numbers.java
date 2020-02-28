@@ -25,6 +25,16 @@ public class Numbers {
     }
 
     @Ignore
+    public Numbers(String title, String number, String note, int favorite, int done, int daily) {
+        this.title = title;
+        this.number = number;
+        this.note = note;
+        this.favorite = favorite;
+        this.done = done;
+        this.daily = daily;
+    }
+
+    @Ignore
     public Numbers(int done, int daily) {
         this.done = done;
         this.daily = daily;

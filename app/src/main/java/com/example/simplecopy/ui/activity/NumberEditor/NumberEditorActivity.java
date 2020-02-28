@@ -23,13 +23,16 @@ import androidx.core.app.NavUtils;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.example.simplecopy.data.local.prefs.SharedPreferencesManger;
 import com.example.simplecopy.utils.AppExecutors;
 import com.example.simplecopy.R;
 import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.Numbers;
+import com.example.simplecopy.utils.HelperMethods;
+import com.example.simplecopy.utils.TextUndoRedo;
 
 
-public class NumberEditorActivity extends AppCompatActivity
+public class NumberEditorActivity extends AppCompatActivity implements TextUndoRedo.TextChangeInfo
 {
     public static final String TAG = "NumberEditorActivity";
 
@@ -37,6 +40,10 @@ public class NumberEditorActivity extends AppCompatActivity
     private static final int DEFAULT_NUMBER_ID = -1;
     public static final String INSTANCE_NUMBER_ID = "instanceTaskId";
     private int mNumberId = DEFAULT_NUMBER_ID;
+    private int fav ;
+    private int done ;
+    private int daily ;
+
 
     private EditText mTitleEditText;
     private EditText mNumbersEditText;
@@ -44,6 +51,9 @@ public class NumberEditorActivity extends AppCompatActivity
     private AppDatabase mDb;
 
     Toolbar toolbar;
+    TextUndoRedo TURT;
+    TextUndoRedo TURM;
+    TextUndoRedo TURN;
 
 
 
@@ -61,6 +71,7 @@ public class NumberEditorActivity extends AppCompatActivity
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        HelperMethods.changeLang(this, SharedPreferencesManger.onLoadLang(this));
         super.onCreate (savedInstanceState);
         setContentView (R.layout.activity_editor);
 
@@ -104,6 +115,9 @@ public class NumberEditorActivity extends AppCompatActivity
         mTitleEditText.setOnTouchListener (mTouchListener);
         mNumbersEditText.setOnTouchListener (mTouchListener);
         mNotesEditText.setOnTouchListener (mTouchListener);
+        TURT = new TextUndoRedo(mTitleEditText, this);
+        TURM = new TextUndoRedo(mNumbersEditText, this);
+        TURN = new TextUndoRedo(mNotesEditText, this);
     }
 
     // get user input from editor and save new data into database
@@ -126,6 +140,7 @@ public class NumberEditorActivity extends AppCompatActivity
 
 
         final Numbers numbers1 = new Numbers (titleString,numbers,notesString);
+        final Numbers numbers2 = new Numbers (titleString,numbers,notesString, fav, done, daily);
         AppExecutors.getInstance ().diskIO ().execute (new Runnable ( ) {
             @Override
             public void run() {
@@ -133,8 +148,8 @@ public class NumberEditorActivity extends AppCompatActivity
                     mDb.numbersDao ().insertTask (numbers1);
 
                 } else {
-                    numbers1.setId (mNumberId);
-                    mDb.numbersDao ().updateTask (numbers1);
+                    numbers2.setId (mNumberId);
+                    mDb.numbersDao ().updateTask (numbers2);
                 }
                 // Exit activity
                 finish ( );
@@ -158,6 +173,9 @@ public class NumberEditorActivity extends AppCompatActivity
         mTitleEditText.setText(number.getTitle());
         mNumbersEditText.setText(number.getNumber());
         mNotesEditText.setText(number.getNote());
+        fav = number.getFavorite ();
+        done = number.getDone ();
+        daily = number.getDaily ();
     }
 
     @Override
@@ -172,6 +190,42 @@ public class NumberEditorActivity extends AppCompatActivity
             case R.id.save:
                 // Save Data
                 insertData ( );
+                return true;
+
+            case R.id.undo:
+                if (mTitleEditText.isFocused ()){
+                    if(TURT.canUndo ()){
+                        TURT. exeUndo();
+                    }
+                }
+                if (mNumbersEditText.isFocused ()){
+                    if(TURM.canUndo ()){
+                        TURM. exeUndo();
+                    }
+                }
+                if (mNotesEditText.isFocused ()){
+                    if(TURN.canUndo ()){
+                        TURN. exeUndo();
+                    }
+                }
+                return true;
+
+            case R.id.redo:
+                if (mTitleEditText.isFocused ()){
+                    if(TURT.canRedo ()){
+                        TURT.exeRedo();
+                    }
+                }
+                if (mNumbersEditText.isFocused ()){
+                    if(TURM.canRedo ()){
+                        TURM.exeRedo();
+                    }
+                }
+                if (mNotesEditText.isFocused ()){
+                    if(TURN.canRedo ()){
+                        TURN.exeRedo();
+                    }
+                }
                 return true;
 
             case android.R.id.home:
@@ -249,4 +303,8 @@ public class NumberEditorActivity extends AppCompatActivity
         alertDialog.show ( );
     }
 
+    @Override
+    public void textAction() {
+
+    }
 }

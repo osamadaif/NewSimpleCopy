@@ -33,6 +33,7 @@
             app:tabIndicatorColor="@color/colorAccent"
             app:tabSelectedTextColor="@color/colorAccent"
             app:tabTextAppearance="@style/MyCustomTabLayout"
+            android:layoutDirection="ltr"
             app:tabTextColor="@color/clolrWhite">
 
         </com.google.android.material.tabs.TabLayout>

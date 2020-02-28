@@ -32,6 +32,7 @@ import com.example.simplecopy.adapters.CopyNoteAdapter;
 import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.NotesData;
 import com.example.simplecopy.ui.activity.NoteEditor.NoteEditorActivity;
+import com.example.simplecopy.ui.activity.SettingsActivity;
 import com.example.simplecopy.ui.activity.user.UserActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -122,7 +123,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         mEmptyView = view.findViewById (R.id.empty_notes_layout);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager (getActivity ());
         mNumbersList.setLayoutManager (layoutManager);
-        mNumbersList.addItemDecoration(new DividerItemDecoration (Objects.requireNonNull (getContext ( )), 0));
+//        mNumbersList.addItemDecoration(new DividerItemDecoration (Objects.requireNonNull (getContext ( )), 0));
         mNumbersList.setItemAnimator (new DefaultItemAnimator ());
         //mNumbersList.showIfEmpty(mEmptyView);
         mNumbersList.setHasFixedSize (true);
@@ -192,8 +193,8 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
                 showDeleteAllConfirmationDialog ( );
                 break;
             case R.id.settings:
-//                Intent StartSettingActivity = new Intent (getActivity (),SettingsActivity.class);
-//                startActivity (StartSettingActivity);
+                startActivity (new Intent (getActivity (), SettingsActivity.class));
+                getActivity ().finish ();
                 break;
             case R.id.logout:
                 if (user != null){

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="none"
+    android:background="@android:color/white"
+    android:scrollingCache="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingTop="@dimen/spacing_large">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/spacing_large"
+            android:text="@string/settings"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Headline"
+            android:textColor="@color/colorPrimaryDark"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="@dimen/spacing_middle">
+
+
+                <LinearLayout
+                    android:id="@+id/settings_activity_lay_select_lang"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:gravity="center_vertical"
+                    android:minHeight="60dp"
+                    android:orientation="horizontal"
+                    android:paddingEnd="@dimen/spacing_large"
+                    android:paddingStart="@dimen/spacing_large"
+                    android:focusable="true">
+
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/select_language"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                        android:textColor="@color/colorPrimary"
+                        android:textStyle="bold" />
+
+                    <View
+                        android:layout_width="@dimen/spacing_middle"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:id="@+id/settings_activity_tv_lang"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                        android:textColor="@color/colorAccent" />
+
+                    <View
+                        android:layout_width="@dimen/spacing_middle"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+
+<!--                <View-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="1px"-->
+<!--                    android:background="@color/gray" />-->
+
+<!--                <LinearLayout-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:gravity="center_vertical"-->
+<!--                    android:minHeight="?attr/actionBarSize"-->
+<!--                    android:orientation="vertical"-->
+<!--                    android:padding="@dimen/spacing_large">-->
+
+<!--                    <LinearLayout-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:background="?attr/selectableItemBackground"-->
+<!--                        android:clickable="true"-->
+<!--                        android:gravity="center_vertical"-->
+<!--                        android:orientation="horizontal"-->
+<!--                        android:focusable="true">-->
+
+<!--                        <TextView-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_weight="1"-->
+<!--                            android:text="Real Time Mode"-->
+<!--                            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"-->
+<!--                            android:textColor="@color/colorPrimary"-->
+<!--                            android:textStyle="bold" />-->
+
+<!--                        <View-->
+<!--                            android:layout_width="@dimen/spacing_middle"-->
+<!--                            android:layout_height="wrap_content" />-->
+
+<!--                        <androidx.appcompat.widget.SwitchCompat-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:padding="4dp"-->
+<!--                            android:checked="true" />-->
+
+<!--                        <View-->
+<!--                            android:layout_width="@dimen/spacing_middle"-->
+<!--                            android:layout_height="wrap_content" />-->
+
+<!--                    </LinearLayout>-->
+
+<!--                    <TextView-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="@string/unsaved_changes_dialog_msg"-->
+<!--                        android:textAppearance="@style/TextAppearance.AppCompat.Small"-->
+<!--                        android:textColor="@color/gray" />-->
+
+<!--                </LinearLayout>-->
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</androidx.core.widget.NestedScrollView>

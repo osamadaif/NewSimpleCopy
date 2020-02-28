@@ -5,14 +5,23 @@
     tools:context=".ui.activity.MainActivity">
 
 
+    <item
+        android:id="@+id/undo"
+        android:icon="@drawable/ic_undo_white"
+        android:title="@string/undo"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/redo"
+        android:icon="@drawable/ic_redo_white"
+        android:title="@string/redo"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/save"
-        android:title="@string/Save"
         android:icon="@drawable/ic_done"
-        app:showAsAction="ifRoom"/>
-
-
+        android:title="@string/Save"
+        app:showAsAction="ifRoom" />
 
 
 </menu>

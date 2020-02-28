@@ -6,9 +6,11 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.simplecopy.R;
+import com.example.simplecopy.data.local.prefs.SharedPreferencesManger;
 import com.example.simplecopy.ui.activity.BaseActivity;
 import com.example.simplecopy.ui.activity.MainActivity;
 import com.example.simplecopy.ui.fragment.user.LoginFragment;
+import com.example.simplecopy.utils.HelperMethods;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -21,6 +23,7 @@ public class UserActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        HelperMethods.changeLang(this, SharedPreferencesManger.onLoadLang(this));
         super.onCreate (savedInstanceState);
         setContentView (R.layout.activity_user);
 

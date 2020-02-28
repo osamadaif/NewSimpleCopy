@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -19,13 +20,16 @@ import androidx.core.app.NavUtils;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.example.simplecopy.data.local.prefs.SharedPreferencesManger;
 import com.example.simplecopy.utils.AppExecutors;
 import com.example.simplecopy.R;
 import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.NotesData;
+import com.example.simplecopy.utils.HelperMethods;
+import com.example.simplecopy.utils.TextUndoRedo;
 
 
-public class NoteEditorActivity extends AppCompatActivity
+public class NoteEditorActivity extends AppCompatActivity implements TextUndoRedo.TextChangeInfo
 {
     public static final String TAG = "NumberEditorActivity";
 
@@ -33,12 +37,15 @@ public class NoteEditorActivity extends AppCompatActivity
     private static final int DEFAULT_Note_ID = -1;
     public static final String INSTANCE_Note_ID = "instanceTaskId";
     private int mNoteId = DEFAULT_Note_ID;
+    private int fav ;
 
     private EditText mTitleEditText;
     private EditText mNotesEditText;
     private AppDatabase mDb;
 
     Toolbar toolbar;
+    TextUndoRedo TURT;
+    TextUndoRedo TURN;
 
     private boolean mNoteHasChanged = false;
 
@@ -54,6 +61,7 @@ public class NoteEditorActivity extends AppCompatActivity
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        HelperMethods.changeLang(this, SharedPreferencesManger.onLoadLang(this));
         super.onCreate (savedInstanceState);
         setContentView (R.layout.activity_note_editor);
 
@@ -96,6 +104,9 @@ public class NoteEditorActivity extends AppCompatActivity
 
         mTitleEditText.setOnTouchListener (mTouchListener);
         mNotesEditText.setOnTouchListener (mTouchListener);
+
+        TURT = new TextUndoRedo(mTitleEditText, this);
+        TURN = new TextUndoRedo(mNotesEditText, this);
     }
 
     // get user input from editor and save new data into database
@@ -103,6 +114,7 @@ public class NoteEditorActivity extends AppCompatActivity
         if (mTitleEditText.getText ( ) == null || mTitleEditText.getText ( ).length () == 0)
         {
             mTitleEditText.setError (getString (R.string.Please_insert_name));
+            mTitleEditText.setFocusable (true);
             return;
         }
         String titleString = mTitleEditText.getText ( ).toString ( ).trim ( );
@@ -110,6 +122,7 @@ public class NoteEditorActivity extends AppCompatActivity
         if (mNotesEditText.getText ( ) == null || mNotesEditText.getText ( ).length () == 0)
         {
             mNotesEditText.setError (getString (R.string.Please_insert_note));
+            mNotesEditText.setFocusable (true);
             return;
         }
         String notesString = mNotesEditText.getText ( ).toString ( ).trim ( );
@@ -118,6 +131,7 @@ public class NoteEditorActivity extends AppCompatActivity
 
 
         final NotesData notes1 = new NotesData (titleString,notesString);
+        final NotesData notes2 = new NotesData (titleString,notesString, fav);
         AppExecutors.getInstance ().diskIO ().execute (new Runnable ( ) {
             @Override
             public void run() {
@@ -125,8 +139,8 @@ public class NoteEditorActivity extends AppCompatActivity
                     mDb.NotesDao ().insertTask (notes1);
 
                 } else {
-                    notes1.setId (mNoteId);
-                    mDb.NotesDao ().updateTask (notes1);
+                    notes2.setId (mNoteId);
+                    mDb.NotesDao ().updateTask (notes2);
                 }
                 // Exit activity
                 finish ( );
@@ -148,6 +162,7 @@ public class NoteEditorActivity extends AppCompatActivity
 
         mTitleEditText.setText(notesData.getTitle());
         mNotesEditText.setText(notesData.getNote());
+        fav = notesData.getFavorite ();
     }
 
     @Override
@@ -162,6 +177,32 @@ public class NoteEditorActivity extends AppCompatActivity
             case R.id.save:
                 // Save Data
                 insertData ( );
+                return true;
+
+            case R.id.undo:
+                if (mTitleEditText.isFocused ()){
+                    if(TURT.canUndo ()){
+                        TURT. exeUndo();
+                    }
+                }
+                if (mNotesEditText.isFocused ()){
+                    if(TURN.canUndo ()){
+                        TURN. exeUndo();
+                    }
+                }
+                return true;
+
+            case R.id.redo:
+                if (mTitleEditText.isFocused ()){
+                    if(TURT.canRedo ()){
+                        TURT.exeRedo();
+                    }
+                }
+                if (mNotesEditText.isFocused ()){
+                    if(TURN.canRedo ()){
+                        TURN.exeRedo();
+                    }
+                }
                 return true;
 
             case android.R.id.home:
@@ -239,4 +280,7 @@ public class NoteEditorActivity extends AppCompatActivity
         alertDialog.show ( );
     }
 
+    @Override
+    public void textAction() {
+    }
 }
