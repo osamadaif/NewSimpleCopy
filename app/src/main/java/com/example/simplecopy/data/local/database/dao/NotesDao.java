@@ -32,6 +32,12 @@ public interface NotesDao {
     @Query ("DELETE FROM notes")
     void deleteAllNotes();
 
+    @Query ("DELETE FROM notes WHERE id IN (:ids)")
+    void deleteItemByIds(List<Integer> ids);
+
+//    @Query ("DELETE FROM notes WHERE id = :itemId")
+//    void deleteItemById(int itemId);
+
     @Query ("SELECT * FROM notes WHERE id = :id")
     LiveData<NotesData> loadNoteById(int id);
 

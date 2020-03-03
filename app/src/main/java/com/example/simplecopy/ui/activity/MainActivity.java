@@ -108,6 +108,7 @@ public class MainActivity extends AppCompatActivity  {
             }
             @Override
             public void onPageScrollStateChanged(int state) {
+                if(NoteListFragment.actionMode != null) NoteListFragment.actionMode.finish();
 
             }
         });

@@ -81,7 +81,7 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
                         return;
                     }
                 AlertDialog.Builder builder = new AlertDialog.Builder (mContext);
-                builder.setMessage (R.string.clear_dialog_msg);
+                builder.setMessage (R.string.clear_dialog_msg_value);
                 builder.setPositiveButton (R.string.clear, new DialogInterface.OnClickListener ( ) {
                     public void onClick(DialogInterface dialog, int id) {
                         // User clicked the "Delete" button, so delete the Number.

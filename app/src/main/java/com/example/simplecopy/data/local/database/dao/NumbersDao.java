@@ -51,5 +51,8 @@ public interface NumbersDao {
     @Query("UPDATE numbers SET done = :value WHERE id = :itemId")
     void insertIfDone(int value, int itemId);
 
+    @Query ("DELETE FROM numbers WHERE id IN (:ids)")
+    void deleteItemByIds(List<Integer> ids);
+
 
 }

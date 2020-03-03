@@ -3,32 +3,71 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:layout_marginStart="8dp"
     android:layout_marginTop="4dp"
     android:layout_marginEnd="8dp"
-    android:layout_marginStart="8dp"
-    app:cardElevation="3dp"
-    app:cardCornerRadius="10dp"
+    android:orientation="vertical"
     android:theme="@style/Theme.MaterialComponents.Light"
-    >
+    app:cardCornerRadius="10dp"
+    app:cardElevation="3dp">
 
     <LinearLayout
         android:id="@+id/container_note"
-        android:layout_height="match_parent"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="horizontal"
+        android:hapticFeedbackEnabled="true"
         android:padding="8dp">
 
-
-        <ImageView
+        <RelativeLayout
             android:layout_width="0dp"
             android:layout_height="15pt"
-            android:id="@+id/btn_fav_note"
-            android:layout_weight=".2"
             android:layout_gravity="center"
-            android:src="@drawable/star_border"
-            />
+            android:gravity="center"
+            android:layout_weight=".2"
+            android:orientation="vertical">
 
+            <RelativeLayout
+                android:id="@+id/lyt_checked"
+                android:layout_width="15pt"
+                android:layout_height="15pt"
+                android:layout_centerInParent="true"
+                android:visibility="gone"
+                >
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/shape_circle"
+                    android:tint="@color/colorPrimaryLight" />
+
+                <ImageView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/ic_done" />
+
+            </RelativeLayout>
+
+            <ImageView
+                android:id="@+id/btn_fav_note"
+                android:layout_width="match_parent"
+                android:layout_height="15pt"
+                android:layout_gravity="center"
+                android:visibility="visible"
+                android:src="@drawable/star_border"/>
+
+        </RelativeLayout>
+
+
+        <!--        <ImageView-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="15pt"-->
+        <!--            android:id="@+id/btn_fav_note"-->
+        <!--            android:layout_weight=".2"-->
+        <!--            android:layout_gravity="center"-->
+        <!--            android:src="@drawable/star_border"-->
+        <!--            />-->
 
 
         <LinearLayout
@@ -38,56 +77,50 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:padding="4dp"
-            >
+            android:padding="4dp">
 
             <TextView
                 android:id="@+id/title_notes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
+                android:gravity="start"
                 android:textAlignment="viewStart"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                android:textColor="@color/colorPrimaryLight"
-                android:gravity="start"
-                />
+                android:textColor="@color/colorPrimaryLight" />
 
             <TextView
                 android:id="@+id/summary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif"
+                android:gravity="start"
                 android:textAlignment="viewStart"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="@color/colorPrimaryLight"
-                android:gravity="start"
-                />
+                android:textColor="@color/colorPrimaryLight" />
 
         </LinearLayout>
 
 
-
         <ImageView
+            android:id="@+id/btn_edit_note"
             android:layout_width="0dp"
             android:layout_height="15pt"
-            android:id="@+id/btn_edit_note"
-            android:layout_weight=".2"
             android:layout_gravity="center"
+            android:layout_weight=".2"
 
-            android:src="@drawable/ic_edit"
-            />
+            android:src="@drawable/ic_edit" />
 
         <ImageView
             android:id="@+id/btn_delete_note"
             android:layout_width="0dp"
             android:layout_height="15pt"
-            android:layout_weight=".2"
             android:layout_gravity="center"
+            android:layout_weight=".2"
             android:src="@drawable/ic_delete" />
 
         <!--</LinearLayout>-->
     </LinearLayout>
-
 
 
 </com.google.android.material.card.MaterialCardView>

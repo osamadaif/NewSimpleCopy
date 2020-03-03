@@ -20,7 +20,7 @@
 
             <ImageView
                 android:layout_width="match_parent"
-                android:layout_height="260dp"
+                android:layout_height="150dp"
                 android:layout_gravity="center"
                 android:src="@drawable/eldaftar_logo" />
 

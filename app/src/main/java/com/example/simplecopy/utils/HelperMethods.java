@@ -11,9 +11,12 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +29,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.ColorRes;
 import androidx.core.app.ActivityCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
@@ -44,6 +48,7 @@ public class HelperMethods {
     public static ProgressDialog progressDialog;
     public static AlertDialog alertDialog;
     static ConnectivityManager cm;
+
     public static void replaceFragment(FragmentManager getChildFragmentManager, int id, Fragment fragment) {
         FragmentTransaction transaction = getChildFragmentManager.beginTransaction ( );
         transaction.replace (id, fragment);
@@ -91,6 +96,15 @@ public class HelperMethods {
             window.addFlags (WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.clearFlags (WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             window.setStatusBarColor (act.getResources ( ).getColor (R.color.colorPrimaryDark));
+        }
+    }
+
+    public static void setSystemBarColor(Activity act, @ColorRes int color) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = act.getWindow ( );
+            window.addFlags (WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.clearFlags (WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.setStatusBarColor (act.getResources ( ).getColor (color));
         }
     }
 
@@ -155,25 +169,25 @@ public class HelperMethods {
     }
 
     public static void showSnackBar(View v, String text) {
-         Snackbar snackbar = Snackbar.make (v, text, Snackbar.LENGTH_LONG);
-        snackbar.show ();
+        Snackbar snackbar = Snackbar.make (v, text, Snackbar.LENGTH_LONG);
+        snackbar.show ( );
     }
 
     public static void showSnackBarWithBottomNavigation(View v, String text, BottomNavigationView bottomNavigation) {
         Snackbar snackbar = Snackbar.make (v, text, Snackbar.LENGTH_LONG);
-        snackbar.setAnchorView(bottomNavigation);
-        snackbar.show ();
+        snackbar.setAnchorView (bottomNavigation);
+        snackbar.show ( );
     }
 
     public static Snackbar getSnackBarWithBottomNavigation(View v, String text, BottomNavigationView bottomNavigation) {
         Snackbar snackbar = Snackbar.make (v, text, Snackbar.LENGTH_LONG);
-        snackbar.setAnchorView(bottomNavigation);
-        return  snackbar;
+        snackbar.setAnchorView (bottomNavigation);
+        return snackbar;
     }
 
     public static void showSnackBarMargin(Snackbar snackbar, int side, int bottom) {
         final View snackBarView = snackbar.getView ( );
-        final ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) snackBarView.getLayoutParams();
+        final ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) snackBarView.getLayoutParams ( );
         params.setMargins (params.leftMargin + side,
                 params.topMargin,
                 params.rightMargin + side,
@@ -307,46 +321,65 @@ public class HelperMethods {
     }
 
 
-
     static public boolean isConnected(Context context) {
         try {
-            cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            cm = (ConnectivityManager) context.getSystemService (Context.CONNECTIVITY_SERVICE);
         } catch (NullPointerException e) {
 
         }
 
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo ( );
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting ( );
         return isConnected;
     }
 
     public static void onCreateErrorToast(Activity activity, String toastTitle) {
-        LayoutInflater inflater = activity.getLayoutInflater();
+        LayoutInflater inflater = activity.getLayoutInflater ( );
 
         int layout_id = R.layout.toast_error;
 
-        View layout = inflater.inflate(layout_id,
-                (ViewGroup) activity.findViewById(R.id.toast_layout_root));
+        View layout = inflater.inflate (layout_id,
+                (ViewGroup) activity.findViewById (R.id.toast_layout_root));
 
-        TextView text = layout.findViewById(R.id.toast_tv_text);
-        text.setText(toastTitle);
+        TextView text = layout.findViewById (R.id.toast_tv_text);
+        text.setText (toastTitle);
 
-        Toast toast = new Toast(activity);
-        toast.setGravity(Gravity.CENTER_VERTICAL | Gravity.BOTTOM, 0, 100);
-        toast.setDuration(Toast.LENGTH_LONG);
-        toast.setView(layout);
-        toast.show();
+        Toast toast = new Toast (activity);
+        toast.setGravity (Gravity.CENTER_VERTICAL | Gravity.BOTTOM, 0, 100);
+        toast.setDuration (Toast.LENGTH_LONG);
+        toast.setView (layout);
+        toast.show ( );
     }
 
     public static boolean validationConfirmPassword(Activity activity, TextInputEditText password, TextInputEditText confirmPassword) {
 
-        if (password.getText ().toString().equals(confirmPassword.getText().toString())) {
+        if (password.getText ( ).toString ( ).equals (confirmPassword.getText ( ).toString ( ))) {
             return true;
         } else {
-            confirmPassword.setError(activity.getString(R.string.invalid_confirm_password));
+            confirmPassword.setError (activity.getString (R.string.invalid_confirm_password));
             confirmPassword.setFocusable (true);
             return false;
         }
-
     }
+
+    public static void vibration(Context context) {
+        Vibrator v = (Vibrator) context.getSystemService (Context.VIBRATOR_SERVICE);
+        // Vibrate for 500 milliseconds
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            assert v != null;
+            v.vibrate (VibrationEffect.createOneShot (100, VibrationEffect.DEFAULT_AMPLITUDE));
+        } else {
+            //deprecated in API 26
+            assert v != null;
+            v.vibrate (100);
+        }
+    }
+
+    public static void vibrate(View view) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            view.performHapticFeedback (HapticFeedbackConstants.KEYBOARD_TAP,
+                    HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);  // Ignore device's setting. Otherwise, you can use FLAG_IGNORE_VIEW_SETTING to ignore view's setting.
+        }
+    }
+
 }

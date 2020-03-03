@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -41,8 +42,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static com.example.simplecopy.utils.HelperMethods.vibrate;
 
 
 public class NumberListFragment extends Fragment implements CopyAdapter.ItemClickListener {
@@ -60,6 +64,9 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
 
+    public static ActionMode actionMode;
+    private ActionModeCallback actionModeCallback;
+
     // Required empty public constructor
     public NumberListFragment() {
     }
@@ -75,9 +82,8 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         mDB = AppDatabase.getInstance (getContext ());
         firebaseAuth = FirebaseAuth.getInstance ();
         user = firebaseAuth.getCurrentUser ();
-
         setupViewModel ( );
-
+        actionModeCallback = new ActionModeCallback ( );
         empty_btn = view.findViewById (R.id.btn_empty_title);
         empty_btn.setOnClickListener (new View.OnClickListener ( ) {
             @Override
@@ -86,13 +92,12 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
             }
         });
         return view;
-
     }
 
     private void setupViewModel() {
         MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
 
-        viewModel.getNumbers ().observe ( this, new Observer<List<Numbers>> ( ) {
+        viewModel.getNumbers ().observe ( getViewLifecycleOwner(), new Observer<List<Numbers>> ( ) {
             @Override
             public void onChanged(List<Numbers> numbersList1) {
                 if (numbersList1.isEmpty ()){
@@ -125,8 +130,6 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         mEmptyView = view.findViewById (R.id.empty_layout);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager (getActivity ());
         mNumbersList.setLayoutManager (layoutManager);
-        //DividerItemDecoration decoration = new DividerItemDecoration(getActivity (), DividerItemDecoration.VERTICAL);
-//        mNumbersList.addItemDecoration(new DividerItemDecoration (Objects.requireNonNull (getContext ( )), 0));
         mNumbersList.setItemAnimator (new DefaultItemAnimator ());
         //mNumbersList.showIfEmpty(mEmptyView);
         mNumbersList.setHasFixedSize (true);
@@ -197,7 +200,7 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
                 break;
             case R.id.settings:
                 startActivity (new Intent (getActivity (), SettingsActivity.class));
-                getActivity ().finish ();
+                Objects.requireNonNull (getActivity ( )).finish ();
                 break;
             case R.id.logout:
                 if (user != null){
@@ -222,7 +225,6 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
     }
 
     private void showDeleteAllConfirmationDialog() {
-
         AlertDialog.Builder builder = new AlertDialog.Builder (getActivity ());
         builder.setMessage (R.string.delete_all_dialog_msg);
         builder.setPositiveButton (R.string.delete, new DialogInterface.OnClickListener ( ) {
@@ -247,7 +249,6 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
     }
 
     private void showLogoutDialog() {
-
         AlertDialog.Builder builder = new AlertDialog.Builder (getActivity ());
         builder.setMessage (R.string.logout_dialog_msg);
         builder.setPositiveButton (R.string.logout, new DialogInterface.OnClickListener ( ) {
@@ -269,30 +270,6 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         // Create and show the AlertDialog
         AlertDialog alertDialog = builder.create ( );
         alertDialog.show ( );
-    }
-
-    @Override
-    public void onItemClickListener(Numbers numbers) {
-        String numberStr = numbers.getNumber ( );
-
-        ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService (Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText ("TextView",numberStr);
-        clipboard.setPrimaryClip (clip);
-        Toast.makeText (getActivity (), getString (R.string.Copied), Toast.LENGTH_SHORT).show ( );
-
-    }
-
-    @Override
-    public void onNumberEdit(int itemId) {
-        Intent intent = new Intent (getActivity (), NumberEditorActivity.class);
-        intent.putExtra (NumberEditorActivity.EXTRA_NUMBER_ID, itemId);
-        startActivity (intent);
-    }
-
-    @Override
-    public void onNumberDelete(Numbers numbers) {
-        showDeleteConfirmationDialog (numbers);
-
     }
 
     private void showDeleteConfirmationDialog(final Numbers numbers) {
@@ -322,9 +299,135 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         alertDialog.show ( );
     }
 
+    @Override
+    public void onNumberEdit(int itemId) {
+        Intent intent = new Intent (getActivity (), NumberEditorActivity.class);
+        intent.putExtra (NumberEditorActivity.EXTRA_NUMBER_ID, itemId);
+        startActivity (intent);
+    }
+
+    @Override
+    public void onNumberDelete(Numbers numbers) {
+        showDeleteConfirmationDialog (numbers);
+
+    }
+
     public void addSomeNumber(View view) {
         Intent intent = new Intent(getActivity (), NumberEditorActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    public void onItemClickListener(View view, Numbers numbers, int pos, int itemId) {
+        String numberStr = numbers.getNumber ( );
+
+        if (mAdapter.getSelectedItemCount ( ) > 0) {
+            enableActionMode (pos, view);
+        } else {
+        ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService (Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText ("TextView",numberStr);
+        clipboard.setPrimaryClip (clip);
+        Toast.makeText (getActivity (), getString (R.string.Copied), Toast.LENGTH_SHORT).show ( );
+        }
+    }
+
+    @Override
+    public void onItemLongClick(View view, Numbers numbers, int pos, int itemId) {
+        enableActionMode (pos, view);
+    }
+
+    private void enableActionMode(int position, View view) {
+        if (actionMode == null) {
+            view.setHapticFeedbackEnabled (true);
+
+            vibrate (view);
+            actionMode = (Objects.requireNonNull (getActivity ( ))).startActionMode (actionModeCallback);
+        }
+        toggleSelection (position);
+    }
+
+    private void toggleSelection(int position) {
+        mAdapter.toggleSelection (position);
+        int count = mAdapter.getSelectedItemCount ( );
+
+        if (count == 0) {
+            actionMode.finish ( );
+            CopyAdapter.isBtnVisible = true;
+        } else {
+            actionMode.setTitle (String.valueOf (count) + " " + getResources ( ).getString (R.string.selected));
+            actionMode.invalidate ( );
+        }
+    }
+
+    public class ActionModeCallback implements ActionMode.Callback {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+//            HelperMethods.setSystemBarColor (getActivity ( ), R.color.colorPrimaryLight);
+            CopyAdapter.isBtnVisible = false;
+            mAdapter.notifyDataSetChanged ();
+            mode.getMenuInflater ( ).inflate (R.menu.menu_delete, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            int id = item.getItemId ( );
+            if (id == R.id.action_delete) {
+                showDeleteSelectedConfirmationDialog ( );
+//                mode.finish ( );
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mAdapter.clearSelections ( );
+            actionMode.finish ( );
+            CopyAdapter.isBtnVisible = true;
+            mAdapter.notifyDataSetChanged ();
+            actionMode = null;
+//            HelperMethods.setSystemBarColor (getActivity ( ), R.color.colorPrimaryDark);
+        }
+    }
+
+    public void deleteSelection() {
+        List<Integer> selectedItemPositions = mAdapter.getSelectedItems ( );
+        List<Integer> selectedItemIDs = new ArrayList<> ( );
+        for (int x : selectedItemPositions) {
+            int selectedId = mAdapter.getId (x);
+            selectedItemIDs.add (selectedId);
+        }
+        mAdapter.removeSelected (selectedItemIDs);
+        mAdapter.notifyDataSetChanged ( );
+    }
+
+    private void showDeleteSelectedConfirmationDialog() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder (getActivity ( ));
+        builder.setMessage (R.string.delete_note_selected_dialog_msg);
+        builder.setPositiveButton (R.string.delete, new DialogInterface.OnClickListener ( ) {
+            public void onClick(DialogInterface dialog, int id) {
+                deleteSelection ( );
+                actionMode.finish ( );
+                Toast.makeText (getActivity ( ), getString (R.string.Deleted), Toast.LENGTH_SHORT).show ( );
+            }
+        });
+        builder.setNegativeButton (R.string.cancel, new DialogInterface.OnClickListener ( ) {
+            public void onClick(DialogInterface dialog, int id) {
+                if (dialog != null) {
+                    dialog.dismiss ( );
+                }
+            }
+        });
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create ( );
+        alertDialog.show ( );
     }
 
 }

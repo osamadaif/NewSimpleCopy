@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:elevation="0dp"
-        android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         >
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -21,8 +21,8 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
             app:layout_scrollFlags="scroll|enterAlways|snap"
-            android:theme="@android:style/ThemeOverlay.Material.Dark.ActionBar"
-
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
             >
 
         </androidx.appcompat.widget.Toolbar>

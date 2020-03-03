@@ -30,11 +30,11 @@
     <string name="cancel">الغاء</string>
     <string name="clear">مسح</string>
     <string name="delete">حذف</string>
-    <string name="delete_all_dialog_msg">هل انت متأكد من حذف كل الارقام ؟</string>
-    <string name="delete_all_notes_dialog_msg">هل انت متأكد من حذف كل الملاحظات ؟</string>
-    <string name="delete_dialog_msg">هل انت متأكد من حذف هذا الرقم ؟</string>
-    <string name="clear_dialog_msg">هل انت متأكد من مسح القيمة ؟</string>
-    <string name="delete_note_dialog_msg">هل انت متأكد من حذف هذه الملاحظة ؟</string>
+    <string name="delete_all_dialog_msg">هل انت متأكد من حذف كل الارقام؟</string>
+    <string name="delete_all_notes_dialog_msg">هل انت متأكد من حذف كل الملاحظات؟</string>
+    <string name="delete_dialog_msg">هل انت متأكد من حذف هذا الرقم؟</string>
+    <string name="clear_dialog_msg_value"> هل انت متأكد من مسح قيمة؟ </string>
+    <string name="delete_note_dialog_msg">هل انت متأكد من حذف هذه الملاحظة؟</string>
     <string name="discard">تجاهل</string>
     <string name="edit_img">تعديل</string>
     <string name="editor_activity_title_edit_note">تعديل الملاحظة</string>
@@ -90,4 +90,6 @@
     <string name="authentication_failed">خطأ فى المصادقة</string>
     <string name="undo">تراجع</string>
     <string name="redo">استعادة</string>
+    <string name="delete_note_selected_dialog_msg">هل انت متأكد من حذف هذه الملاحظات ؟</string>
+    <string name="selected">محدد</string>
 </resources>

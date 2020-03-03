@@ -13,6 +13,8 @@
     <color name="black">#000</color>
     <color name="splash_back">#dee4e8</color>
     <color name="mtrl_textinput_default_box_stroke_color" tools:ignore="PrivateResource">#344955</color>
+    <color name="blue_grey_600">#546E7A</color>
+    <color name="blue_grey_700">#455A64</color>
 
 
 </resources>
