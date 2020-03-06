@@ -51,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/btn_edittext"
                 android:hint="@string/Enter_Title"
-                android:inputType="textCapWords"
+                android:inputType="textCapWords|textNoSuggestions"
                 android:maxLength="25"
                 android:padding="5dp"
 
@@ -76,7 +76,7 @@
             android:background="@drawable/btn_edittext"
             android:gravity="start"
             android:hint="@string/Enter_Notes"
-            android:inputType="textMultiLine|textCapWords"
+            android:inputType="textMultiLine|textCapWords|textNoSuggestions"
             android:padding="5dp"
             android:textStyle="normal"
 

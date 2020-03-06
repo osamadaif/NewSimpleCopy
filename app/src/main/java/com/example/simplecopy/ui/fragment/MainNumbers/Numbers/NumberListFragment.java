@@ -365,6 +365,9 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
 //            HelperMethods.setSystemBarColor (getActivity ( ), R.color.colorPrimaryLight);
             CopyAdapter.isBtnVisible = false;
             mAdapter.notifyDataSetChanged ();
+            if (fab.isShown ()){
+                fab.hide ();
+            }
             mode.getMenuInflater ( ).inflate (R.menu.menu_delete, menu);
             return true;
         }
@@ -391,6 +394,9 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
             actionMode.finish ( );
             CopyAdapter.isBtnVisible = true;
             mAdapter.notifyDataSetChanged ();
+            if (!fab.isShown ()){
+                fab.show ();
+            }
             actionMode = null;
 //            HelperMethods.setSystemBarColor (getActivity ( ), R.color.colorPrimaryDark);
         }

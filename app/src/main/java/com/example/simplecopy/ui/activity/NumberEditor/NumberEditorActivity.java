@@ -29,10 +29,10 @@ import com.example.simplecopy.R;
 import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.Numbers;
 import com.example.simplecopy.utils.HelperMethods;
-import com.example.simplecopy.utils.TextUndoRedo;
+import com.example.simplecopy.utils.TextViewUndoRedo;
 
 
-public class NumberEditorActivity extends AppCompatActivity implements TextUndoRedo.TextChangeInfo
+public class NumberEditorActivity extends AppCompatActivity
 {
     public static final String TAG = "NumberEditorActivity";
 
@@ -44,18 +44,16 @@ public class NumberEditorActivity extends AppCompatActivity implements TextUndoR
     private int done ;
     private int daily ;
 
-
     private EditText mTitleEditText;
     private EditText mNumbersEditText;
     private EditText mNotesEditText;
     private AppDatabase mDb;
 
     Toolbar toolbar;
-    TextUndoRedo TURT;
-    TextUndoRedo TURM;
-    TextUndoRedo TURN;
 
-
+    TextViewUndoRedo undoRedoT;
+    TextViewUndoRedo undoRedoM;
+    TextViewUndoRedo undoRedoN;
 
     private boolean mNumberHasChanged = false;
 
@@ -64,9 +62,7 @@ public class NumberEditorActivity extends AppCompatActivity implements TextUndoR
         public boolean onTouch(View view, MotionEvent motionEvent) {
             mNumberHasChanged = true;
             return false;
-
         }
-
     };
 
     @Override
@@ -109,15 +105,14 @@ public class NumberEditorActivity extends AppCompatActivity implements TextUndoR
         else {
             setTitle (getString (R.string.editor_activity_title_new_number));
             getSupportActionBar().setTitle(Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.editor_activity_title_new_number) + "</font>"));
-
         }
 
         mTitleEditText.setOnTouchListener (mTouchListener);
         mNumbersEditText.setOnTouchListener (mTouchListener);
         mNotesEditText.setOnTouchListener (mTouchListener);
-        TURT = new TextUndoRedo(mTitleEditText, this);
-        TURM = new TextUndoRedo(mNumbersEditText, this);
-        TURN = new TextUndoRedo(mNotesEditText, this);
+        undoRedoT = new TextViewUndoRedo(mTitleEditText, this);
+        undoRedoM = new TextViewUndoRedo(mNumbersEditText, this);
+        undoRedoN = new TextViewUndoRedo(mNotesEditText, this);
     }
 
     // get user input from editor and save new data into database
@@ -137,7 +132,6 @@ public class NumberEditorActivity extends AppCompatActivity implements TextUndoR
         String numbers = mNumbersEditText.getText ( ).toString ( ).trim ( );
 
         String notesString = mNotesEditText.getText ( ).toString ( ).trim ( );
-
 
         final Numbers numbers1 = new Numbers (titleString,numbers,notesString);
         final Numbers numbers2 = new Numbers (titleString,numbers,notesString, fav, done, daily);
@@ -185,6 +179,79 @@ public class NumberEditorActivity extends AppCompatActivity implements TextUndoR
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        updateEnableButtons (menu);
+        super.onPrepareOptionsMenu(menu);
+        return true;
+    }
+
+    private void updateEnableButtons(Menu menu){
+        //enable undo button
+        if (mTitleEditText.isFocused ( )) {
+            invalidateOptionsMenu();
+            if (undoRedoT.getCanUndo ( )) {
+                menu.getItem(0).setEnabled(true);
+                menu.getItem(0).setIcon (R.drawable.ic_undo_white);
+            }else {
+                menu.getItem(0).setEnabled(false);
+                menu.getItem(0).setIcon (R.drawable.ic_undo_false);
+            }
+        }
+        if (mNumbersEditText.isFocused ( )) {
+            invalidateOptionsMenu();
+            if (undoRedoM.getCanUndo ( )) {
+                menu.getItem(0).setEnabled(true);
+                menu.getItem(0).setIcon (R.drawable.ic_undo_white);
+            }else {
+                menu.getItem(0).setEnabled(false);
+                menu.getItem(0).setIcon (R.drawable.ic_undo_false);
+            }
+        }
+        if (mNotesEditText.isFocused ( )) {
+            invalidateOptionsMenu();
+            if (undoRedoN.getCanUndo ( )) {
+                menu.getItem(0).setEnabled(true);
+                menu.getItem(0).setIcon (R.drawable.ic_undo_white);
+            }else {
+                menu.getItem(0).setEnabled(false);
+                menu.getItem(0).setIcon (R.drawable.ic_undo_false);
+            }
+        }
+
+        //enable redo button
+        if (mTitleEditText.isFocused ( )) {
+            invalidateOptionsMenu();
+            if (undoRedoT.getCanRedo ( )) {
+                menu.getItem(1).setEnabled(true);
+                menu.getItem(1).setIcon (R.drawable.ic_redo_white);
+            }else {
+                menu.getItem(1).setEnabled(false);
+                menu.getItem(1).setIcon (R.drawable.ic_redo_false);
+            }
+        }
+        if (mNumbersEditText.isFocused ( )) {
+            invalidateOptionsMenu();
+            if (undoRedoM.getCanRedo ( )) {
+                menu.getItem(1).setEnabled(true);
+                menu.getItem(1).setIcon (R.drawable.ic_redo_white);
+            }else {
+                menu.getItem(1).setEnabled(false);
+                menu.getItem(1).setIcon (R.drawable.ic_redo_false);
+            }
+        }
+        if (mNotesEditText.isFocused ( )) {
+            invalidateOptionsMenu();
+            if (undoRedoN.getCanRedo ( )) {
+                menu.getItem(1).setEnabled(true);
+                menu.getItem(1).setIcon (R.drawable.ic_redo_white);
+            }else {
+                menu.getItem(1).setEnabled(false);
+                menu.getItem(1).setIcon (R.drawable.ic_redo_false);
+            }
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId ( )) {
             case R.id.save:
@@ -193,37 +260,37 @@ public class NumberEditorActivity extends AppCompatActivity implements TextUndoR
                 return true;
 
             case R.id.undo:
-                if (mTitleEditText.isFocused ()){
-                    if(TURT.canUndo ()){
-                        TURT. exeUndo();
+                if (mTitleEditText.isFocused ( )) {
+                    if (undoRedoT.getCanUndo ( )) {
+                        undoRedoT.undo ( );
                     }
                 }
-                if (mNumbersEditText.isFocused ()){
-                    if(TURM.canUndo ()){
-                        TURM. exeUndo();
+                if (mNumbersEditText.isFocused ( )) {
+                    if (undoRedoM.getCanUndo ( )) {
+                        undoRedoM.undo ( );
                     }
                 }
-                if (mNotesEditText.isFocused ()){
-                    if(TURN.canUndo ()){
-                        TURN. exeUndo();
+                if (mNotesEditText.isFocused ( )) {
+                    if (undoRedoN.getCanUndo ( )) {
+                        undoRedoN.undo ( );
                     }
                 }
                 return true;
 
             case R.id.redo:
-                if (mTitleEditText.isFocused ()){
-                    if(TURT.canRedo ()){
-                        TURT.exeRedo();
+                if (mTitleEditText.isFocused ( )) {
+                    if (undoRedoT.getCanRedo ( )) {
+                        undoRedoT.redo ( );
                     }
                 }
-                if (mNumbersEditText.isFocused ()){
-                    if(TURM.canRedo ()){
-                        TURM.exeRedo();
+                if (mNumbersEditText.isFocused ( )) {
+                    if (undoRedoM.getCanRedo ( )) {
+                        undoRedoM.redo ( );
                     }
                 }
-                if (mNotesEditText.isFocused ()){
-                    if(TURN.canRedo ()){
-                        TURN.exeRedo();
+                if (mNotesEditText.isFocused ( )) {
+                    if (undoRedoN.getCanRedo ( )) {
+                        undoRedoN.redo ( );
                     }
                 }
                 return true;
@@ -301,10 +368,5 @@ public class NumberEditorActivity extends AppCompatActivity implements TextUndoR
         // Create and show the AlertDialog
         AlertDialog alertDialog = builder.create ( );
         alertDialog.show ( );
-    }
-
-    @Override
-    public void textAction() {
-
     }
 }

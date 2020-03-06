@@ -10,7 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -26,10 +25,10 @@ import com.example.simplecopy.R;
 import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.NotesData;
 import com.example.simplecopy.utils.HelperMethods;
-import com.example.simplecopy.utils.TextUndoRedo;
+import com.example.simplecopy.utils.TextViewUndoRedo;
 
 
-public class NoteEditorActivity extends AppCompatActivity implements TextUndoRedo.TextChangeInfo
+public class NoteEditorActivity extends AppCompatActivity
 {
     public static final String TAG = "NumberEditorActivity";
 
@@ -44,8 +43,8 @@ public class NoteEditorActivity extends AppCompatActivity implements TextUndoRed
     private AppDatabase mDb;
 
     Toolbar toolbar;
-    TextUndoRedo TURT;
-    TextUndoRedo TURN;
+    TextViewUndoRedo undoRedoT;
+    TextViewUndoRedo undoRedoN;
 
     private boolean mNoteHasChanged = false;
 
@@ -54,9 +53,7 @@ public class NoteEditorActivity extends AppCompatActivity implements TextUndoRed
         public boolean onTouch(View view, MotionEvent motionEvent) {
             mNoteHasChanged = true;
             return false;
-
         }
-
     };
 
     @Override
@@ -70,7 +67,8 @@ public class NoteEditorActivity extends AppCompatActivity implements TextUndoRed
         setSupportActionBar (toolbar);
 
         initViews();
-
+        undoRedoT = new TextViewUndoRedo (mTitleEditText, this);
+        undoRedoN = new TextViewUndoRedo (mNotesEditText,this);
         mDb = AppDatabase.getInstance (getApplicationContext ());
 
         if (savedInstanceState != null && savedInstanceState.containsKey(INSTANCE_Note_ID) ){
@@ -99,14 +97,10 @@ public class NoteEditorActivity extends AppCompatActivity implements TextUndoRed
         else {
             setTitle (getString (R.string.editor_activity_title_new_note));
             getSupportActionBar().setTitle(Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.editor_activity_title_new_note) + "</font>"));
-
         }
 
         mTitleEditText.setOnTouchListener (mTouchListener);
         mNotesEditText.setOnTouchListener (mTouchListener);
-
-        TURT = new TextUndoRedo(mTitleEditText, this);
-        TURN = new TextUndoRedo(mNotesEditText, this);
     }
 
     // get user input from editor and save new data into database
@@ -126,9 +120,6 @@ public class NoteEditorActivity extends AppCompatActivity implements TextUndoRed
             return;
         }
         String notesString = mNotesEditText.getText ( ).toString ( ).trim ( );
-
-
-
 
         final NotesData notes1 = new NotesData (titleString,notesString);
         final NotesData notes2 = new NotesData (titleString,notesString, fav);
@@ -172,6 +163,59 @@ public class NoteEditorActivity extends AppCompatActivity implements TextUndoRed
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        updateEnableButtons (menu);
+        super.onPrepareOptionsMenu(menu);
+        return true;
+    }
+
+    private void updateEnableButtons(Menu menu){
+        //enable undo button
+        if (mTitleEditText.isFocused ( )) {
+            invalidateOptionsMenu();
+            if (undoRedoT.getCanUndo ( )) {
+                menu.getItem(0).setEnabled(true);
+                menu.getItem(0).setIcon (R.drawable.ic_undo_white);
+            }else {
+                menu.getItem(0).setEnabled(false);
+                menu.getItem(0).setIcon (R.drawable.ic_undo_false);
+            }
+        }
+        if (mNotesEditText.isFocused ( )) {
+            invalidateOptionsMenu();
+            if (undoRedoN.getCanUndo ( )) {
+                menu.getItem(0).setEnabled(true);
+                menu.getItem(0).setIcon (R.drawable.ic_undo_white);
+            }else {
+                menu.getItem(0).setEnabled(false);
+                menu.getItem(0).setIcon (R.drawable.ic_undo_false);
+            }
+        }
+
+        //enable redo button
+        if (mTitleEditText.isFocused ( )) {
+            invalidateOptionsMenu();
+            if (undoRedoT.getCanRedo ( )) {
+                menu.getItem(1).setEnabled(true);
+                menu.getItem(1).setIcon (R.drawable.ic_redo_white);
+            }else {
+                menu.getItem(1).setEnabled(false);
+                menu.getItem(1).setIcon (R.drawable.ic_redo_false);
+            }
+        }
+        if (mNotesEditText.isFocused ( )) {
+            invalidateOptionsMenu();
+            if (undoRedoN.getCanRedo ( )) {
+                menu.getItem(1).setEnabled(true);
+                menu.getItem(1).setIcon (R.drawable.ic_redo_white);
+            }else {
+                menu.getItem(1).setEnabled(false);
+                menu.getItem(1).setIcon (R.drawable.ic_redo_false);
+            }
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId ( )) {
             case R.id.save:
@@ -180,27 +224,27 @@ public class NoteEditorActivity extends AppCompatActivity implements TextUndoRed
                 return true;
 
             case R.id.undo:
-                if (mTitleEditText.isFocused ()){
-                    if(TURT.canUndo ()){
-                        TURT. exeUndo();
+                if (mTitleEditText.isFocused ( )) {
+                    if (undoRedoT.getCanUndo ( )) {
+                        undoRedoT.undo ( );
                     }
                 }
-                if (mNotesEditText.isFocused ()){
-                    if(TURN.canUndo ()){
-                        TURN. exeUndo();
+                if (mNotesEditText.isFocused ( )) {
+                    if (undoRedoN.getCanUndo ( )) {
+                        undoRedoN.undo ( );
                     }
                 }
                 return true;
 
             case R.id.redo:
-                if (mTitleEditText.isFocused ()){
-                    if(TURT.canRedo ()){
-                        TURT.exeRedo();
+                if (mTitleEditText.isFocused ( )) {
+                    if (undoRedoT.getCanRedo ( )) {
+                        undoRedoT.redo ( );
                     }
                 }
-                if (mNotesEditText.isFocused ()){
-                    if(TURN.canRedo ()){
-                        TURN.exeRedo();
+                if (mNotesEditText.isFocused ( )) {
+                    if (undoRedoN.getCanRedo ( )) {
+                        undoRedoN.redo ( );
                     }
                 }
                 return true;
@@ -278,9 +322,5 @@ public class NoteEditorActivity extends AppCompatActivity implements TextUndoRed
         // Create and show the AlertDialog
         AlertDialog alertDialog = builder.create ( );
         alertDialog.show ( );
-    }
-
-    @Override
-    public void textAction() {
     }
 }

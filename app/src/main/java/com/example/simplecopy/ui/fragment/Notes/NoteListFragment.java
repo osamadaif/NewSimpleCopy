@@ -366,6 +366,10 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
 //            HelperMethods.setSystemBarColor (getActivity ( ), R.color.colorPrimaryLight);
             isBtnVisible = false;
             mAdapter.notifyDataSetChanged ();
+            if (fab.isShown ()){
+                fab.hide ();
+            }
+
             mode.getMenuInflater ( ).inflate (R.menu.menu_delete, menu);
             return true;
         }
@@ -392,6 +396,9 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
             actionMode.finish ( );
             isBtnVisible = true;
             mAdapter.notifyDataSetChanged ();
+            if (!fab.isShown ()){
+                fab.show ();
+            }
             actionMode = null;
 //            HelperMethods.setSystemBarColor (getActivity ( ), R.color.colorPrimaryDark);
         }
