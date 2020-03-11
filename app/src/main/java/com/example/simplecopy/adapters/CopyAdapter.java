@@ -127,6 +127,7 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
         holder.container.setActivated (selected_items.get (position, false));
         holder.mEdit_btn.setVisibility (isBtnVisible ? View.VISIBLE : View.INVISIBLE);
         holder.mDelete_btn.setVisibility (isBtnVisible ? View.VISIBLE : View.INVISIBLE);
+        holder.mFavorite.setVisibility (isBtnVisible ? View.VISIBLE : View.INVISIBLE);
         toggleCheckedIcon (holder, position);
     }
 
@@ -249,13 +250,13 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
 
     private void toggleCheckedIcon(CopyViewHolder holder, int position) {
         if (selected_items.get (position, false)) {
-            holder.mFavorite.setVisibility (View.GONE);
+//            holder.mFavorite.setVisibility (View.GONE);
             holder.lyt_checked.setVisibility (View.VISIBLE);
             holder.container.setBackgroundResource (R.color.colorAccent_transparent);
             if (current_selected_idx == position) resetCurrentIndex ( );
         } else {
             holder.lyt_checked.setVisibility (View.GONE);
-            holder.mFavorite.setVisibility (View.VISIBLE);
+//            holder.mFavorite.setVisibility (View.VISIBLE);
             holder.container.setBackgroundColor (selected_items.get(position) ? 0x00000000
                     : Color.TRANSPARENT);
             if (current_selected_idx == position) resetCurrentIndex ( );
