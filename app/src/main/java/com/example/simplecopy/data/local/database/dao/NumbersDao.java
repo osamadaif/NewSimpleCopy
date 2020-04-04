@@ -53,6 +53,4 @@ public interface NumbersDao {
 
     @Query ("DELETE FROM numbers WHERE id IN (:ids)")
     void deleteItemByIds(List<Integer> ids);
-
-
 }

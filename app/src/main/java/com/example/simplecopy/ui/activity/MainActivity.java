@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity  {
             @Override
             public void onPageScrollStateChanged(int state) {
                 if(NoteListFragment.actionMode != null) NoteListFragment.actionMode.finish();
-
+                if(NumberListFragment.actionMode != null) NumberListFragment.actionMode.finish();
             }
         });
     }
@@ -119,26 +119,8 @@ public class MainActivity extends AppCompatActivity  {
         adapter.AddFragment (new NoteListFragment (), getString(R.string.notes));
         adapter.AddFragment (new NumberListFragment (), getResources ().getString (R.string.Numbers));
         adapter.AddFragment (new DailyWalletListFragment (), getResources ().getString (R.string.Daily_Wallet));
-
         viewPager.setAdapter (adapter);
     }
-
-//    @Override
-//    protected void onStart() {
-//        checkUserStatus ();
-//        super.onStart ( );
-//    }
-//
-//    private void checkUserStatus(){
-//        FirebaseUser user = firebaseAuth.getCurrentUser ();
-//        if (user != null){
-//            //user is signed in stay here
-//        } else {
-//            //user not signed in, go to login activity
-//            startActivity (new Intent (MainActivity.this, UserActivity.class));
-//            finish ();
-//        }
-//    }
 
     @Override
     public void onBackPressed() {

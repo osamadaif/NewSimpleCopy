@@ -25,6 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -80,7 +81,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         view = inflater.inflate (R.layout.copy_notes_fragment, container, false);
         fab = getActivity ( ).findViewById (R.id.fab);
         setUpRecycleView ( );
-        mainViewModel = ViewModelProviders.of (this).get (NotesViewModel.class);
+        mainViewModel = new ViewModelProvider (this).get (NotesViewModel.class);
         mDB = AppDatabase.getInstance (getContext ( ));
         firebaseAuth = FirebaseAuth.getInstance ( );
         user = firebaseAuth.getCurrentUser ( );
@@ -97,7 +98,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
     }
 
     private void setupViewModel() {
-        NotesViewModel viewModel = ViewModelProviders.of (this).get (NotesViewModel.class);
+        NotesViewModel viewModel = new ViewModelProvider (this).get (NotesViewModel.class);
 
         viewModel.getNotes ( ).observe (getViewLifecycleOwner ( ), new Observer<List<NotesData>> ( ) {
             @Override

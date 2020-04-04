@@ -13,6 +13,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -139,9 +140,9 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
 
 
     private void setupViewModel() {
-        MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        MainViewModel viewModel = new ViewModelProvider (this).get(MainViewModel.class);
 
-        viewModel.getDailyFirst ().observe ( this, new Observer<List<Numbers>> ( ) {
+        viewModel.getDailyFirst ().observe ( getViewLifecycleOwner(), new Observer<List<Numbers>> ( ) {
             @Override
             public void onChanged(List<Numbers> numbersList1) {
                 if (numbersList1.isEmpty ()){

@@ -1,6 +1,7 @@
 package com.example.simplecopy.adapters;
 
 import androidx.appcompat.app.AlertDialog;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -31,14 +32,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdapter.DailyViewHolder>   {
+public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdapter.DailyViewHolder> {
     private static final String TAG = DailyRecyclerAdapter.class.getSimpleName ( );
 
     private List<Numbers> mNumberList;
     //private List<Numbers> mFilteredNumberList= new ArrayList<> ();
     private Context mContext;
     private ItemClickListener mItemClickListener;
-    private String searchString="";
+    private String searchString = "";
     private AppDatabase mDB;
 
     public DailyRecyclerAdapter(Context context, ItemClickListener listener) {
@@ -51,7 +52,7 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
     @Override
     public DailyViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
         View view = LayoutInflater.from (mContext)
-                .inflate (R.layout.list_daily_wallet, viewGroup,false);
+                .inflate (R.layout.list_daily_wallet, viewGroup, false);
         return new DailyViewHolder (view);
     }
 
@@ -68,56 +69,49 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
         String numberStr = String.valueOf (numberInt);
         holder.mNumberTextView.setText (numberStr);
 
-
-
-
-
         holder.mClear_btn.setOnClickListener (new View.OnClickListener ( ) {
             @Override
             public void onClick(View v) {
-                if (mItemClickListener != null ){
-                    if (numbers.getDaily () == 0 || holder.mNumberTextView.getText ( ) == "0")
-                    {
+                if (mItemClickListener != null) {
+                    if (numbers.getDaily ( ) == 0 || holder.mNumberTextView.getText ( ) == "0") {
                         return;
                     }
-                AlertDialog.Builder builder = new AlertDialog.Builder (mContext);
-                builder.setMessage (R.string.clear_dialog_msg_value);
-                builder.setPositiveButton (R.string.clear, new DialogInterface.OnClickListener ( ) {
-                    public void onClick(DialogInterface dialog, int id) {
-                        // User clicked the "Delete" button, so delete the Number.
-                        AppExecutors.getInstance ().diskIO ().execute (new Runnable ( ) {
-                            @Override
-                            public void run() {
-
+                    AlertDialog.Builder builder = new AlertDialog.Builder (mContext);
+                    builder.setMessage (R.string.clear_dialog_msg_value);
+                    builder.setPositiveButton (R.string.clear, new DialogInterface.OnClickListener ( ) {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // User clicked the "Delete" button, so delete the Number.
+                            AppExecutors.getInstance ( ).diskIO ( ).execute (new Runnable ( ) {
+                                @Override
+                                public void run() {
 
                                     final int dailyNumber = 0;
-                                    mDB.numbersDao ().insertDaily (dailyNumber, mNumberList.get (position).getId () );
-                                    AppExecutors.getInstance ().mainThread ().execute (new Runnable ( ) {
+                                    if (numbers.getDone ( ) == 1) {
+                                        mDB.numbersDao ( ).insertIfDone (0, mNumberList.get (position).getId ( ));
+                                    }
+                                    mDB.numbersDao ( ).insertDaily (dailyNumber, mNumberList.get (position).getId ( ));
+                                    AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
                                         @Override
                                         public void run() {
-                                            notifyDataSetChanged ();
-
+                                            notifyDataSetChanged ( );
                                         }
                                     });
-
-                            }
-
-                        });
-
-                    }
-                });
-                builder.setNegativeButton (R.string.cancel, new DialogInterface.OnClickListener ( ) {
-                    public void onClick(DialogInterface dialog, int id) {
-
-                        if (dialog != null) {
-                            dialog.dismiss ( );
+                                }
+                            });
                         }
-                    }
-                });
+                    });
+                    builder.setNegativeButton (R.string.cancel, new DialogInterface.OnClickListener ( ) {
+                        public void onClick(DialogInterface dialog, int id) {
 
-                // Create and show the AlertDialog
-                AlertDialog alertDialog = builder.create ( );
-                alertDialog.show ( );
+                            if (dialog != null) {
+                                dialog.dismiss ( );
+                            }
+                        }
+                    });
+
+                    // Create and show the AlertDialog
+                    AlertDialog alertDialog = builder.create ( );
+                    alertDialog.show ( );
 
                 }
 
@@ -126,75 +120,73 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
 
         // Spannable HighLight Work
 
-        String sTitle = title.toLowerCase (Locale.getDefault ());
-        if (searchString != null && !searchString.isEmpty () && sTitle.contains (searchString )){
-            Log.d (TAG,"searchString != null");
-            int startPos = sTitle.indexOf(searchString);
-            int endPos = startPos + searchString.length();
+        String sTitle = title.toLowerCase (Locale.getDefault ( ));
+        if (searchString != null && !searchString.isEmpty ( ) && sTitle.contains (searchString)) {
+            Log.d (TAG, "searchString != null");
+            int startPos = sTitle.indexOf (searchString);
+            int endPos = startPos + searchString.length ( );
 
-            if (startPos != -1){
-                Log.d (TAG,"start pos != -1");
-                Spannable spanString = Spannable.Factory.getInstance().newSpannable(holder.mTitleTextView.getText());
-                spanString.setSpan(new ForegroundColorSpan (Color.parseColor ("#F9AA33")), startPos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            if (startPos != -1) {
+                Log.d (TAG, "start pos != -1");
+                Spannable spanString = Spannable.Factory.getInstance ( ).newSpannable (holder.mTitleTextView.getText ( ));
+                spanString.setSpan (new ForegroundColorSpan (Color.parseColor ("#F9AA33")), startPos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-                holder.mTitleTextView.setText(spanString);
+                holder.mTitleTextView.setText (spanString);
             } else {
-                Log.d (TAG,"start pos == -1");
+                Log.d (TAG, "start pos == -1");
                 holder.mTitleTextView.setText (title);
                 //holder.mTitleTextView.setTextColor(Color.parseColor ("#4A6572"));
             }
 
-        }
-        else {
-            Log.d (TAG,"searchString == null");
+        } else {
+            Log.d (TAG, "searchString == null");
             holder.mTitleTextView.setText (title);
             //holder.mTitleTextView.setTextColor(Color.parseColor ("#4A6572"));
         }
 
 
-        String sNumber = numberStr.toLowerCase (Locale.getDefault ());
-        if (sNumber.contains (searchString)){
-            int startPos = sNumber.indexOf(searchString);
-            int endPos = startPos + searchString.length();
+        String sNumber = numberStr.toLowerCase (Locale.getDefault ( ));
+        if (sNumber.contains (searchString)) {
+            int startPos = sNumber.indexOf (searchString);
+            int endPos = startPos + searchString.length ( );
 
-            Spannable spanString = Spannable.Factory.getInstance().newSpannable(holder.mNumberTextView.getText());
-            spanString.setSpan(new ForegroundColorSpan (Color.parseColor ("#F9AA33")), startPos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            Spannable spanString = Spannable.Factory.getInstance ( ).newSpannable (holder.mNumberTextView.getText ( ));
+            spanString.setSpan (new ForegroundColorSpan (Color.parseColor ("#F9AA33")), startPos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-            holder.mNumberTextView.setText(spanString);
+            holder.mNumberTextView.setText (spanString);
         }
 
         holder.mEnter_btn.setOnClickListener (new View.OnClickListener ( ) {
             @Override
             public void onClick(View v) {
-                InputMethodManager imm = (InputMethodManager)mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = (InputMethodManager) mContext.getSystemService (Context.INPUT_METHOD_SERVICE);
                 assert imm != null;
-                imm.hideSoftInputFromWindow(holder.mEnter_btn.getWindowToken(), 0);
-                holder.mAddNumber.setFocusable(false);
-                holder.mAddNumber.setFocusableInTouchMode(true);
-                AppExecutors.getInstance ().diskIO ().execute (new Runnable ( ) {
+                imm.hideSoftInputFromWindow (holder.mEnter_btn.getWindowToken ( ), 0);
+                holder.mAddNumber.setFocusable (false);
+                holder.mAddNumber.setFocusableInTouchMode (true);
+                AppExecutors.getInstance ( ).diskIO ( ).execute (new Runnable ( ) {
                     @Override
                     public void run() {
                         //final int favorite = getFav (numbers);
-                        if (mItemClickListener != null){
-                            if (holder.mAddNumber.getText ( ) == null || holder.mAddNumber.getText ( ).length () == 0)
-                            {
+                        if (mItemClickListener != null) {
+                            if (holder.mAddNumber.getText ( ) == null || holder.mAddNumber.getText ( ).length ( ) == 0) {
                                 return;
                             }
                             int oldDaily = numbers.getDaily ( );
-                            String numbersString = holder.mAddNumber.getText ().toString ().trim ();
+                            String numbersString = holder.mAddNumber.getText ( ).toString ( ).trim ( );
                             final int dailyNumber = Integer.parseInt (numbersString);
                             //final Numbers numbers1 = new Numbers (titleString,dailyNumber);
 
                             int finalDaily = oldDaily + dailyNumber;
 
-                            mDB.numbersDao ().insertDaily (finalDaily, mNumberList.get (position).getId () );
+                            mDB.numbersDao ( ).insertDaily (finalDaily, mNumberList.get (position).getId ( ));
                             //Toast.makeText (this, getString (R.string.Saved), Toast.LENGTH_SHORT).show ( );
 
-                            AppExecutors.getInstance ().mainThread ().execute (new Runnable ( ) {
+                            AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
                                 @Override
                                 public void run() {
                                     holder.mAddNumber.setText ("");
-                                    notifyDataSetChanged ();
+                                    notifyDataSetChanged ( );
 
                                 }
                             });
@@ -207,28 +199,27 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
         holder.mMinus_btn.setOnClickListener (new View.OnClickListener ( ) {
             @Override
             public void onClick(View v) {
-                InputMethodManager imm = (InputMethodManager)mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = (InputMethodManager) mContext.getSystemService (Context.INPUT_METHOD_SERVICE);
                 assert imm != null;
-                imm.hideSoftInputFromWindow(holder.mEnter_btn.getWindowToken(), 0);
-                holder.mAddNumber.setFocusable(false);
-                holder.mAddNumber.setFocusableInTouchMode(true);
-                AppExecutors.getInstance ().diskIO ().execute (new Runnable ( ) {
+                imm.hideSoftInputFromWindow (holder.mEnter_btn.getWindowToken ( ), 0);
+                holder.mAddNumber.setFocusable (false);
+                holder.mAddNumber.setFocusableInTouchMode (true);
+                AppExecutors.getInstance ( ).diskIO ( ).execute (new Runnable ( ) {
                     @Override
                     public void run() {
                         //final int favorite = getFav (numbers);
-                        if (mItemClickListener != null){
-                            if (holder.mAddNumber.getText ( ) == null || holder.mAddNumber.getText ( ).length () == 0)
-                            {
+                        if (mItemClickListener != null) {
+                            if (holder.mAddNumber.getText ( ) == null || holder.mAddNumber.getText ( ).length ( ) == 0) {
                                 return;
                             }
                             int oldDaily = numbers.getDaily ( );
-                            String numbersString = holder.mAddNumber.getText ().toString ().trim ();
+                            String numbersString = holder.mAddNumber.getText ( ).toString ( ).trim ( );
                             final int dailyNumber = Integer.parseInt (numbersString);
                             //final Numbers numbers1 = new Numbers (titleString,dailyNumber);
 
                             int finalDaily = oldDaily - dailyNumber;
-                            if (finalDaily <= 0){
-                                AppExecutors.getInstance ().mainThread ().execute (new Runnable ( ) {
+                            if (finalDaily <= 0) {
+                                AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
                                     @Override
                                     public void run() {
                                         holder.mAddNumber.setError (mContext.getResources ( ).getString (R.string.invalid_value));
@@ -238,16 +229,16 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
 
                             } else {
 
-                            mDB.numbersDao ().insertDaily (finalDaily, mNumberList.get (position).getId () );
-                            //Toast.makeText (this, getString (R.string.Saved), Toast.LENGTH_SHORT).show ( );
+                                mDB.numbersDao ( ).insertDaily (finalDaily, mNumberList.get (position).getId ( ));
+                                //Toast.makeText (this, getString (R.string.Saved), Toast.LENGTH_SHORT).show ( );
 
-                            AppExecutors.getInstance ().mainThread ().execute (new Runnable ( ) {
-                                @Override
-                                public void run() {
-                                    holder.mAddNumber.setText ("");
-                                    notifyDataSetChanged ();
-                                }
-                            });
+                                AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
+                                    @Override
+                                    public void run() {
+                                        holder.mAddNumber.setText ("");
+                                        notifyDataSetChanged ( );
+                                    }
+                                });
                             }
                         }
                     }
@@ -255,24 +246,21 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
             }
         });
 
-        if (numbers.getDone () == 1){
-            holder.mTitleTextView.setPaintFlags (holder.mTitleTextView.getPaintFlags ()| Paint.STRIKE_THRU_TEXT_FLAG);
-            holder.mTitleTextView.setTextColor (mContext.getResources().getColor (R.color.red));
-            holder.mNumberTextView.setTextColor (mContext.getResources().getColor (R.color.red));
-
+        if (numbers.getDone ( ) == 1) {
+            holder.mTitleTextView.setPaintFlags (holder.mTitleTextView.getPaintFlags ( ) | Paint.STRIKE_THRU_TEXT_FLAG);
+            holder.mTitleTextView.setTextColor (mContext.getResources ( ).getColor (R.color.red));
+            holder.mNumberTextView.setTextColor (mContext.getResources ( ).getColor (R.color.red));
         }
-        else if (numbers.getDone () == 0){
-            holder.mTitleTextView.setPaintFlags (holder.mTitleTextView.getPaintFlags ()& (~Paint.STRIKE_THRU_TEXT_FLAG));
-            holder.mTitleTextView.setTextColor (mContext.getResources().getColor (R.color.colorPrimaryLight));
-            holder.mNumberTextView.setTextColor (mContext.getResources().getColor (R.color.colorPrimaryLight));
+        else if (numbers.getDone ( ) == 0) {
+            holder.mTitleTextView.setPaintFlags (holder.mTitleTextView.getPaintFlags ( ) & (~Paint.STRIKE_THRU_TEXT_FLAG));
+            holder.mTitleTextView.setTextColor (mContext.getResources ( ).getColor (R.color.colorPrimaryLight));
+            holder.mNumberTextView.setTextColor (mContext.getResources ( ).getColor (R.color.colorPrimaryLight));
         }
-
-
     }
 
     @Override
     public int getItemCount() {
-        if (mNumberList == null || mNumberList.isEmpty ()) {
+        if (mNumberList == null || mNumberList.isEmpty ( )) {
             return 0;
         }
         return mNumberList.size ( );
@@ -287,7 +275,6 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
 //    }
 
 
-
     class DailyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView mTitleTextView;
         TextView mNumberTextView;
@@ -299,42 +286,41 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
         private int mPosition;
         LinearLayout container;
 
-         public DailyViewHolder(@NonNull View itemView) {
-             super (itemView);
-             container = itemView.findViewById (R.id.container2);
-             mTitleTextView = itemView.findViewById (R.id.title_daily);
-             mNumberTextView = itemView.findViewById (R.id.number_daily);
-             mEnter_btn = itemView.findViewById (R.id.btn_Enter);
-             mMinus_btn = itemView.findViewById (R.id.btn_minus);
-             mAddNumber = itemView.findViewById (R.id.edit_daily);
-             mClear_btn = itemView.findViewById (R.id.clear);
-             mAddNumber.setMaxWidth(7);
-             mNumberTextView.setMaxWidth(7);
+        public DailyViewHolder(@NonNull View itemView) {
+            super (itemView);
+            container = itemView.findViewById (R.id.container2);
+            mTitleTextView = itemView.findViewById (R.id.title_daily);
+            mNumberTextView = itemView.findViewById (R.id.number_daily);
+            mEnter_btn = itemView.findViewById (R.id.btn_Enter);
+            mMinus_btn = itemView.findViewById (R.id.btn_minus);
+            mAddNumber = itemView.findViewById (R.id.edit_daily);
+            mClear_btn = itemView.findViewById (R.id.clear);
+            mAddNumber.setMaxWidth (7);
+            mNumberTextView.setMaxWidth (7);
 
-             mEnter_btn.setOnClickListener (new View.OnClickListener ( ) {
-                 @Override
-                 public void onClick(View v) {
-                     int elementId = mNumberList.get (mPosition).getId ( );
-                     mItemClickListener.onNumberSubmit (elementId);
-                 }
-             });
+            mEnter_btn.setOnClickListener (new View.OnClickListener ( ) {
+                @Override
+                public void onClick(View v) {
+                    int elementId = mNumberList.get (mPosition).getId ( );
+                    mItemClickListener.onNumberSubmit (elementId);
+                }
+            });
 
-             mClear_btn.setOnClickListener (new View.OnClickListener ( ) {
-                 @Override
-                 public void onClick(View v) {
-                     int elementId = mNumberList.get (mPosition).getId ( );
-                     mItemClickListener.onNumberClear (elementId);
-                 }
-             });
-             itemView.setOnClickListener (this);
+            mClear_btn.setOnClickListener (new View.OnClickListener ( ) {
+                @Override
+                public void onClick(View v) {
+                    int elementId = mNumberList.get (mPosition).getId ( );
+                    mItemClickListener.onNumberClear (elementId);
+                }
+            });
+            itemView.setOnClickListener (this);
+        }
 
-         }
-
-         @Override
+        @Override
         public void onClick(View v) {
-             if (getAdapterPosition ( ) != RecyclerView.NO_POSITION && mItemClickListener != null) {
-                 mItemClickListener.onItemClickListener (mNumberList.get (mPosition));
-             }
+            if (getAdapterPosition ( ) != RecyclerView.NO_POSITION && mItemClickListener != null) {
+                mItemClickListener.onItemClickListener (mNumberList.get (mPosition));
+            }
         }
 
         public void setPosition(int position) {
@@ -344,14 +330,14 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
 
     public void setSearchItem(List<Numbers> newList, String searchString) {
 
-        mNumberList = new ArrayList<> ();
+        mNumberList = new ArrayList<> ( );
         mNumberList.addAll (newList);
-        this.searchString=searchString;
+        this.searchString = searchString;
         notifyDataSetChanged ( );
     }
 
     public void setSearchItem(List<Numbers> newList) {
-        mNumberList = new ArrayList<> ();
+        mNumberList = new ArrayList<> ( );
         mNumberList.addAll (newList);
         notifyDataSetChanged ( );
     }
@@ -403,7 +389,6 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
         void onItemClickListener(Numbers numbers);
         void onNumberSubmit(int itemId);
         void onNumberClear(int itemId);
-
     }
 
     public List<Numbers> getItems() {
@@ -412,7 +397,7 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
     }
 
     public void setItems(List<Numbers> itemList) {
-       // mNumberListFull = itemList;
+        // mNumberListFull = itemList;
         mNumberList = itemList;
         //mFilteredNumberList.addAll(mNumberList);
         notifyDataSetChanged ( );
