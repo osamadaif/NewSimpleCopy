@@ -61,6 +61,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
     private AppDatabase mDB;
     View mEmptyView;
     Button empty_btn;
+    private boolean enableMenuItemNote;
 
     private FloatingActionButton fab;
     //FireBase auth
@@ -107,9 +108,11 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
                     mNumbersList.setVisibility (View.VISIBLE);
                     mEmptyView.setVisibility (View.GONE);
                     mAdapter.setItems (notesDataList1);
+                    enableMenuItemNote = true;
                 } else {
                     mNumbersList.setVisibility (View.GONE);
                     mEmptyView.setVisibility (View.VISIBLE);
+                    enableMenuItemNote = false;
                 }
             }
         });
@@ -200,9 +203,8 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
                 // delete all data
                 showDeleteAllConfirmationDialog ( );
                 break;
-            case R.id.settings:
-                startActivity (new Intent (getActivity ( ), SettingsActivity.class));
-                Objects.requireNonNull (getActivity ( )).finish ( );
+            case R.id.lang:
+                HelperMethods.showSelectLanguageDialog (getActivity (), getContext ());
                 break;
             case R.id.logout:
                 if (user != null) {
@@ -222,6 +224,14 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
             item.setTitle (getResources ( ).getString (R.string.logout));
         } else {
             item.setTitle (getResources ( ).getString (R.string.login));
+        }
+
+        MenuItem deleteAllItemNote = menu.findItem (R.id.deletall);
+        if (enableMenuItemNote) {
+            deleteAllItemNote.setEnabled(true);
+        } else {
+            // disabled
+            deleteAllItemNote.setEnabled(false);
         }
         super.onPrepareOptionsMenu (menu);
     }

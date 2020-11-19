@@ -40,6 +40,7 @@ import com.example.simplecopy.adapters.CopyAdapter;
 import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.Numbers;
 import com.example.simplecopy.ui.activity.NumberEditor.NumberEditorActivity;
+import com.example.simplecopy.utils.HelperMethods;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -59,6 +60,8 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
     private CopyAdapter mAdapter;
     private MainViewModel mainViewModel;
     private AppDatabase mDB;
+    private boolean enableMenuItem;
+
     View mEmptyView;
     Button empty_btn;
     private FloatingActionButton fab;
@@ -105,11 +108,13 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
                 if (numbersList1.isEmpty ( )) {
                     mNumbersList.setVisibility (View.GONE);
                     mEmptyView.setVisibility (View.VISIBLE);
+                    enableMenuItem = false;
 
                 } else {
                     mNumbersList.setVisibility (View.VISIBLE);
                     mEmptyView.setVisibility (View.GONE);
                     mAdapter.setItems (numbersList1);
+                    enableMenuItem = true;
                 }
 
             }
@@ -153,6 +158,8 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
             }
         });
     }
+
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -198,9 +205,8 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
                 // delete all data
                 showDeleteAllConfirmationDialog ( );
                 break;
-            case R.id.settings:
-                startActivity (new Intent (getActivity ( ), SettingsActivity.class));
-                Objects.requireNonNull (getActivity ( )).finish ( );
+            case R.id.lang:
+                HelperMethods.showSelectLanguageDialog (getActivity (), getContext ());
                 break;
             case R.id.logout:
                 if (user != null) {
@@ -221,8 +227,19 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         } else {
             item.setTitle (getResources ( ).getString (R.string.login));
         }
+        MenuItem deleteAllItem = menu.findItem (R.id.deletall);
+        if (enableMenuItem) {
+            deleteAllItem.setEnabled(true);
+        } else {
+            // disabled
+            deleteAllItem.setEnabled(false);
+        }
         super.onPrepareOptionsMenu (menu);
     }
+
+
+
+
 
     private void showDeleteAllConfirmationDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder (getActivity ( ));

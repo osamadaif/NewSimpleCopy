@@ -8,13 +8,13 @@
         android:id="@+id/searchDaily"
         android:title="@string/Search"
         android:icon="@drawable/ic_search"
-        app:showAsAction="ifRoom|collapseActionView"
-        app:actionViewClass="androidx.appcompat.widget.SearchView"/>
+        app:showAsAction="ifRoom"/>
+
 
     <item
-        android:id="@+id/settings_daily"
-        android:title="@string/Settings"
-        android:icon="@drawable/ic_settings"
+        android:id="@+id/lang_daily"
+        android:title="@string/lang"
+        android:icon="@drawable/ic_language"
         app:showAsAction="never"/>
 
     <item

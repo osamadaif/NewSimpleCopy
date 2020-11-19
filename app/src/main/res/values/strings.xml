@@ -16,6 +16,8 @@
     <string name="Notes">Notes</string>
     <string name="Enter_Notes">Enter Notes</string>
     <string name="Settings">Settings</string>
+    <string name="lang">Language</string>
+
     <string name="Deleted">Deleted</string>
     <string name="DeleteAll">Delete All</string>
     <string name="Save">Save</string>

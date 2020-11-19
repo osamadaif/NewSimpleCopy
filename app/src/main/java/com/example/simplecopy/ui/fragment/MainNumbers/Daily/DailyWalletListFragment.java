@@ -1,10 +1,12 @@
 package com.example.simplecopy.ui.fragment.MainNumbers.Daily;
 
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Point;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -30,6 +32,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.example.simplecopy.ui.activity.MainActivity;
 import com.example.simplecopy.ui.activity.NumberEditor.NumberEditorActivity;
 import com.example.simplecopy.ui.activity.SettingsActivity;
 import com.example.simplecopy.ui.activity.user.UserActivity;
@@ -40,6 +43,9 @@ import com.example.simplecopy.ui.fragment.MainNumbers.MainViewModel;
 import com.example.simplecopy.adapters.DailyRecyclerAdapter;
 import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.Numbers;
+import com.example.simplecopy.utils.HelperMethods;
+import com.ferfalk.simplesearchview.SimpleSearchView;
+import com.ferfalk.simplesearchview.utils.DimensUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -54,12 +60,15 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
     private RecyclerView mNumbersList;
     private DailyRecyclerAdapter mAdapter;
     private AppDatabase mDB;
+    private MainActivity mainActivity;
     //FireBase auth
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
 
     private View mEmptyView;
     Button empty_btn;
+
+    private SimpleSearchView searchView;
 
     // Required empty public constructor
     public DailyWalletListFragment() {
@@ -76,7 +85,9 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
         mDB = AppDatabase.getInstance (getContext ());
         firebaseAuth = FirebaseAuth.getInstance ();
         user = firebaseAuth.getCurrentUser ();
+        mainActivity =(MainActivity)this.getActivity();
         setupViewModel ( );
+        searchView = getActivity ().findViewById(R.id.searchView);
         empty_btn = view.findViewById (R.id.btn_empty_title);
         empty_btn.setOnClickListener (new View.OnClickListener ( ) {
             @Override
@@ -169,15 +180,17 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
         super.onCreate (savedInstanceState);
     }
 
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate (R.menu.menu_daily, menu);
         final MenuItem item = menu.findItem (R.id.searchDaily);
-        SearchView searchView = (SearchView)item.getActionView ();
-        searchView.setActivated (true);
-        searchView.setQueryHint (getString (R.string.Search));
-        //searchView.clearFocus ();
-        searchView.setOnQueryTextListener (new SearchView.OnQueryTextListener ( ) {
+        searchView.setMenuItem(item);
+        searchView.setTabLayout( mainActivity.tabLayout);
+        if (!searchView.hasFocus () && searchView.isSearchOpen ()){
+            searchView.closeSearch();
+        }
+        searchView.setOnQueryTextListener(new SimpleSearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;
@@ -189,36 +202,99 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
                 return false;
             }
 
-            private void getResults (final String newText){
-//                newText = newText.toLowerCase();
-//                List<Numbers> newList = new ArrayList<> ();
-
+            @Override
+            public boolean onQueryTextCleared() {
+                mAdapter.searchString = "";
+                setupViewModel ();
+                return false;
+            }
+            public void getResults (final String newText){
                 mainViewModel.searchQueryByDaily (newText)
                         .observe (Objects.requireNonNull (getActivity ( )), new Observer<List<Numbers>> ( ) {
                             @Override
                             public void onChanged(List<Numbers> numbers) {
 
-                                if (numbers == null)return;
-                                     mAdapter.setSearchItem (numbers,newText);
+                                if (numbers == null)
+                                    return;
+                                mAdapter.setSearchItem (numbers,newText);
                             }
                         });
             }
+
+
         });
+        searchView.setOnSearchViewListener(new SimpleSearchView.SearchViewListener() {
+            @Override
+            public void onSearchViewShown() {
+//                Log.d("SimpleSearchView", "onSearchViewShown");
+
+            }
+
+            @Override
+            public void onSearchViewClosed() {
+                mAdapter.searchString = "";
+                setupViewModel ();
+//                Log.d("SimpleSearchView", "onSearchViewClosed");
+            }
+
+            @Override
+            public void onSearchViewShownAnimation() {
+//                Log.d("SimpleSearchView", "onSearchViewShownAnimation");
+            }
+
+            @Override
+            public void onSearchViewClosedAnimation() {
+//                Log.d("SimpleSearchView", "onSearchViewClosedAnimation");
+            }
+        });
+
+//        SearchView searchView = (SearchView)item.getActionView ();
+//        searchView.setActivated (true);
+//        searchView.setQueryHint (getString (R.string.Search));
+//        //searchView.clearFocus ();
+//        searchView.setOnQueryTextListener (new SearchView.OnQueryTextListener ( ) {
+//            @Override
+//            public boolean onQueryTextSubmit(String query) {
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onQueryTextChange(String newText) {
+//                getResults (newText);
+//                return false;
+//            }
+//
+//            private void getResults (final String newText){
+////                newText = newText.toLowerCase();
+////                List<Numbers> newList = new ArrayList<> ();
+//
+//                mainViewModel.searchQueryByDaily (newText)
+//                        .observe (Objects.requireNonNull (getActivity ( )), new Observer<List<Numbers>> ( ) {
+//                            @Override
+//                            public void onChanged(List<Numbers> numbers) {
+//
+//                                if (numbers == null)
+//                                    return;
+//                                mAdapter.setSearchItem (numbers,newText);
+//                            }
+//                        });
+//            }
+//        });
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId ()){
-            case R.id.settings_daily:
-                startActivity (new Intent (getActivity (), SettingsActivity.class));
-                getActivity ().finish ();
-                return true;
+            case R.id.lang_daily:
+                HelperMethods.showSelectLanguageDialog (getActivity (), getContext ());
+                break;
             case R.id.logout_daily:
                 if (user != null){
                     showLogoutDialog ();
                 } else {
                     startActivity (new Intent (getActivity (), UserActivity.class));
                 }
+
         }
         return super.onOptionsItemSelected (item);
     }

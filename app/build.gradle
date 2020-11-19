@@ -84,5 +84,8 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     implementation 'com.android.support:multidex:1.0.3'
+
+    //Search view new
+    implementation 'com.github.Ferfalk:SimpleSearchView:0.1.6'
 }
 apply plugin: 'com.google.gms.google-services'

@@ -20,6 +20,7 @@ import com.example.simplecopy.ui.fragment.MainNumbers.Daily.DailyWalletListFragm
 import com.example.simplecopy.R;
 import com.example.simplecopy.adapters.viewPagerAdapter;
 import com.example.simplecopy.utils.HelperMethods;
+import com.ferfalk.simplesearchview.SimpleSearchView;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
@@ -34,10 +35,11 @@ public class MainActivity extends AppCompatActivity  {
     private long backPressedTime;
     private Toast backToast;
 
-    TabLayout tabLayout;
+     public TabLayout tabLayout;
     AppBarLayout appBarLayout;
     ViewPager viewPager;
     Toolbar toolbar;
+    private SimpleSearchView searchView;
     private FloatingActionButton fab;
 
     //FireBase auth
@@ -60,7 +62,7 @@ public class MainActivity extends AppCompatActivity  {
 
         setupViewPager (viewPager);
         tabLayout.setupWithViewPager (viewPager);
-
+        searchView = findViewById(R.id.searchView);
         fab =  findViewById(R.id.fab);
         if (tabLayout.getSelectedTabPosition() == 0) {
             fab.setOnClickListener(new View.OnClickListener() {
@@ -124,7 +126,11 @@ public class MainActivity extends AppCompatActivity  {
 
     @Override
     public void onBackPressed() {
-        if (backPressedTime + 2000 > System.currentTimeMillis ()){
+        if (searchView.onBackPressed()) {
+            searchView.closeSearch ();
+            return;
+        }
+        else if (backPressedTime + 2000 > System.currentTimeMillis ()){
             backToast.cancel ();
             super.onBackPressed ( );
             return;

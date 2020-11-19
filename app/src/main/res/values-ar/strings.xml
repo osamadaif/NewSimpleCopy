@@ -92,4 +92,5 @@
     <string name="redo">استعادة</string>
     <string name="delete_note_selected_dialog_msg">هل انت متأكد من حذف هذه الملاحظات ؟</string>
     <string name="selected">محدد</string>
+    <string name="lang">اللغة</string>
 </resources>

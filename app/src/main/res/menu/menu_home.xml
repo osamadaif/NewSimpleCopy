@@ -18,9 +18,11 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView"/>
 
     <item
-        android:id="@+id/settings"
-        android:title="@string/Settings"
+        android:id="@+id/lang"
+        android:title="@string/lang"
+        android:icon="@drawable/ic_language"
         app:showAsAction="never"/>
+
     <item
         android:id="@+id/logout"
         android:title="@string/logout"

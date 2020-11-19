@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
@@ -36,7 +38,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.simplecopy.App;
 import com.example.simplecopy.R;
+import com.example.simplecopy.data.local.prefs.SharedPreferencesManger;
+import com.example.simplecopy.ui.activity.MainActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
@@ -44,10 +49,16 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.Locale;
 
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LANG_NUM;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadData;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.SaveData;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_LANG;
+
 public class HelperMethods {
     public static ProgressDialog progressDialog;
     public static AlertDialog alertDialog;
     static ConnectivityManager cm;
+    static int lanChoose = 0;
 
     public static void replaceFragment(FragmentManager getChildFragmentManager, int id, Fragment fragment) {
         FragmentTransaction transaction = getChildFragmentManager.beginTransaction ( );
@@ -380,6 +391,55 @@ public class HelperMethods {
             view.performHapticFeedback (HapticFeedbackConstants.KEYBOARD_TAP,
                     HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);  // Ignore device's setting. Otherwise, you can use FLAG_IGNORE_VIEW_SETTING to ignore view's setting.
         }
+    }
+
+    public static void showSelectLanguageDialog( Activity activity, Context context) {
+
+        final String[] lanList = {App.getContext().getResources ().getString(R.string.arabic_key), App.getContext().getResources ().getString(R.string.english_key)};
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(R.string.language);
+
+        if (LoadData (activity, LANG_NUM) != null){
+            lanChoose = Integer.parseInt(LoadData(activity,LANG_NUM));
+        }
+
+        builder.setSingleChoiceItems(lanList, lanChoose, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which == 0) {
+                    //Arabic
+                    if (LoadData(activity,LANG_NUM) != null){
+                        if (Integer.parseInt(LoadData(activity,LANG_NUM)) == 0){
+                            dialog.dismiss();
+                            return;
+                        }
+                    }
+                    SaveData(activity, USER_LANG, "ar");
+                } else if (which == 1) {
+                    //English
+                    if (LoadData(activity,LANG_NUM) != null){
+                        if (Integer.parseInt(LoadData(activity,LANG_NUM)) == 1){
+                            dialog.dismiss();
+                            return;
+                        }
+                    }
+                    SaveData(activity, USER_LANG, "en");
+                }
+                SaveData(activity,LANG_NUM,Integer.toString(which));
+                dialog.dismiss();
+                activity.finish();
+                activity.overridePendingTransition( 0, 0);
+                activity.startActivity(activity.getIntent());
+                activity.overridePendingTransition( 0, 0);
+
+
+
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create ( );
+        alertDialog.show ( );
     }
 
 }

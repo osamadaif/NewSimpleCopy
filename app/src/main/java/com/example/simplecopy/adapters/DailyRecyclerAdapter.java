@@ -26,7 +26,6 @@ import com.example.simplecopy.utils.AppExecutors;
 import com.example.simplecopy.R;
 import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.Numbers;
-import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +38,7 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
     //private List<Numbers> mFilteredNumberList= new ArrayList<> ();
     private Context mContext;
     private ItemClickListener mItemClickListener;
-    private String searchString = "";
+    public String searchString = "";
     private AppDatabase mDB;
 
     public DailyRecyclerAdapter(Context context, ItemClickListener listener) {
@@ -119,19 +118,19 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
         });
 
         // Spannable HighLight Work
-
         String sTitle = title.toLowerCase (Locale.getDefault ( ));
-        if (searchString != null && !searchString.isEmpty ( ) && sTitle.contains (searchString)) {
+        if (!searchString.isEmpty ( )) {
             Log.d (TAG, "searchString != null");
             int startPos = sTitle.indexOf (searchString);
             int endPos = startPos + searchString.length ( );
 
             if (startPos != -1) {
                 Log.d (TAG, "start pos != -1");
-                Spannable spanString = Spannable.Factory.getInstance ( ).newSpannable (holder.mTitleTextView.getText ( ));
-                spanString.setSpan (new ForegroundColorSpan (Color.parseColor ("#F9AA33")), startPos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                Spannable spanStringTitle = Spannable.Factory.getInstance ( ).newSpannable (holder.mTitleTextView.getText ( ));
+                spanStringTitle.setSpan (new ForegroundColorSpan (Color.parseColor ("#F9AA33")), startPos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-                holder.mTitleTextView.setText (spanString);
+                holder.mTitleTextView.setText (spanStringTitle);
+
             } else {
                 Log.d (TAG, "start pos == -1");
                 holder.mTitleTextView.setText (title);
@@ -145,23 +144,23 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
         }
 
 
-        String sNumber = numberStr.toLowerCase (Locale.getDefault ( ));
-        if (sNumber.contains (searchString)) {
-            int startPos = sNumber.indexOf (searchString);
-            int endPos = startPos + searchString.length ( );
+//        String sNumber = numberStr.toLowerCase (Locale.getDefault ( ));
+//        if (sNumber.contains (searchString)) {
+//            int startPos = sNumber.indexOf (searchString);
+//            int endPos = startPos + searchString.length ( );
+//
+//            Spannable spanStringNumber = Spannable.Factory.getInstance ( ).newSpannable (holder.mNumberTextView.getText ( ));
+//            spanStringNumber.setSpan (new ForegroundColorSpan (Color.parseColor ("#F9AA33")), startPos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//
+//            holder.mNumberTextView.setText (spanStringNumber);
+//        }
 
-            Spannable spanString = Spannable.Factory.getInstance ( ).newSpannable (holder.mNumberTextView.getText ( ));
-            spanString.setSpan (new ForegroundColorSpan (Color.parseColor ("#F9AA33")), startPos, endPos, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-            holder.mNumberTextView.setText (spanString);
-        }
-
-        holder.mEnter_btn.setOnClickListener (new View.OnClickListener ( ) {
+        holder.mPlus_btn.setOnClickListener (new View.OnClickListener ( ) {
             @Override
             public void onClick(View v) {
                 InputMethodManager imm = (InputMethodManager) mContext.getSystemService (Context.INPUT_METHOD_SERVICE);
                 assert imm != null;
-                imm.hideSoftInputFromWindow (holder.mEnter_btn.getWindowToken ( ), 0);
+                imm.hideSoftInputFromWindow (holder.mPlus_btn.getWindowToken ( ), 0);
                 holder.mAddNumber.setFocusable (false);
                 holder.mAddNumber.setFocusableInTouchMode (true);
                 AppExecutors.getInstance ( ).diskIO ( ).execute (new Runnable ( ) {
@@ -201,7 +200,7 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
             public void onClick(View v) {
                 InputMethodManager imm = (InputMethodManager) mContext.getSystemService (Context.INPUT_METHOD_SERVICE);
                 assert imm != null;
-                imm.hideSoftInputFromWindow (holder.mEnter_btn.getWindowToken ( ), 0);
+                imm.hideSoftInputFromWindow (holder.mPlus_btn.getWindowToken ( ), 0);
                 holder.mAddNumber.setFocusable (false);
                 holder.mAddNumber.setFocusableInTouchMode (true);
                 AppExecutors.getInstance ( ).diskIO ( ).execute (new Runnable ( ) {
@@ -278,7 +277,7 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
     class DailyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView mTitleTextView;
         TextView mNumberTextView;
-        ImageView mEnter_btn;
+        ImageView mPlus_btn;
         ImageView mMinus_btn;
         Button mClear_btn;
         AppCompatEditText mAddNumber;
@@ -291,14 +290,14 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
             container = itemView.findViewById (R.id.container2);
             mTitleTextView = itemView.findViewById (R.id.title_daily);
             mNumberTextView = itemView.findViewById (R.id.number_daily);
-            mEnter_btn = itemView.findViewById (R.id.btn_Enter);
+            mPlus_btn = itemView.findViewById (R.id.btn_Enter);
             mMinus_btn = itemView.findViewById (R.id.btn_minus);
             mAddNumber = itemView.findViewById (R.id.edit_daily);
             mClear_btn = itemView.findViewById (R.id.clear);
             mAddNumber.setMaxWidth (7);
             mNumberTextView.setMaxWidth (7);
 
-            mEnter_btn.setOnClickListener (new View.OnClickListener ( ) {
+            mPlus_btn.setOnClickListener (new View.OnClickListener ( ) {
                 @Override
                 public void onClick(View v) {
                     int elementId = mNumberList.get (mPosition).getId ( );
