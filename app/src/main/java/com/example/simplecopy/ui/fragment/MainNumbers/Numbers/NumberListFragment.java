@@ -11,13 +11,12 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,8 +31,8 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.simplecopy.R;
+import com.example.simplecopy.data.local.prefs.SharedPreferencesManger;
 import com.example.simplecopy.ui.activity.MainActivity;
-import com.example.simplecopy.ui.activity.SettingsActivity;
 import com.example.simplecopy.ui.activity.user.UserActivity;
 import com.example.simplecopy.ui.fragment.MainNumbers.MainViewModel;
 import com.example.simplecopy.adapters.CopyAdapter;
@@ -41,6 +40,7 @@ import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.Numbers;
 import com.example.simplecopy.ui.activity.NumberEditor.NumberEditorActivity;
 import com.example.simplecopy.utils.HelperMethods;
+import com.example.simplecopy.utils.ThemeHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -208,6 +208,16 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
             case R.id.lang:
                 HelperMethods.showSelectLanguageDialog (getActivity (), getContext ());
                 break;
+            case R.id.darkMode:
+                if (AppCompatDelegate.getDefaultNightMode () == AppCompatDelegate.MODE_NIGHT_YES){
+                    SharedPreferencesManger.SaveThemePref (false, getActivity ());
+                    ThemeHelper.applyTheme (false);
+                } else {
+                    SharedPreferencesManger.SaveThemePref (true, getActivity ());
+                    ThemeHelper.applyTheme (true);
+                }
+                restartApp ();
+                break;
             case R.id.logout:
                 if (user != null) {
                     showLogoutDialog ( );
@@ -221,18 +231,26 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
 
     @Override
     public void onPrepareOptionsMenu(@NonNull Menu menu) {
-        MenuItem item = menu.findItem (R.id.logout);
-        if (user != null) {
-            item.setTitle (getResources ( ).getString (R.string.logout));
-        } else {
-            item.setTitle (getResources ( ).getString (R.string.login));
-        }
         MenuItem deleteAllItem = menu.findItem (R.id.deletall);
         if (enableMenuItem) {
             deleteAllItem.setEnabled(true);
         } else {
             // disabled
             deleteAllItem.setEnabled(false);
+        }
+
+        MenuItem darkModeItem = menu.findItem (R.id.darkMode);
+        if (AppCompatDelegate.getDefaultNightMode () == AppCompatDelegate.MODE_NIGHT_YES) {
+            darkModeItem.setTitle (getResources ( ).getString (R.string.lightMode));
+        } else {
+            darkModeItem.setTitle (getResources ( ).getString (R.string.darkMode));
+        }
+
+        MenuItem item = menu.findItem (R.id.logout);
+        if (user != null) {
+            item.setTitle (getResources ( ).getString (R.string.logout));
+        } else {
+            item.setTitle (getResources ( ).getString (R.string.login));
         }
         super.onPrepareOptionsMenu (menu);
     }
@@ -452,4 +470,8 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         alertDialog.show ( );
     }
 
+    public void restartApp()
+    {
+        getActivity ().recreate ();
+    }
 }

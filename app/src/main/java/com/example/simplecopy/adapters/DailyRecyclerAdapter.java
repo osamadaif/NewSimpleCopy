@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.simplecopy.data.local.prefs.SharedPreferencesManger;
 import com.example.simplecopy.utils.AppExecutors;
 import com.example.simplecopy.R;
 import com.example.simplecopy.data.local.database.AppDatabase;
@@ -252,8 +253,14 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
         }
         else if (numbers.getDone ( ) == 0) {
             holder.mTitleTextView.setPaintFlags (holder.mTitleTextView.getPaintFlags ( ) & (~Paint.STRIKE_THRU_TEXT_FLAG));
-            holder.mTitleTextView.setTextColor (mContext.getResources ( ).getColor (R.color.colorPrimaryLight));
-            holder.mNumberTextView.setTextColor (mContext.getResources ( ).getColor (R.color.colorPrimaryLight));
+            if (SharedPreferencesManger.getThemePref (mContext)){
+                holder.mTitleTextView.setTextColor (mContext.getResources ( ).getColor (R.color.clolrWhite));
+                holder.mNumberTextView.setTextColor (mContext.getResources ( ).getColor (R.color.clolrWhite));
+            }else {
+                holder.mTitleTextView.setTextColor (mContext.getResources ( ).getColor (R.color.colorPrimaryLight));
+                holder.mNumberTextView.setTextColor (mContext.getResources ( ).getColor (R.color.colorPrimaryLight));
+            }
+
         }
     }
 

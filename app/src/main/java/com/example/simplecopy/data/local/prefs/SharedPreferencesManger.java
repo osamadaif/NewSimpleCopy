@@ -1,6 +1,7 @@
 package com.example.simplecopy.data.local.prefs;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 
 
@@ -19,6 +20,13 @@ public class SharedPreferencesManger {
         if (sharedPreferences == null) {
             sharedPreferences = activity.getSharedPreferences (
                     "Blood", activity.MODE_PRIVATE);
+        }
+    }
+
+    public static void setSharedPreferences(Context activity) {
+        if (sharedPreferences == null) {
+            sharedPreferences = activity.getSharedPreferences (
+                    "themePref", activity.MODE_PRIVATE);
         }
     }
 
@@ -42,6 +50,23 @@ public class SharedPreferencesManger {
         } else {
             setSharedPreferences (activity);
         }
+    }
+
+    public static void SaveThemePref(boolean isDark, Activity activity) {
+        setSharedPreferences (activity);
+        if (sharedPreferences != null) {
+            SharedPreferences.Editor editor = sharedPreferences.edit ( );
+            editor.putBoolean ("themePref", isDark);
+            editor.apply ( );
+        } else {
+            setSharedPreferences (activity);
+        }
+    }
+
+    public static boolean getThemePref(Context activity){
+        setSharedPreferences (activity);
+
+        return sharedPreferences.getBoolean ("themePref", false);
     }
 
 //    public static void SaveData(Activity activity, String data_Key, Object data_Value) {

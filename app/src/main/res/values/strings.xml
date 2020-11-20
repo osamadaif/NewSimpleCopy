@@ -101,5 +101,7 @@
     <string name="undo">undo</string>
     <string name="redo">redo</string>
     <string name="selected">selected</string>
+    <string name="darkMode">Dark Mode</string>
+    <string name="lightMode">Light Mode</string>
 
 </resources>

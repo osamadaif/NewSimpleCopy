@@ -18,6 +18,11 @@
         app:showAsAction="never"/>
 
     <item
+        android:id="@+id/darkMode_daily"
+        android:title="@string/darkMode"
+        app:showAsAction="never"/>
+
+    <item
         android:id="@+id/logout_daily"
         android:title="@string/logout"
         app:showAsAction="never"/>

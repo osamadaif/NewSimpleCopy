@@ -12,6 +12,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -32,6 +33,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.example.simplecopy.data.local.prefs.SharedPreferencesManger;
 import com.example.simplecopy.ui.activity.MainActivity;
 import com.example.simplecopy.ui.activity.NumberEditor.NumberEditorActivity;
 import com.example.simplecopy.ui.activity.SettingsActivity;
@@ -44,6 +46,7 @@ import com.example.simplecopy.adapters.DailyRecyclerAdapter;
 import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.Numbers;
 import com.example.simplecopy.utils.HelperMethods;
+import com.example.simplecopy.utils.ThemeHelper;
 import com.ferfalk.simplesearchview.SimpleSearchView;
 import com.ferfalk.simplesearchview.utils.DimensUtils;
 import com.google.firebase.auth.FirebaseAuth;
@@ -288,6 +291,16 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
             case R.id.lang_daily:
                 HelperMethods.showSelectLanguageDialog (getActivity (), getContext ());
                 break;
+            case R.id.darkMode_daily:
+                if (AppCompatDelegate.getDefaultNightMode () == AppCompatDelegate.MODE_NIGHT_YES){
+                    SharedPreferencesManger.SaveThemePref (false, getActivity ());
+                    ThemeHelper.applyTheme (false);
+                } else {
+                    SharedPreferencesManger.SaveThemePref (true, getActivity ());
+                    ThemeHelper.applyTheme (true);
+                }
+                restartApp ();
+                break;
             case R.id.logout_daily:
                 if (user != null){
                     showLogoutDialog ();
@@ -301,8 +314,14 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
 
     @Override
     public void onPrepareOptionsMenu(@NonNull Menu menu) {
-        MenuItem item = menu.findItem (R.id.logout_daily);
+        MenuItem darkModeItem = menu.findItem (R.id.darkMode_daily);
+        if (AppCompatDelegate.getDefaultNightMode () == AppCompatDelegate.MODE_NIGHT_YES) {
+            darkModeItem.setTitle (getResources ( ).getString (R.string.lightMode));
+        } else {
+            darkModeItem.setTitle (getResources ( ).getString (R.string.darkMode));
+        }
 
+        MenuItem item = menu.findItem (R.id.logout_daily);
         if (user != null){
             item.setTitle (getResources ().getString (R.string.logout));
         } else {
@@ -358,5 +377,10 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
 //        mAdapter.notifyItemMoved (itemId, mNumbersList.getAdapter ().getItemCount ());
 //        mNumbersList.smoothScrollToPosition (itemId);
 
+    }
+
+    public void restartApp()
+    {
+        getActivity ().recreate ();
     }
 }

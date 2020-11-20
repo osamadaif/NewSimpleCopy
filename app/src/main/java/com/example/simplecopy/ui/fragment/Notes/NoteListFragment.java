@@ -22,6 +22,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -34,11 +35,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.simplecopy.R;
 import com.example.simplecopy.adapters.CopyNoteAdapter;
 import com.example.simplecopy.data.local.database.AppDatabase;
+import com.example.simplecopy.data.local.prefs.SharedPreferencesManger;
 import com.example.simplecopy.data.model.NotesData;
+import com.example.simplecopy.ui.activity.MainActivity;
 import com.example.simplecopy.ui.activity.NoteEditor.NoteEditorActivity;
 import com.example.simplecopy.ui.activity.SettingsActivity;
 import com.example.simplecopy.ui.activity.user.UserActivity;
 import com.example.simplecopy.utils.HelperMethods;
+import com.example.simplecopy.utils.ThemeHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -206,6 +210,16 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
             case R.id.lang:
                 HelperMethods.showSelectLanguageDialog (getActivity (), getContext ());
                 break;
+            case R.id.darkMode:
+                if (AppCompatDelegate.getDefaultNightMode () == AppCompatDelegate.MODE_NIGHT_YES){
+                    SharedPreferencesManger.SaveThemePref (false, getActivity ());
+                    ThemeHelper.applyTheme (false);
+                } else {
+                    SharedPreferencesManger.SaveThemePref (true, getActivity ());
+                    ThemeHelper.applyTheme (true);
+                }
+                restartApp ();
+                break;
             case R.id.logout:
                 if (user != null) {
                     showLogoutDialog ( );
@@ -224,6 +238,13 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
             item.setTitle (getResources ( ).getString (R.string.logout));
         } else {
             item.setTitle (getResources ( ).getString (R.string.login));
+        }
+
+        MenuItem darkModeItem = menu.findItem (R.id.darkMode);
+        if (AppCompatDelegate.getDefaultNightMode () == AppCompatDelegate.MODE_NIGHT_YES) {
+            darkModeItem.setTitle (getResources ( ).getString (R.string.lightMode));
+        } else {
+            darkModeItem.setTitle (getResources ( ).getString (R.string.darkMode));
         }
 
         MenuItem deleteAllItemNote = menu.findItem (R.id.deletall);
@@ -447,5 +468,10 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         // Create and show the AlertDialog
         AlertDialog alertDialog = builder.create ( );
         alertDialog.show ( );
+    }
+
+    public void restartApp()
+    {
+        getActivity ().recreate ();
     }
 }
