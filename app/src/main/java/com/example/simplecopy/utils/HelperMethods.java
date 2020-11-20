@@ -427,10 +427,7 @@ public class HelperMethods {
                 }
                 SaveData(activity,LANG_NUM,Integer.toString(which));
                 dialog.dismiss();
-                activity.finish();
-                activity.overridePendingTransition( 0, 0);
-                activity.startActivity(activity.getIntent());
-                activity.overridePendingTransition( 0, 0);
+                activity.recreate ();
 
 
 

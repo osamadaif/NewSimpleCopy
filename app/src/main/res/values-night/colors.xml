@@ -16,6 +16,7 @@
 <!--    <color name="primaryTextColorNight">#ffffff</color>-->
 
     <color name="backgroundCard">#344955</color>
+    <color name="backgroundEmpty">#232F34</color>
     <color name="clolrOffWhite">#FFFBE6</color>
     <color name="clolrWhite">#FFFFFF</color>
     <color name="gray">#d4d3d3</color>
