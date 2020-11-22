@@ -20,6 +20,8 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -41,6 +43,7 @@ import com.example.simplecopy.data.model.Numbers;
 import com.example.simplecopy.ui.activity.NumberEditor.NumberEditorActivity;
 import com.example.simplecopy.utils.HelperMethods;
 import com.example.simplecopy.utils.ThemeHelper;
+import com.ferfalk.simplesearchview.SimpleSearchView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -60,6 +63,7 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
     private CopyAdapter mAdapter;
     private MainViewModel mainViewModel;
     private AppDatabase mDB;
+    private MainActivity mainActivity;
     private boolean enableMenuItem;
 
     View mEmptyView;
@@ -69,6 +73,7 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
 
+    private SimpleSearchView searchView;
     public static ActionMode actionMode;
     private ActionModeCallback actionModeCallback;
 
@@ -87,6 +92,8 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         mDB = AppDatabase.getInstance (getContext ( ));
         firebaseAuth = FirebaseAuth.getInstance ( );
         user = firebaseAuth.getCurrentUser ( );
+        mainActivity =(MainActivity)this.getActivity();
+        searchView = getActivity ().findViewById(R.id.searchView);
         setupViewModel ( );
         actionModeCallback = new ActionModeCallback ( );
         empty_btn = view.findViewById (R.id.btn_empty_title);
@@ -101,8 +108,7 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
 
     private void setupViewModel() {
         MainViewModel viewModel = new ViewModelProvider (this).get (MainViewModel.class);
-
-        viewModel.getNumbers ( ).observe (getViewLifecycleOwner ( ), new Observer<List<Numbers>> ( ) {
+        viewModel.getsearchQueryForNumber ( ).observe (getViewLifecycleOwner ( ), new Observer<List<Numbers>> ( ) {
             @Override
             public void onChanged(List<Numbers> numbersList1) {
                 if (numbersList1.isEmpty ( )) {
@@ -119,6 +125,29 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
 
             }
         });
+
+        //first time set an empty value to get all data
+        viewModel.filterTextAll.setValue ("");
+        searchView.getSearchEditText ().addTextChangedListener (new TextWatcher ( ) {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                viewModel.setFilter (s.toString());
+                mAdapter.searchString = s.toString ();
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                viewModel.setFilter (s.toString());
+                mAdapter.searchString = s.toString ();
+            }
+        });
+
     }
 
     @Override
@@ -165,36 +194,11 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate (R.menu.menu_home, menu);
         MenuItem item = menu.findItem (R.id.search);
-        SearchView searchView = (SearchView) item.getActionView ( );
-        searchView.setActivated (true);
-        searchView.setQueryHint (getString (R.string.Search));
-        //searchView.clearFocus ();
-
-        searchView.setOnQueryTextListener (new SearchView.OnQueryTextListener ( ) {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                getResults (newText);
-                return false;
-            }
-
-            private void getResults(final String newText) {
-
-                mainViewModel.searchQuery (newText)
-                        .observe (getActivity ( ), new Observer<List<Numbers>> ( ) {
-                            @Override
-                            public void onChanged(List<Numbers> numbers) {
-                                if (numbers == null) return;
-                                mAdapter.setSearchItem (numbers, newText);
-
-                            }
-                        });
-            }
-        });
+//        SearchView searchView = (SearchView) item.getActionView ( );
+//        searchView.setActivated (true);
+//        searchView.setQueryHint (getString (R.string.Search));
+        searchView.setMenuItem(item);
+        searchView.setTabLayout( mainActivity.tabLayout);
     }
 
     @Override

@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,18 +18,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -39,10 +38,10 @@ import com.example.simplecopy.data.local.prefs.SharedPreferencesManger;
 import com.example.simplecopy.data.model.NotesData;
 import com.example.simplecopy.ui.activity.MainActivity;
 import com.example.simplecopy.ui.activity.NoteEditor.NoteEditorActivity;
-import com.example.simplecopy.ui.activity.SettingsActivity;
 import com.example.simplecopy.ui.activity.user.UserActivity;
 import com.example.simplecopy.utils.HelperMethods;
 import com.example.simplecopy.utils.ThemeHelper;
+import com.ferfalk.simplesearchview.SimpleSearchView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -63,8 +62,11 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
     private CopyNoteAdapter mAdapter;
     private NotesViewModel mainViewModel;
     private AppDatabase mDB;
+    private MainActivity mainActivity;
+
     View mEmptyView;
     Button empty_btn;
+
     private boolean enableMenuItemNote;
 
     private FloatingActionButton fab;
@@ -72,6 +74,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
     private FirebaseAuth firebaseAuth;
     private FirebaseUser user;
 
+    private SimpleSearchView searchView;
     public static ActionMode actionMode;
     private ActionModeCallback actionModeCallback;
 
@@ -90,6 +93,8 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         mDB = AppDatabase.getInstance (getContext ( ));
         firebaseAuth = FirebaseAuth.getInstance ( );
         user = firebaseAuth.getCurrentUser ( );
+        mainActivity =(MainActivity)this.getActivity();
+        searchView = getActivity ().findViewById(R.id.searchView);
         setupViewModel ( );
         actionModeCallback = new ActionModeCallback ( );
         empty_btn = view.findViewById (R.id.btn_empty_note);
@@ -105,7 +110,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
     private void setupViewModel() {
         NotesViewModel viewModel = new ViewModelProvider (this).get (NotesViewModel.class);
 
-        viewModel.getNotes ( ).observe (getViewLifecycleOwner ( ), new Observer<List<NotesData>> ( ) {
+        viewModel.getsearchQueryByNote ( ).observe (getViewLifecycleOwner ( ), new Observer<List<NotesData>> ( ) {
             @Override
             public void onChanged(List<NotesData> notesDataList1) {
                 if (!notesDataList1.isEmpty ( )) {
@@ -120,6 +125,29 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
                 }
             }
         });
+
+        //first time set an empty value to get all data
+        viewModel.filterTextAll.setValue ("");
+        searchView.getSearchEditText ().addTextChangedListener (new TextWatcher ( ) {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                viewModel.setFilter (s.toString());
+                mAdapter.searchString = s.toString ();
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                viewModel.setFilter (s.toString());
+                mAdapter.searchString = s.toString ();
+            }
+        });
+
     }
 
     @Override
@@ -168,35 +196,11 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate (R.menu.menu_home, menu);
         MenuItem item = menu.findItem (R.id.search);
-        SearchView searchView = (SearchView) item.getActionView ( );
-        searchView.setActivated (true);
-        searchView.setQueryHint (getString (R.string.Search));
-        //searchView.clearFocus ();
-        searchView.setOnQueryTextListener (new SearchView.OnQueryTextListener ( ) {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                getResults (newText);
-
-                return false;
-            }
-
-            private void getResults(final String newText) {
-                mainViewModel.searchQuery (newText)
-                        .observe (Objects.requireNonNull (getActivity ( )), new Observer<List<NotesData>> ( ) {
-                            @Override
-                            public void onChanged(List<NotesData> notesData) {
-                                if (notesData == null) return;
-                                mAdapter.setSearchItem (notesData, newText);
-                            }
-                        });
-            }
-        });
+//        SearchView searchView = (SearchView) item.getActionView ( );
+//        searchView.setActivated (true);
+//        searchView.setQueryHint (getString (R.string.Search));
+        searchView.setMenuItem(item);
+        searchView.setTabLayout( mainActivity.tabLayout);
     }
 
     @Override

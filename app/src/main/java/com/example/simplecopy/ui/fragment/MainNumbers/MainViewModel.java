@@ -5,40 +5,61 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
 
+import com.example.simplecopy.data.local.database.dao.NumbersDao;
 import com.example.simplecopy.data.model.Numbers;
-import com.example.simplecopy.ui.fragment.MainNumbers.MainRepository;
 
 import java.util.List;
 
 public class MainViewModel extends AndroidViewModel {
-
+    private NumbersDao numbersDao ;
     private MainRepository repository;
-    private LiveData<List<Numbers>> numbers;
-    private LiveData<List<Numbers>> numbersDaily;
+    private LiveData<List<Numbers>> loadAllNumbers;
+    public LiveData<List<Numbers>> SearchNumbers;
+    private LiveData<List<Numbers>> loadAllDaily;
+    public LiveData<List<Numbers>> SearchDaily;
+    public MutableLiveData<String> filterTextAll = new MutableLiveData<>();
 
     public MainViewModel(@NonNull Application application) {
         super (application);
-
         repository = new MainRepository (application);
-        numbers = repository.getAllNumbers ();
-        numbersDaily = repository.getDailyFirst ();
+        loadAllNumbers = repository.getAllNumbers ();
+        loadAllDaily = repository.getDailyFirst ();
+        SearchDaily = Transformations.switchMap (filterTextAll,input -> {
+            if (input.isEmpty ()){
+                return  getAllDaily ();
+            }
+           return repository.searchQueryByDaily (input);});
+
+        loadAllNumbers = repository.getAllNumbers ();
+        SearchNumbers = Transformations.switchMap (filterTextAll,input -> {
+            if (input.isEmpty ()){
+                return  getLoadAllNumbers ();
+            }
+            return repository.searchQueryForNumbers (input);});
     }
 
-    public LiveData<List<Numbers>> searchQuery(String query){
-        return repository.searchQuery (query);
+    public LiveData<List<Numbers>> getsearchQueryForNumber(){
+        return SearchNumbers;
     }
 
-    public LiveData<List<Numbers>> searchQueryByDaily(String query){
-        return repository.searchQueryByDaily (query);
+    public LiveData<List<Numbers>> getsearchQueryByDaily(){
+        return SearchDaily;
     }
 
-    public LiveData<List<Numbers>> getNumbers() {
-        return numbers;
+    public void setFilter(String filter){
+        filterTextAll.setValue (filter);
     }
 
-    public LiveData<List<Numbers>> getDailyFirst() {
-        return numbersDaily;
+
+    public LiveData<List<Numbers>> getLoadAllNumbers() {
+        return loadAllNumbers;
+    }
+
+    public LiveData<List<Numbers>> getAllDaily() {
+        return loadAllDaily;
     }
 
 

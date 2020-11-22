@@ -24,6 +24,8 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -89,8 +91,8 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
         firebaseAuth = FirebaseAuth.getInstance ();
         user = firebaseAuth.getCurrentUser ();
         mainActivity =(MainActivity)this.getActivity();
-        setupViewModel ( );
         searchView = getActivity ().findViewById(R.id.searchView);
+        setupViewModel ( );
         empty_btn = view.findViewById (R.id.btn_empty_title);
         empty_btn.setOnClickListener (new View.OnClickListener ( ) {
             @Override
@@ -155,8 +157,7 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
 
     private void setupViewModel() {
         MainViewModel viewModel = new ViewModelProvider (this).get(MainViewModel.class);
-
-        viewModel.getDailyFirst ().observe ( getViewLifecycleOwner(), new Observer<List<Numbers>> ( ) {
+        viewModel.getsearchQueryByDaily ().observe ( getViewLifecycleOwner(), new Observer<List<Numbers>> ( ) {
             @Override
             public void onChanged(List<Numbers> numbersList1) {
                 if (numbersList1.isEmpty ()){
@@ -167,9 +168,31 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
                     mNumbersList.setVisibility (View.VISIBLE);
                     mEmptyView.setVisibility (View.GONE);
                     mAdapter.setItems (numbersList1);
+
                 }
             }
         });
+                //first time set an empty value to get all data
+                viewModel.filterTextAll.setValue ("");
+                searchView.getSearchEditText ().addTextChangedListener (new TextWatcher ( ) {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        viewModel.setFilter (s.toString());
+                        mAdapter.searchString = s.toString ();
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        viewModel.setFilter (s.toString());
+                        mAdapter.searchString = s.toString ();
+                    }
+                });
     }
 
     @Override
@@ -190,99 +213,6 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
         final MenuItem item = menu.findItem (R.id.searchDaily);
         searchView.setMenuItem(item);
         searchView.setTabLayout( mainActivity.tabLayout);
-        if (!searchView.hasFocus () && searchView.isSearchOpen ()){
-            searchView.closeSearch();
-        }
-        searchView.setOnQueryTextListener(new SimpleSearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                getResults (newText);
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextCleared() {
-                mAdapter.searchString = "";
-                setupViewModel ();
-                return false;
-            }
-            public void getResults (final String newText){
-                mainViewModel.searchQueryByDaily (newText)
-                        .observe (Objects.requireNonNull (getActivity ( )), new Observer<List<Numbers>> ( ) {
-                            @Override
-                            public void onChanged(List<Numbers> numbers) {
-
-                                if (numbers == null)
-                                    return;
-                                mAdapter.setSearchItem (numbers,newText);
-                            }
-                        });
-            }
-
-
-        });
-        searchView.setOnSearchViewListener(new SimpleSearchView.SearchViewListener() {
-            @Override
-            public void onSearchViewShown() {
-//                Log.d("SimpleSearchView", "onSearchViewShown");
-
-            }
-
-            @Override
-            public void onSearchViewClosed() {
-                mAdapter.searchString = "";
-                setupViewModel ();
-//                Log.d("SimpleSearchView", "onSearchViewClosed");
-            }
-
-            @Override
-            public void onSearchViewShownAnimation() {
-//                Log.d("SimpleSearchView", "onSearchViewShownAnimation");
-            }
-
-            @Override
-            public void onSearchViewClosedAnimation() {
-//                Log.d("SimpleSearchView", "onSearchViewClosedAnimation");
-            }
-        });
-
-//        SearchView searchView = (SearchView)item.getActionView ();
-//        searchView.setActivated (true);
-//        searchView.setQueryHint (getString (R.string.Search));
-//        //searchView.clearFocus ();
-//        searchView.setOnQueryTextListener (new SearchView.OnQueryTextListener ( ) {
-//            @Override
-//            public boolean onQueryTextSubmit(String query) {
-//                return false;
-//            }
-//
-//            @Override
-//            public boolean onQueryTextChange(String newText) {
-//                getResults (newText);
-//                return false;
-//            }
-//
-//            private void getResults (final String newText){
-////                newText = newText.toLowerCase();
-////                List<Numbers> newList = new ArrayList<> ();
-//
-//                mainViewModel.searchQueryByDaily (newText)
-//                        .observe (Objects.requireNonNull (getActivity ( )), new Observer<List<Numbers>> ( ) {
-//                            @Override
-//                            public void onChanged(List<Numbers> numbers) {
-//
-//                                if (numbers == null)
-//                                    return;
-//                                mAdapter.setSearchItem (numbers,newText);
-//                            }
-//                        });
-//            }
-//        });
     }
 
     @Override
@@ -331,7 +261,6 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
     }
 
     private void showLogoutDialog() {
-
         AlertDialog.Builder builder = new AlertDialog.Builder (getActivity ());
         builder.setMessage (R.string.logout_dialog_msg);
         builder.setPositiveButton (R.string.logout, new DialogInterface.OnClickListener ( ) {
@@ -358,7 +287,6 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
     @Override
     public void onItemClickListener(Numbers numbers) {
         String numberStr = numbers.getNumber ( );
-
         ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService (Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText ("TextView",numberStr);
         clipboard.setPrimaryClip (clip);
@@ -366,18 +294,10 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
     }
 
     @Override
-    public void onNumberSubmit(int itemId) {
-//        mAdapter.notifyItemMoved (itemId, mNumbersList.getAdapter ().getItemCount ());
-//        mNumbersList.smoothScrollToPosition (itemId);
-
-    }
+    public void onNumberSubmit(int itemId) { }
 
     @Override
-    public void onNumberClear(int itemId) {
-//        mAdapter.notifyItemMoved (itemId, mNumbersList.getAdapter ().getItemCount ());
-//        mNumbersList.smoothScrollToPosition (itemId);
-
-    }
+    public void onNumberClear(int itemId) { }
 
     public void restartApp()
     {

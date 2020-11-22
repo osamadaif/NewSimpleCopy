@@ -36,7 +36,7 @@ public class CopyNoteAdapter extends RecyclerView.Adapter<CopyNoteAdapter.CopyVi
     private List<NotesData> mNumberList;
     private Context mContext;
     private ItemClickListener mItemClickListener;
-    private String searchString = "";
+    public String searchString = "";
     private AppDatabase mDB;
     private SparseBooleanArray selected_items;
     private int current_selected_idx = -1;

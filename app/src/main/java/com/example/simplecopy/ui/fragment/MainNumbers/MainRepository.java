@@ -32,7 +32,7 @@ public class MainRepository {
         return numbersDaily;
     }
 
-    public LiveData<List<Numbers>> searchQuery(String query){
+    public LiveData<List<Numbers>> searchQueryForNumbers(String query){
         return numbersDao.searchFor ("%" + query + "%");
     }
     public LiveData<List<Numbers>> searchQueryByDaily(String query){

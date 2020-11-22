@@ -5,34 +5,44 @@ import android.app.Application;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
 
 import com.example.simplecopy.data.model.NotesData;
+import com.example.simplecopy.data.model.Numbers;
 
 import java.util.List;
 
 public class NotesViewModel extends AndroidViewModel {
 
     private NotesRepository repository;
-    private LiveData<List<NotesData>> notes;
+    private LiveData<List<NotesData>> loadAllNotes;
+    public LiveData<List<NotesData>> searchNotes;
+    public MutableLiveData<String> filterTextAll = new MutableLiveData<>();
 
     public NotesViewModel(@NonNull Application application) {
         super (application);
-
         repository = new NotesRepository (application);
-        notes = repository.getAllNumbers ();
+        loadAllNotes = repository.getAllNotes ();
+        searchNotes = Transformations.switchMap (filterTextAll, input -> {
+            if (input.isEmpty ()){
+                return  getLoadAllNotes ();
+            }
+            return repository.searchQueryForNotes (input);});
     }
 
-    public LiveData<List<NotesData>> searchQuery(String query){
-        return repository.searchQuery (query);
+    public LiveData<List<NotesData>> getsearchQueryByNote(){
+        return searchNotes;
     }
 
-    public LiveData<List<NotesData>> getNotes() {
-        return notes;
+    public void setFilter(String filter){
+        filterTextAll.setValue (filter);
     }
 
-//    public int insertFavorite (int value, int id){
-//        return repository.insertFavorite (value ,id);
-//    }
+    public LiveData<List<NotesData>> getLoadAllNotes() {
+        return loadAllNotes;
+    }
+
 
     public void insert(NotesData notes){
         repository.insert (notes);

@@ -22,11 +22,11 @@ public class NotesRepository {
     }
 
 
-    public LiveData<List<NotesData>> getAllNumbers(){
+    public LiveData<List<NotesData>> getAllNotes(){
         return notes;
     }
 
-    public LiveData<List<NotesData>> searchQuery(String query){
+    public LiveData<List<NotesData>> searchQueryForNotes(String query){
         return notesDao.searchFor ("%" + query + "%");
     }
 
