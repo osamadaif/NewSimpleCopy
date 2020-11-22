@@ -28,7 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/sign_up"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/primaryTextColor"
                 android:textSize="30sp"
                 android:textStyle="bold"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead"
@@ -74,11 +74,12 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:hint="@string/email"
+                    android:textCursorDrawable="@drawable/color_cursor"
                     android:inputType="textEmailAddress"
                     android:maxLength="50"
                     android:maxLines="1"
                     android:singleLine="true"
-                    android:textColor="@color/colorPrimary"
+                    android:textColor="@color/primaryTextColor"
                     android:textSize="21sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -98,11 +99,12 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:hint="@string/password"
+                    android:textCursorDrawable="@drawable/color_cursor"
                     android:inputType="textPassword"
                     android:maxLength="50"
                     android:maxLines="1"
                     android:singleLine="true"
-                    android:textColor="@color/colorPrimary"
+                    android:textColor="@color/primaryTextColor"
                     android:textSize="21sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -122,11 +124,12 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:hint="@string/confirm_password"
+                    android:textCursorDrawable="@drawable/color_cursor"
                     android:inputType="textPassword"
                     android:maxLength="50"
                     android:maxLines="1"
                     android:singleLine="true"
-                    android:textColor="@color/colorPrimary"
+                    android:textColor="@color/primaryTextColor"
                     android:textSize="21sp" />
             </com.google.android.material.textfield.TextInputLayout>
 

@@ -6,6 +6,7 @@
     <color name="colorAccent">#f9aa33</color>
     <color name="colorAccent_transparent">#66F9AA33</color>
     <color name="primaryTextColor">#ffffff</color>
+    <color name="primaryTextColor_transparent">#d4d3d3</color>
 
 
 <!--    <color name="colorPrimaryNight">#344955</color>-->

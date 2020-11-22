@@ -6,6 +6,7 @@
     <color name="colorAccent">#F9AA33</color>
     <color name="colorAccent_transparent">#66F9AA33</color>
     <color name="primaryTextColor">#4A6572</color>
+    <color name="primaryTextColor_transparent">#5f7481</color>
 
 
     <color name="backgroundCard">#FFFFFF</color>

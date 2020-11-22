@@ -98,7 +98,7 @@
                 android:gravity="start"
                 android:textAlignment="viewStart"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="?attr/primaryTextColor" />
+                android:textColor="@color/primaryTextColor_transparent" />
 
         </LinearLayout>
 

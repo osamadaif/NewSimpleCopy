@@ -1,6 +1,6 @@
 package com.example.simplecopy.ui.fragment.user;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -108,6 +108,7 @@ public class LoginFragment extends BaseFragment {
         // Configure Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder (GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken (getString (R.string.default_web_client_id))
+
                 .requestEmail ( )
                 .build ( );
         mGoogleSignInClient = GoogleSignIn.getClient (Objects.requireNonNull (getActivity ( )), gso);
@@ -297,10 +298,12 @@ public class LoginFragment extends BaseFragment {
             try {
                 // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = task.getResult (ApiException.class);
+                Log.w (TAG, "signInWithCredential:Donnnnnnnnnnnnnnn", task.getException ( ));
                 firebaseAuthWithGoogle (account);
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
 //                Log.w(TAG, "Google sign in failed", e);
+                Log.w (TAG, "signInWithCredential:nooooooooooooo", task.getException ( ));
                 Toast.makeText (getActivity ( ), e.getMessage ( ), Toast.LENGTH_SHORT).show ( );
                 // ...
             }

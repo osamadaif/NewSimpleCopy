@@ -12,6 +12,7 @@
     <string name="Numbers">Numbers</string>
     <string name="Daily_Wallet">Balance</string>
 
+    <string name="default_web_client_id" translatable="false">107293982911-o1hie00hpccbj4012pvo5t4t2lriq6ni.apps.googleusercontent.com</string>
     <string name="Enter_Number">Enter Number</string>
     <string name="Notes">Notes</string>
     <string name="Enter_Notes">Enter Notes</string>
