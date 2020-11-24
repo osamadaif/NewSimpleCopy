@@ -120,7 +120,11 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
                     enableMenuItemNote = true;
                 } else {
                     mNumbersList.setVisibility (View.GONE);
-                    mEmptyView.setVisibility (View.VISIBLE);
+                    if (mAdapter.getItems ().size () == 0){
+                        mEmptyView.setVisibility (View.VISIBLE);
+                    } else {
+                        mEmptyView.setVisibility (View.GONE);
+                    }
                     enableMenuItemNote = false;
                 }
             }

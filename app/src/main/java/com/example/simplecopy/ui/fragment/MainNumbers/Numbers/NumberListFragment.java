@@ -65,17 +65,14 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
     private AppDatabase mDB;
     private MainActivity mainActivity;
     private boolean enableMenuItem;
-
+    private FloatingActionButton fab;
+    private FirebaseAuth firebaseAuth;  //FireBase auth
+    private FirebaseUser user;
+    private SimpleSearchView searchView;
+    private ActionModeCallback actionModeCallback;
+    public static ActionMode actionMode;
     View mEmptyView;
     Button empty_btn;
-    private FloatingActionButton fab;
-    //FireBase auth
-    private FirebaseAuth firebaseAuth;
-    private FirebaseUser user;
-
-    private SimpleSearchView searchView;
-    public static ActionMode actionMode;
-    private ActionModeCallback actionModeCallback;
 
     // Required empty public constructor
     public NumberListFragment() {
@@ -113,7 +110,12 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
             public void onChanged(List<Numbers> numbersList1) {
                 if (numbersList1.isEmpty ( )) {
                     mNumbersList.setVisibility (View.GONE);
-                    mEmptyView.setVisibility (View.VISIBLE);
+
+                    if (mAdapter.getItems ().size () == 0){
+                        mEmptyView.setVisibility (View.VISIBLE);
+                    } else {
+                        mEmptyView.setVisibility (View.GONE);
+                    }
                     enableMenuItem = false;
 
                 } else {
@@ -186,6 +188,8 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
                     fab.hide ( );
             }
         });
+
+
     }
 
 

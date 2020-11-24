@@ -162,7 +162,11 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
             public void onChanged(List<Numbers> numbersList1) {
                 if (numbersList1.isEmpty ()){
                     mNumbersList.setVisibility (View.GONE);
-                    mEmptyView.setVisibility (View.VISIBLE);
+                    if (mAdapter.getItems ().size () == 0){
+                        mEmptyView.setVisibility (View.VISIBLE);
+                    } else {
+                        mEmptyView.setVisibility (View.GONE);
+                    }
 
                 }else {
                     mNumbersList.setVisibility (View.VISIBLE);
