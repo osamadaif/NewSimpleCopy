@@ -12,6 +12,7 @@ import com.example.simplecopy.data.model.NotesData;
 import com.example.simplecopy.data.model.Numbers;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class NotesViewModel extends AndroidViewModel {
 
@@ -44,8 +45,8 @@ public class NotesViewModel extends AndroidViewModel {
     }
 
 
-    public void insert(NotesData notes){
-        repository.insert (notes);
+    public Long insert(NotesData notes) throws ExecutionException, InterruptedException{
+        return repository.insert (notes);
     }
 
     public void update(NotesData notes){

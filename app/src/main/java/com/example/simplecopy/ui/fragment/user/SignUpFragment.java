@@ -32,6 +32,8 @@ import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.RE
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.REMEMBER_ME;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.SaveData;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_ID;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_NAME;
+import static com.example.simplecopy.utils.Constants.ISLOGIN;
 import static com.example.simplecopy.utils.HelperMethods.isConnected;
 import static com.example.simplecopy.utils.HelperMethods.progressDialog;
 import static com.example.simplecopy.utils.HelperMethods.validationConfirmPassword;
@@ -136,8 +138,11 @@ public class SignUpFragment extends BaseFragment {
                                 // Sign in success, dismiss dialog and start register activity
                                 HelperMethods.dismissProgressDialog();
                                 FirebaseUser user = mAuth.getCurrentUser ( );
-//                                assert user != null;
-//                                SaveData(getActivity (), USER_ID, user.getUid ());
+                                String[] parts = email.split("@");
+                                String nickname = parts[0];
+                                SaveData (getActivity (), USER_ID, user.getUid ());
+                                SaveData (getActivity (), USER_NAME, nickname);
+                                SaveData (getActivity (), ISLOGIN, true);
                                 Toast.makeText (getActivity (), getResources ().getString (R.string.registered)+ "\n"+ user.getEmail (), Toast.LENGTH_SHORT).show ();
                                 startActivity (new Intent (getActivity (), MainActivity.class));
                                 getActivity ().finish ();

@@ -95,4 +95,5 @@
     <string name="lang">اللغة</string>
     <string name="darkMode">الوضع الداكن</string>
     <string name="lightMode">الوضع المضئ</string>
+    <string name="Name_is_exist">الاسم مسجل من قبل</string>
 </resources>

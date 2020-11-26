@@ -2,6 +2,7 @@ package com.example.simplecopy.adapters;
 
 import androidx.appcompat.app.AlertDialog;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -17,6 +18,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatEditText;
@@ -27,10 +29,26 @@ import com.example.simplecopy.utils.AppExecutors;
 import com.example.simplecopy.R;
 import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.Numbers;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadData;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_ID;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_NAME;
+import static com.example.simplecopy.utils.Constants.DAILY;
+import static com.example.simplecopy.utils.Constants.DONE;
+import static com.example.simplecopy.utils.Constants.NUMBERS;
+import static com.example.simplecopy.utils.Constants.TITLE_NOTE;
+import static com.example.simplecopy.utils.Constants.USERS;
+import static com.example.simplecopy.utils.FireStoreHelperQuery.fsUpdate;
 
 public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdapter.DailyViewHolder> {
     private static final String TAG = DailyRecyclerAdapter.class.getSimpleName ( );
@@ -38,13 +56,18 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
     private List<Numbers> mNumberList;
     //private List<Numbers> mFilteredNumberList= new ArrayList<> ();
     private Context mContext;
+    private Activity activity;
     private ItemClickListener mItemClickListener;
     public String searchString = "";
     private AppDatabase mDB;
 
-    public DailyRecyclerAdapter(Context context, ItemClickListener listener) {
+    private FirebaseFirestore fdb;
+    private CollectionReference numberDocuRef;
+
+    public DailyRecyclerAdapter(Context context, Activity activity, ItemClickListener listener) {
         mContext = context;
         this.mItemClickListener = listener;
+        this.activity = activity;
         //mNumberListFull = new ArrayList<> (mNumberList);
     }
 
@@ -60,7 +83,10 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
     public void onBindViewHolder(@NonNull final DailyViewHolder holder, final int position) {
         final Numbers numbers = mNumberList.get (position);
         mDB = AppDatabase.getInstance (mContext.getApplicationContext ( ));
-
+        fdb = FirebaseFirestore.getInstance ( );
+        numberDocuRef = fdb.collection (USERS)
+                .document (LoadData (activity, USER_NAME) + " " + LoadData (activity, USER_ID))
+                .collection (NUMBERS);
         String title = numbers.getTitle ( );
         holder.mTitleTextView.setText (title);
         holder.setPosition (position);
@@ -68,7 +94,7 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
         int numberInt = numbers.getDaily ( );
         String numberStr = String.valueOf (numberInt);
         holder.mNumberTextView.setText (numberStr);
-
+        String uidStr = String.valueOf (mNumberList.get (position).getId ( ));
         holder.mClear_btn.setOnClickListener (new View.OnClickListener ( ) {
             @Override
             public void onClick(View v) {
@@ -84,12 +110,18 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
                             AppExecutors.getInstance ( ).diskIO ( ).execute (new Runnable ( ) {
                                 @Override
                                 public void run() {
-
                                     final int dailyNumber = 0;
                                     if (numbers.getDone ( ) == 1) {
                                         mDB.numbersDao ( ).insertIfDone (0, mNumberList.get (position).getId ( ));
+                                        Map<String, Object> doneMap = new HashMap<> ( );
+                                        doneMap.put (DONE , "0");
+                                        fsUpdate (numberDocuRef, uidStr, doneMap);
                                     }
                                     mDB.numbersDao ( ).insertDaily (dailyNumber, mNumberList.get (position).getId ( ));
+                                    Map<String, Object> dailyeMap = new HashMap<> ( );
+                                    dailyeMap.put (DAILY , "0");
+                                    fsUpdate (numberDocuRef, uidStr, dailyeMap);
+
                                     AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
                                         @Override
                                         public void run() {
@@ -176,18 +208,17 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
                             String numbersString = holder.mAddNumber.getText ( ).toString ( ).trim ( );
                             final int dailyNumber = Integer.parseInt (numbersString);
                             //final Numbers numbers1 = new Numbers (titleString,dailyNumber);
-
                             int finalDaily = oldDaily + dailyNumber;
-
                             mDB.numbersDao ( ).insertDaily (finalDaily, mNumberList.get (position).getId ( ));
-                            //Toast.makeText (this, getString (R.string.Saved), Toast.LENGTH_SHORT).show ( );
-
+                            String finalDailyStr = String.valueOf (finalDaily);
+                            Map<String, Object> dailyPlusMap = new HashMap<> ( );
+                            dailyPlusMap.put (DAILY , finalDailyStr);
+                            fsUpdate (numberDocuRef, uidStr, dailyPlusMap);
                             AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
                                 @Override
                                 public void run() {
                                     holder.mAddNumber.setText ("");
                                     notifyDataSetChanged ( );
-
                                 }
                             });
                         }
@@ -230,7 +261,10 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
                             } else {
 
                                 mDB.numbersDao ( ).insertDaily (finalDaily, mNumberList.get (position).getId ( ));
-                                //Toast.makeText (this, getString (R.string.Saved), Toast.LENGTH_SHORT).show ( );
+                                String finalDailyStr = String.valueOf (finalDaily);
+                                Map<String, Object> dailyMinusMap = new HashMap<> ( );
+                                dailyMinusMap.put (DAILY , finalDailyStr);
+                                fsUpdate (numberDocuRef, uidStr, dailyMinusMap);
 
                                 AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
                                     @Override

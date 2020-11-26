@@ -21,7 +21,7 @@ public interface NotesDao {
     LiveData<List<NotesData>> searchFor (String searchQuery);
 
     @Insert
-    void insertTask(NotesData notesData);
+    long insertTask(NotesData notesData);
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     void updateTask(NotesData notesData);
@@ -43,6 +43,9 @@ public interface NotesDao {
 
     @Query("UPDATE notes SET favorite= :value WHERE id = :itemId")
     void insertFavorite(int value, int itemId);
+
+    @Query("SELECT * FROM notes WHERE title = :userName")
+    boolean isNameExist(String userName);
 
 }
 

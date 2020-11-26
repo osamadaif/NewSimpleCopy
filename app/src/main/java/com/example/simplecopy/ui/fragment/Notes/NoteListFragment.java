@@ -51,6 +51,8 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.example.simplecopy.adapters.CopyNoteAdapter.isBtnVisible;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.SaveData;
+import static com.example.simplecopy.utils.Constants.ISLOGIN;
 import static com.example.simplecopy.utils.HelperMethods.vibrate;
 
 
@@ -120,7 +122,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
                     enableMenuItemNote = true;
                 } else {
                     mNumbersList.setVisibility (View.GONE);
-                    if (mAdapter.getItems ().size () == 0){
+                    if (mAdapter.getItemCount () == 0){
                         mEmptyView.setVisibility (View.VISIBLE);
                     } else {
                         mEmptyView.setVisibility (View.GONE);
@@ -174,7 +176,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         mNumbersList.setItemAnimator (new DefaultItemAnimator ( ));
         //mNumbersList.showIfEmpty(mEmptyView);
         mNumbersList.setHasFixedSize (true);
-        mAdapter = new CopyNoteAdapter (getActivity ( ), this);
+        mAdapter = new CopyNoteAdapter (getActivity ( ), getActivity (), this);
         mAdapter.setHasStableIds (true);
         mNumbersList.setAdapter (mAdapter);
         mNumbersList.addOnScrollListener (new RecyclerView.OnScrollListener ( ) {
@@ -232,6 +234,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
                 if (user != null) {
                     showLogoutDialog ( );
                 } else {
+                    SaveData (getActivity (), ISLOGIN, false);
                     startActivity (new Intent (getActivity ( ), UserActivity.class));
                 }
                 return true;
@@ -295,6 +298,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         builder.setPositiveButton (R.string.logout, new DialogInterface.OnClickListener ( ) {
             public void onClick(DialogInterface dialog, int id) {
                 firebaseAuth.signOut ( );
+                SaveData (getActivity (), ISLOGIN, false);
                 startActivity (new Intent (getActivity ( ), UserActivity.class));
                 getActivity ( ).finish ( );
             }

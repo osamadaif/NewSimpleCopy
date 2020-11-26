@@ -1,6 +1,7 @@
 package com.example.simplecopy.adapters;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.text.Spannable;
@@ -14,36 +15,50 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.simplecopy.data.model.Numbers;
 import com.example.simplecopy.utils.AppExecutors;
 import com.example.simplecopy.R;
 import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.NotesData;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadData;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_ID;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_NAME;
+import static com.example.simplecopy.utils.Constants.FAVORITE;
+import static com.example.simplecopy.utils.Constants.NOTES;
+import static com.example.simplecopy.utils.Constants.USERS;
+import static com.example.simplecopy.utils.FireStoreHelperQuery.fsUpdate;
 
 public class CopyNoteAdapter extends RecyclerView.Adapter<CopyNoteAdapter.CopyViewHolder> {
 
     private static final String TAG = CopyNoteAdapter.class.getSimpleName ( );
 
-    private List<NotesData> mNumberList;
+    private List<NotesData> mNoteList;
     private Context mContext;
+    private Activity activity;
     private ItemClickListener mItemClickListener;
     public String searchString = "";
     private AppDatabase mDB;
     private SparseBooleanArray selected_items;
     private int current_selected_idx = -1;
+    private FirebaseFirestore fdb;
+    private CollectionReference noteDocRef;
     public static boolean isBtnVisible = true;
 
-    public CopyNoteAdapter(Context context, ItemClickListener listener) {
+    public CopyNoteAdapter(Context context, Activity activity, ItemClickListener listener) {
         mContext = context;
+        this.activity = activity;
         this.mItemClickListener = listener;
         selected_items = new SparseBooleanArray ( );
     }
@@ -59,7 +74,7 @@ public class CopyNoteAdapter extends RecyclerView.Adapter<CopyNoteAdapter.CopyVi
 
     @Override
     public void onBindViewHolder(@NonNull final CopyNoteAdapter.CopyViewHolder holder, final int position) {
-        final NotesData notesData = mNumberList.get (position);
+        final NotesData notesData = mNoteList.get (position);
 
         holder.setPosition (position);
         String title = notesData.getTitle ( );
@@ -77,7 +92,10 @@ public class CopyNoteAdapter extends RecyclerView.Adapter<CopyNoteAdapter.CopyVi
             holder.mSummary.setText (supSummary);
         }
         mDB = AppDatabase.getInstance (mContext.getApplicationContext ( ));
-
+        fdb = FirebaseFirestore.getInstance ( );
+        noteDocRef = fdb.collection (USERS)
+                .document (LoadData (activity, USER_NAME) + " " + LoadData (activity, USER_ID))
+                .collection (NOTES);
         // Spannable HighLight Work
         String sTitle = title.toLowerCase (Locale.getDefault ( ));
         if (sTitle.contains (searchString)) {
@@ -96,6 +114,7 @@ public class CopyNoteAdapter extends RecyclerView.Adapter<CopyNoteAdapter.CopyVi
         } else if (notesData.getFavorite ( ) == 1) {
             holder.mFavorite.setImageResource (R.drawable.ic_star);
         }
+        String uidStr = String.valueOf (mNoteList.get (position).getId ( ));
         holder.mFavorite.setOnClickListener (new View.OnClickListener ( ) {
             @Override
             public void onClick(View v) {
@@ -106,11 +125,17 @@ public class CopyNoteAdapter extends RecyclerView.Adapter<CopyNoteAdapter.CopyVi
                         if (mItemClickListener != null) {
 
                             if (notesData.getFavorite ( ) == 0) {
-                                mDB.NotesDao ( ).insertFavorite (1, mNumberList.get (position).getId ( ));
+                                mDB.NotesDao ( ).insertFavorite (1, mNoteList.get (position).getId ( ));
+                                Map<String, Object> favMapP = new HashMap<> ( );
+                                favMapP.put (FAVORITE , "1");
+                                fsUpdate (noteDocRef, uidStr, favMapP);
                                 Log.d (TAG, "numbers checked ");
 
                             } else if (notesData.getFavorite ( ) == 1) {
-                                mDB.NotesDao ( ).insertFavorite (0, mNumberList.get (position).getId ( ));
+                                mDB.NotesDao ( ).insertFavorite (0, mNoteList.get (position).getId ( ));
+                                Map<String, Object> favMapM = new HashMap<> ( );
+                                favMapM.put (FAVORITE , "0");
+                                fsUpdate (noteDocRef, uidStr, favMapM);
                                 Log.d (TAG, "numbers unchecked ");
                             }
                         }
@@ -135,30 +160,30 @@ public class CopyNoteAdapter extends RecyclerView.Adapter<CopyNoteAdapter.CopyVi
 
     public void setSearchItem(List<NotesData> newList, String searchString) {
         this.searchString = searchString;
-        mNumberList = new ArrayList<> ( );
-        mNumberList.addAll (newList);
+        mNoteList = new ArrayList<> ( );
+        mNoteList.addAll (newList);
         notifyDataSetChanged ( );
     }
 
 
     @Override
     public int getItemCount() {
-        if (mNumberList == null || mNumberList.isEmpty ( )) {
+        if (mNoteList == null || mNoteList.isEmpty ( )) {
             return 0;
         }
-        return mNumberList.size ( );
+        return mNoteList.size ( );
     }
 
     @Override
     public long getItemId(int position) {
-        if (position < mNumberList.size ( )) {
-            return mNumberList.get (position).getId ( );
+        if (position < mNoteList.size ( )) {
+            return mNoteList.get (position).getId ( );
         }
         return RecyclerView.NO_ID;
     }
 
     public int getId(int position) {
-        return mNumberList.get (position).getId ( );
+        return mNoteList.get (position).getId ( );
     }
 
     class CopyViewHolder extends RecyclerView.ViewHolder {
@@ -186,7 +211,7 @@ public class CopyNoteAdapter extends RecyclerView.Adapter<CopyNoteAdapter.CopyVi
             mEdit_btn.setOnClickListener (new View.OnClickListener ( ) {
                 @Override
                 public void onClick(View v) {
-                    int elementId = mNumberList.get (mPosition).getId ( );
+                    int elementId = mNoteList.get (mPosition).getId ( );
                     mItemClickListener.onNoteEdit (elementId);
                 }
             });
@@ -196,7 +221,7 @@ public class CopyNoteAdapter extends RecyclerView.Adapter<CopyNoteAdapter.CopyVi
                 public void onClick(View v) {
 
                     if (getAdapterPosition ( ) != RecyclerView.NO_POSITION && mItemClickListener != null) {
-                        mItemClickListener.onNoteDelete (mNumberList.get (mPosition));
+                        mItemClickListener.onNoteDelete (mNoteList.get (mPosition));
                     }
                 }
             });
@@ -205,7 +230,7 @@ public class CopyNoteAdapter extends RecyclerView.Adapter<CopyNoteAdapter.CopyVi
                 @Override
                 public void onClick(View v) {
                     if (getAdapterPosition ( ) != RecyclerView.NO_POSITION && mItemClickListener != null) {
-                        mItemClickListener.onItemClickListener (v, mNumberList.get (mPosition), mPosition, mNumberList.get (mPosition).getId ( ));
+                        mItemClickListener.onItemClickListener (v, mNoteList.get (mPosition), mPosition, mNoteList.get (mPosition).getId ( ));
                     }
                 }
             });
@@ -214,7 +239,7 @@ public class CopyNoteAdapter extends RecyclerView.Adapter<CopyNoteAdapter.CopyVi
                 @Override
                 public boolean onLongClick(View v) {
                     if (mItemClickListener == null) return false;
-                    mItemClickListener.onItemLongClick (v, mNumberList.get (mPosition), mPosition, mNumberList.get (mPosition).getId ( ));
+                    mItemClickListener.onItemLongClick (v, mNoteList.get (mPosition), mPosition, mNoteList.get (mPosition).getId ( ));
                     return true;
                 }
             });
@@ -292,11 +317,11 @@ public class CopyNoteAdapter extends RecyclerView.Adapter<CopyNoteAdapter.CopyVi
     }
 
     public List<NotesData> getItems() {
-        return mNumberList;
+        return mNoteList;
     }
 
     public void setItems(List<NotesData> itemList) {
-        mNumberList = itemList;
+        mNoteList = itemList;
         notifyDataSetChanged ( );
     }
 }

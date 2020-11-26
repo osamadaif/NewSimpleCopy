@@ -11,6 +11,7 @@ public class SharedPreferencesManger {
     public static final String USER_DATA = "USER_DATA";
     public static final String USER_PASSWORD = "USER_PASSWORD";
     public static final String USER_ID = "USER_ID";
+    public static final String USER_NAME = "USER_NAME";
     public static final String REMEMBER = "REMEMBER";
     public static final String REMEMBER_ME = "REMEMBER_ME";
     public static final String USER_LANG = "USER_LANG";

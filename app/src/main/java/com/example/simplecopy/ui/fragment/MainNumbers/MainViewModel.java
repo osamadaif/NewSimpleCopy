@@ -12,6 +12,7 @@ import com.example.simplecopy.data.local.database.dao.NumbersDao;
 import com.example.simplecopy.data.model.Numbers;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class MainViewModel extends AndroidViewModel {
     private NumbersDao numbersDao ;
@@ -63,8 +64,8 @@ public class MainViewModel extends AndroidViewModel {
     }
 
 
-    public void insert(Numbers numbers){
-        repository.insert (numbers);
+    public Long insert(Numbers numbers) throws ExecutionException, InterruptedException{
+       return repository.insert (numbers);
     }
 
     public void update(Numbers numbers){

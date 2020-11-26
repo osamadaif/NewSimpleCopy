@@ -45,6 +45,10 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.SaveData;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_ID;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_NAME;
+import static com.example.simplecopy.utils.Constants.ISLOGIN;
 import static com.example.simplecopy.utils.HelperMethods.isConnected;
 import static com.example.simplecopy.utils.HelperMethods.progressDialog;
 import static com.example.simplecopy.utils.HelperMethods.replaceFragment;
@@ -69,20 +73,8 @@ public class LoginFragment extends BaseFragment {
     @BindView(R.id.login_fragment_btn_google_login)
     SignInButton loginFragmentBtnGoogleLogin;
 
-    //    @BindView(R.id.login_fragment_txt_skip)
-//    TextView loginFragmentTxtSkip;
-//    @BindView(R.id.login_fragment_txt_email_or_phone)
-//    TextInputEditText loginFragmentTxtEmailOrPhone;
-//    @BindView(R.id.login_fragment_txt_password)
-//    TextInputEditText loginFragmentTxtPassword;
-//    @BindView(R.id.login_fragment_txt_forgot_password)
-//    TextView loginFragmentTxtForgotPassword;
-//    @BindView(R.id.login_fragment_btn_login)
-//    Button loginFragmentBtnLogin;
-//    @BindView(R.id.login_fragment_txt_sign_up)
-//    TextView loginFragmentTxtSignUp;
-//    @BindView(R.id.login_fragment_btn_google_login)
-//    SignInButton loginFragmentBtnGoogleLogin;
+    private GoogleSignInAccount account;
+
     private Unbinder unbinder = null;
 
     //Declare an instance of FirebaseAuth
@@ -262,8 +254,11 @@ public class LoginFragment extends BaseFragment {
                             if (task.isSuccessful ( )) {
                                 // Sign in success, update UI with the signed-in user's information
                                 FirebaseUser user = mAuth.getCurrentUser ( );
-//                            assert user != null;
-//                            SaveData(getActivity (), USER_ID, user.getUid ());
+                                String[] parts = email.split("@");
+                                String nickname = parts[0];
+                                SaveData (getActivity (), USER_ID, user.getUid ());
+                                SaveData (getActivity (), USER_NAME, nickname);
+                                SaveData (getActivity (), ISLOGIN, true);
                                 startActivity (new Intent (getActivity ( ), MainActivity.class));
                                 getActivity ( ).finish ( );
                             } else {
@@ -297,7 +292,7 @@ public class LoginFragment extends BaseFragment {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent (data);
             try {
                 // Google Sign In was successful, authenticate with Firebase
-                GoogleSignInAccount account = task.getResult (ApiException.class);
+                account = task.getResult (ApiException.class);
                 Log.w (TAG, "signInWithCredential:Donnnnnnnnnnnnnnn", task.getException ( ));
                 firebaseAuthWithGoogle (account);
             } catch (ApiException e) {
@@ -328,6 +323,9 @@ public class LoginFragment extends BaseFragment {
                             // Sign in success, update UI with the signed-in user's information
 //                            Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser ( );
+                            SaveData (getActivity (), USER_ID, user.getUid ());
+                            SaveData (getActivity (), USER_NAME, account.getDisplayName ());
+                            SaveData (getActivity (), ISLOGIN, true);
                             startActivity (new Intent (getActivity ( ), MainActivity.class));
                             getActivity ( ).finish ( );
 //                            updateUI(user);

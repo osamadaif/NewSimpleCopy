@@ -104,5 +104,6 @@
     <string name="selected">selected</string>
     <string name="darkMode">Dark Mode</string>
     <string name="lightMode">Light Mode</string>
+    <string name="Name_is_exist">this name is exist</string>
 
 </resources>

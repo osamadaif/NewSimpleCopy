@@ -10,6 +10,7 @@ import com.example.simplecopy.data.local.database.dao.NotesDao;
 import com.example.simplecopy.data.model.NotesData;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class NotesRepository {
     private NotesDao notesDao;
@@ -30,8 +31,8 @@ public class NotesRepository {
         return notesDao.searchFor ("%" + query + "%");
     }
 
-    public void insert(NotesData notes){
-        new insertNumberAsyncTask (notesDao).execute (notes);
+    public long insert(NotesData notes) throws ExecutionException, InterruptedException{
+        return new insertNoteAsyncTask (notesDao).execute (notes).get ();
     }
 
 
@@ -50,17 +51,17 @@ public class NotesRepository {
 
 
 
-    private static class insertNumberAsyncTask extends AsyncTask <NotesData, Void, Void>{
+    private static class insertNoteAsyncTask extends AsyncTask <NotesData, Void, Long>{
         private NotesDao notesDao;
 
-        public insertNumberAsyncTask(NotesDao notesDao) {
+        public insertNoteAsyncTask(NotesDao notesDao) {
             this.notesDao = notesDao;
         }
 
         @Override
-        protected Void doInBackground(NotesData... notes) {
-            notesDao.insertTask (notes[0]);
-            return null;
+        protected Long doInBackground(NotesData... notes) {
+            long id = notesDao.insertTask (notes[0]);
+            return id;
         }
     }
 

@@ -1,6 +1,7 @@
 package com.example.simplecopy.adapters;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.text.Spannable;
@@ -22,10 +23,23 @@ import com.example.simplecopy.utils.AppExecutors;
 import com.example.simplecopy.R;
 import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.Numbers;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadData;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_ID;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_NAME;
+import static com.example.simplecopy.utils.Constants.DONE;
+import static com.example.simplecopy.utils.Constants.FAVORITE;
+import static com.example.simplecopy.utils.Constants.NUMBERS;
+import static com.example.simplecopy.utils.Constants.USERS;
+import static com.example.simplecopy.utils.FireStoreHelperQuery.fsUpdate;
 
 public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder> {
 
@@ -33,16 +47,20 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
 
     private List<Numbers> mNumberList;
     private Context mContext;
+    private Activity activity;
     private ItemClickListener mItemClickListener;
     public String searchString = "";
     private AppDatabase mDB;
     private SparseBooleanArray selected_items;
     private int current_selected_idx = -1;
+    private FirebaseFirestore fdb;
+    private CollectionReference numberDocuRef;
     public static boolean isBtnVisible = true;
 
 
-    public CopyAdapter(Context context, ItemClickListener listener) {
+    public CopyAdapter(Context context, Activity activity, ItemClickListener listener) {
         mContext = context;
+        this.activity = activity;
         this.mItemClickListener = listener;
         selected_items = new SparseBooleanArray ( );
     }
@@ -66,7 +84,10 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
         holder.mNumberTextView.setText (numberStr);
 
         mDB = AppDatabase.getInstance (mContext.getApplicationContext ( ));
-
+        fdb = FirebaseFirestore.getInstance ( );
+        numberDocuRef = fdb.collection (USERS)
+                .document (LoadData (activity, USER_NAME) + " " + LoadData (activity, USER_ID))
+                .collection (NUMBERS);
         // Spannable HighLight Work
         String sTitle = title.toLowerCase (Locale.getDefault ( ));
         if (sTitle.contains (searchString)) {
@@ -96,6 +117,7 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
         } else if (numbers.getFavorite ( ) == 1) {
             holder.mFavorite.setImageResource (R.drawable.ic_star);
         }
+        String uidStr = String.valueOf (mNumberList.get (position).getId ( ));
         holder.mFavorite.setOnClickListener (new View.OnClickListener ( ) {
             @Override
             public void onClick(View v) {
@@ -107,10 +129,16 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
 
                             if (numbers.getFavorite ( ) == 0) {
                                 mDB.numbersDao ( ).insertFavorite (1, mNumberList.get (position).getId ( ));
+                                Map<String, Object> favMapP = new HashMap<> ( );
+                                favMapP.put (FAVORITE , "1");
+                                fsUpdate (numberDocuRef, uidStr, favMapP);
                                 Log.d (TAG, "numbers checked ");
 
                             } else if (numbers.getFavorite ( ) == 1) {
                                 mDB.numbersDao ( ).insertFavorite (0, mNumberList.get (position).getId ( ));
+                                Map<String, Object> favMapM = new HashMap<> ( );
+                                favMapM.put (FAVORITE , "0");
+                                fsUpdate (numberDocuRef, uidStr, favMapM);
                                 Log.d (TAG, "numbers unchecked ");
                             }
                         }

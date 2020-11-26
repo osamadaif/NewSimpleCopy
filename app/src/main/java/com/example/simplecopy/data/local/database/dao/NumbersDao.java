@@ -28,7 +28,7 @@ public interface NumbersDao {
     LiveData<List<Numbers>> searchForByDaily (String searchQuery);
 
     @Insert
-    void insertTask(Numbers numbers);
+    long insertTask(Numbers numbers);
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     void updateTask(Numbers numbers);
@@ -53,4 +53,10 @@ public interface NumbersDao {
 
     @Query ("DELETE FROM numbers WHERE id IN (:ids)")
     void deleteItemByIds(List<Integer> ids);
+
+    @Query("SELECT * FROM numbers WHERE title = :userName")
+    boolean isNameExist(String userName);
+
+    @Query("SELECT * FROM numbers WHERE title = :userName")
+    int getIdAfterSave(String userName);
 }
