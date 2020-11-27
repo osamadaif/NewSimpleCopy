@@ -52,4 +52,10 @@ public class FireStoreHelperQuery {
                     }
                 });
     }
+
+    public static void fsDelete(CollectionReference collectionReference, String rowIdStr){
+        collectionReference
+                .document (rowIdStr)
+                .delete ();
+    }
 }

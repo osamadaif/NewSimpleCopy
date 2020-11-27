@@ -39,6 +39,7 @@ import static com.example.simplecopy.utils.Constants.DONE;
 import static com.example.simplecopy.utils.Constants.FAVORITE;
 import static com.example.simplecopy.utils.Constants.NUMBERS;
 import static com.example.simplecopy.utils.Constants.USERS;
+import static com.example.simplecopy.utils.FireStoreHelperQuery.fsDelete;
 import static com.example.simplecopy.utils.FireStoreHelperQuery.fsUpdate;
 
 public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder> {
@@ -228,7 +229,8 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
                 @Override
                 public void onClick(View v) {
                     if (getAdapterPosition ( ) != RecyclerView.NO_POSITION && mItemClickListener != null) {
-                        mItemClickListener.onNumberDelete (mNumberList.get (mPosition));
+                        int elementId = mNumberList.get (mPosition).getId ( );
+                        mItemClickListener.onNumberDelete (mNumberList.get (mPosition), elementId);
                     }
                 }
             });
@@ -256,12 +258,18 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
             mPosition = position;
         }
     }
-
     public interface ItemClickListener {
         void onItemClickListener(View view, Numbers numbers, int pos, int itemId);
         void onNumberEdit(int itemId);
-        void onNumberDelete(Numbers numbers);
+        void onNumberDelete(Numbers numbers, int itemId);
         void onItemLongClick(View view, Numbers numbers, int pos, int itemId);
+    }
+
+    public void deleteAllFS() {
+        for (int i = 0; i < mNumberList.size ( ) ; i++) {
+            String uidStr = String.valueOf (mNumberList.get (i).getId ());
+            fsDelete (numberDocuRef,uidStr);
+        }
     }
 
     public int getSelectedItemCount() {
@@ -275,6 +283,7 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
         }
         return items;
     }
+
 
     private void toggleCheckedIcon(CopyViewHolder holder, int position) {
         if (selected_items.get (position, false)) {

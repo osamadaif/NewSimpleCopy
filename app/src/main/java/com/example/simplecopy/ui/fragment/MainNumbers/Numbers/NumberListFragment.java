@@ -12,7 +12,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -47,13 +46,21 @@ import com.ferfalk.simplesearchview.SimpleSearchView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadData;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.SaveData;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_ID;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_NAME;
 import static com.example.simplecopy.utils.Constants.ISLOGIN;
+import static com.example.simplecopy.utils.Constants.NUMBERS;
+import static com.example.simplecopy.utils.Constants.USERS;
+import static com.example.simplecopy.utils.FireStoreHelperQuery.fsDelete;
 import static com.example.simplecopy.utils.HelperMethods.vibrate;
 
 
@@ -70,6 +77,8 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
     private FloatingActionButton fab;
     private FirebaseAuth firebaseAuth;  //FireBase auth
     private FirebaseUser user;
+    private FirebaseFirestore fdb;
+    private CollectionReference numberDocuRef;
     private SimpleSearchView searchView;
     private ActionModeCallback actionModeCallback;
     public static ActionMode actionMode;
@@ -91,6 +100,10 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         mDB = AppDatabase.getInstance (getContext ( ));
         firebaseAuth = FirebaseAuth.getInstance ( );
         user = firebaseAuth.getCurrentUser ( );
+        fdb = FirebaseFirestore.getInstance ( );
+        numberDocuRef = fdb.collection (USERS)
+                .document (LoadData (getActivity (), USER_NAME) + " " + LoadData (getActivity (), USER_ID))
+                .collection (NUMBERS);
         mainActivity =(MainActivity)this.getActivity();
         searchView = getActivity ().findViewById(R.id.searchView);
         setupViewModel ( );
@@ -190,19 +203,12 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
                     fab.hide ( );
             }
         });
-
-
     }
-
-
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate (R.menu.menu_home, menu);
         MenuItem item = menu.findItem (R.id.search);
-//        SearchView searchView = (SearchView) item.getActionView ( );
-//        searchView.setActivated (true);
-//        searchView.setQueryHint (getString (R.string.Search));
         searchView.setMenuItem(item);
         searchView.setTabLayout( mainActivity.tabLayout);
     }
@@ -266,17 +272,14 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         super.onPrepareOptionsMenu (menu);
     }
 
-
-
-
-
     private void showDeleteAllConfirmationDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder (getActivity ( ));
         builder.setMessage (R.string.delete_all_dialog_msg);
         builder.setPositiveButton (R.string.delete, new DialogInterface.OnClickListener ( ) {
             public void onClick(DialogInterface dialog, int id) {
-                // User clicked the "Delete" button, so delete the number.
+                // User clicked the "Delete All" button, so delete the All numbers.
                 mainViewModel.deleteAllNumbers ( );
+                mAdapter.deleteAllFS ();
                 Toast.makeText (getActivity ( ), getString (R.string.Deleted), Toast.LENGTH_SHORT).show ( );
             }
         });
@@ -319,7 +322,24 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         alertDialog.show ( );
     }
 
-    private void showDeleteConfirmationDialog(final Numbers numbers) {
+    @Override
+    public void onNumberEdit(int itemId) {
+        Intent intent = new Intent (getActivity ( ), NumberEditorActivity.class);
+        intent.putExtra (NumberEditorActivity.EXTRA_NUMBER_ID, itemId);
+        startActivity (intent);
+    }
+
+    @Override
+    public void onNumberDelete(Numbers numbers, int itemId) {
+        showDeleteConfirmationDialog (numbers, itemId);
+    }
+
+    public void addSomeNumber(View view) {
+        Intent intent = new Intent (getActivity ( ), NumberEditorActivity.class);
+        startActivity (intent);
+    }
+
+    private void showDeleteConfirmationDialog(final Numbers numbers, int itemId) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder (getActivity ( ));
         builder.setMessage (R.string.delete_dialog_msg);
@@ -327,9 +347,9 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked the "Delete" button, so delete the Number.
                 mainViewModel.delete (numbers);
-
+                String uidStr = String.valueOf (itemId);
+                fsDelete (numberDocuRef, uidStr);
                 Toast.makeText (getActivity ( ), getString (R.string.Deleted), Toast.LENGTH_SHORT).show ( );
-
             }
         });
         builder.setNegativeButton (R.string.cancel, new DialogInterface.OnClickListener ( ) {
@@ -344,23 +364,6 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         // Create and show the AlertDialog
         AlertDialog alertDialog = builder.create ( );
         alertDialog.show ( );
-    }
-
-    @Override
-    public void onNumberEdit(int itemId) {
-        Intent intent = new Intent (getActivity ( ), NumberEditorActivity.class);
-        intent.putExtra (NumberEditorActivity.EXTRA_NUMBER_ID, itemId);
-        startActivity (intent);
-    }
-
-    @Override
-    public void onNumberDelete(Numbers numbers) {
-        showDeleteConfirmationDialog (numbers);
-    }
-
-    public void addSomeNumber(View view) {
-        Intent intent = new Intent (getActivity ( ), NumberEditorActivity.class);
-        startActivity (intent);
     }
 
     @Override
@@ -454,6 +457,9 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         for (int x : selectedItemPositions) {
             int selectedId = mAdapter.getId (x);
             selectedItemIDs.add (selectedId);
+
+            String uidStr = String.valueOf (selectedId);
+            fsDelete (numberDocuRef, uidStr);
         }
         mAdapter.removeSelected (selectedItemIDs);
         mAdapter.notifyDataSetChanged ( );

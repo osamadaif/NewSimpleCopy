@@ -38,6 +38,7 @@ import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.US
 import static com.example.simplecopy.utils.Constants.FAVORITE;
 import static com.example.simplecopy.utils.Constants.NOTES;
 import static com.example.simplecopy.utils.Constants.USERS;
+import static com.example.simplecopy.utils.FireStoreHelperQuery.fsDelete;
 import static com.example.simplecopy.utils.FireStoreHelperQuery.fsUpdate;
 
 public class CopyNoteAdapter extends RecyclerView.Adapter<CopyNoteAdapter.CopyViewHolder> {
@@ -221,7 +222,8 @@ public class CopyNoteAdapter extends RecyclerView.Adapter<CopyNoteAdapter.CopyVi
                 public void onClick(View v) {
 
                     if (getAdapterPosition ( ) != RecyclerView.NO_POSITION && mItemClickListener != null) {
-                        mItemClickListener.onNoteDelete (mNoteList.get (mPosition));
+                        int elementId = mNoteList.get (mPosition).getId ( );
+                        mItemClickListener.onNoteDelete (mNoteList.get (mPosition), elementId);
                     }
                 }
             });
@@ -244,19 +246,23 @@ public class CopyNoteAdapter extends RecyclerView.Adapter<CopyNoteAdapter.CopyVi
                 }
             });
         }
-
-
         public void setPosition(int position) {
             mPosition = position;
         }
-
     }
 
     public interface ItemClickListener {
         void onItemClickListener(View view, NotesData notesData, int pos, int itemId);
         void onNoteEdit(int itemId);
-        void onNoteDelete(NotesData notesData);
+        void onNoteDelete(NotesData notesData, int itemId);
         void onItemLongClick(View view, NotesData notesData, int pos, int itemId);
+    }
+
+    public void deleteAllFS() {
+        for (int i = 0; i < mNoteList.size ( ) ; i++) {
+            String uidStr = String.valueOf (mNoteList.get (i).getId ());
+            fsDelete (noteDocRef,uidStr);
+        }
     }
 
     public int getSelectedItemCount() {

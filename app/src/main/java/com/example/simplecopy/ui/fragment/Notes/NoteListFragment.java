@@ -45,14 +45,22 @@ import com.ferfalk.simplesearchview.SimpleSearchView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import static com.example.simplecopy.adapters.CopyNoteAdapter.isBtnVisible;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadData;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.SaveData;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_ID;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_NAME;
 import static com.example.simplecopy.utils.Constants.ISLOGIN;
+import static com.example.simplecopy.utils.Constants.NOTES;
+import static com.example.simplecopy.utils.Constants.USERS;
+import static com.example.simplecopy.utils.FireStoreHelperQuery.fsDelete;
 import static com.example.simplecopy.utils.HelperMethods.vibrate;
 
 
@@ -64,6 +72,8 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
     private CopyNoteAdapter mAdapter;
     private NotesViewModel mainViewModel;
     private AppDatabase mDB;
+    private FirebaseFirestore fdb;
+    private CollectionReference noteDocuRef;
     private MainActivity mainActivity;
 
     View mEmptyView;
@@ -95,6 +105,10 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         mDB = AppDatabase.getInstance (getContext ( ));
         firebaseAuth = FirebaseAuth.getInstance ( );
         user = firebaseAuth.getCurrentUser ( );
+        fdb = FirebaseFirestore.getInstance ( );
+        noteDocuRef = fdb.collection (USERS)
+                .document (LoadData (getActivity (), USER_NAME) + " " + LoadData (getActivity (), USER_ID))
+                .collection (NOTES);
         mainActivity =(MainActivity)this.getActivity();
         searchView = getActivity ().findViewById(R.id.searchView);
         setupViewModel ( );
@@ -202,9 +216,6 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate (R.menu.menu_home, menu);
         MenuItem item = menu.findItem (R.id.search);
-//        SearchView searchView = (SearchView) item.getActionView ( );
-//        searchView.setActivated (true);
-//        searchView.setQueryHint (getString (R.string.Search));
         searchView.setMenuItem(item);
         searchView.setTabLayout( mainActivity.tabLayout);
     }
@@ -275,6 +286,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked the "Delete" button, so delete the number.
                 mainViewModel.deleteAllNumbers ( );
+                mAdapter.deleteAllFS ();
                 Toast.makeText (getActivity ( ), getString (R.string.Deleted), Toast.LENGTH_SHORT).show ( );
             }
         });
@@ -317,7 +329,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         alertDialog.show ( );
     }
 
-    private void showDeleteConfirmationDialog(final NotesData notesData) {
+    private void showDeleteConfirmationDialog(final NotesData notesData, int itemId) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder (getActivity ( ));
         builder.setMessage (R.string.delete_note_dialog_msg);
@@ -325,7 +337,8 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked the "Delete" button, so delete the Number.
                 mainViewModel.delete (notesData);
-
+                String uidStr = String.valueOf (itemId);
+                fsDelete (noteDocuRef, uidStr);
                 Toast.makeText (getActivity ( ), getString (R.string.Deleted), Toast.LENGTH_SHORT).show ( );
 
             }
@@ -357,8 +370,8 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
     }
 
     @Override
-    public void onNoteDelete(NotesData notesData) {
-        showDeleteConfirmationDialog (notesData);
+    public void onNoteDelete(NotesData notesData, int itemId) {
+        showDeleteConfirmationDialog (notesData, itemId);
 
     }
 
