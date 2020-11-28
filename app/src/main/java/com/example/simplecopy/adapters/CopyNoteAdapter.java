@@ -19,11 +19,15 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.simplecopy.data.model.Numbers;
 import com.example.simplecopy.utils.AppExecutors;
 import com.example.simplecopy.R;
 import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.NotesData;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -35,10 +39,21 @@ import java.util.Map;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadData;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_ID;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_NAME;
+import static com.example.simplecopy.utils.Constants.DAILY;
+import static com.example.simplecopy.utils.Constants.DONE;
 import static com.example.simplecopy.utils.Constants.FAVORITE;
+import static com.example.simplecopy.utils.Constants.FAVORITE_NOTE;
+import static com.example.simplecopy.utils.Constants.NOTE;
 import static com.example.simplecopy.utils.Constants.NOTES;
+import static com.example.simplecopy.utils.Constants.NOTE_NOTE;
+import static com.example.simplecopy.utils.Constants.NUMBER;
+import static com.example.simplecopy.utils.Constants.TITLE;
+import static com.example.simplecopy.utils.Constants.TITLE_NOTE;
+import static com.example.simplecopy.utils.Constants.UID;
+import static com.example.simplecopy.utils.Constants.UID_NOTE;
 import static com.example.simplecopy.utils.Constants.USERS;
 import static com.example.simplecopy.utils.FireStoreHelperQuery.fsDelete;
+import static com.example.simplecopy.utils.FireStoreHelperQuery.fsInsert;
 import static com.example.simplecopy.utils.FireStoreHelperQuery.fsUpdate;
 
 public class CopyNoteAdapter extends RecyclerView.Adapter<CopyNoteAdapter.CopyViewHolder> {
@@ -256,6 +271,52 @@ public class CopyNoteAdapter extends RecyclerView.Adapter<CopyNoteAdapter.CopyVi
         void onNoteEdit(int itemId);
         void onNoteDelete(NotesData notesData, int itemId);
         void onItemLongClick(View view, NotesData notesData, int pos, int itemId);
+    }
+
+    public void insertAllIntoFireStore() {
+        if (mNoteList.size ( ) != 0) {
+            for (int i = 0; i < mNoteList.size ( ); i++) {
+                String uidStr = String.valueOf (mNoteList.get (i).getId ( ));
+                NotesData notesData = mNoteList.get (i);
+                Map<String, Object> notesMap = new HashMap<> ( );
+                notesMap.put (UID_NOTE, notesData.getId ( ));
+                notesMap.put (TITLE_NOTE, notesData.getTitle ( ));
+                notesMap.put (NOTE_NOTE, notesData.getNote ( ));
+                notesMap.put (FAVORITE_NOTE, String.valueOf (notesData.getFavorite ( )));
+                fsInsert (noteDocRef, uidStr, notesMap);
+            }
+        }
+    }
+
+    public void syncDataWithFireStore() {
+        if (mNoteList.size ( ) != 0) {
+            for (int i = 0; i < mNoteList.size ( ); i++) {
+                String uidStr = String.valueOf (mNoteList.get (i).getId ( ));
+                NotesData notesData = mNoteList.get (i);
+                noteDocRef.document (uidStr).get ( ).addOnCompleteListener (new OnCompleteListener<DocumentSnapshot> ( ) {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful ( )) {
+                            DocumentSnapshot document = task.getResult ( );
+                            if (document.exists ( )) {
+                                Log.d (TAG, "Document exists!");
+                            } else {
+                                Log.d (TAG, "Document does not exist!");
+                                Map<String, Object> notesMap = new HashMap<> ( );
+                                notesMap.put (UID_NOTE, notesData.getId ( ));
+                                notesMap.put (TITLE_NOTE, notesData.getTitle ( ));
+                                notesMap.put (NOTE_NOTE, notesData.getNote ( ));
+                                notesMap.put (FAVORITE_NOTE, String.valueOf (notesData.getFavorite ( )));
+                                fsInsert (noteDocRef, uidStr, notesMap);
+                            }
+                        } else {
+                            Log.d (TAG, "Failed with: ", task.getException ( ));
+                        }
+                    }
+                });
+
+            }
+        }
     }
 
     public void deleteAllFS() {

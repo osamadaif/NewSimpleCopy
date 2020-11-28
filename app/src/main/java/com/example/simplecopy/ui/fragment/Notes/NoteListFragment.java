@@ -8,8 +8,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,7 +26,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -39,47 +41,69 @@ import com.example.simplecopy.data.model.NotesData;
 import com.example.simplecopy.ui.activity.MainActivity;
 import com.example.simplecopy.ui.activity.NoteEditor.NoteEditorActivity;
 import com.example.simplecopy.ui.activity.user.UserActivity;
+import com.example.simplecopy.utils.AppExecutors;
 import com.example.simplecopy.utils.HelperMethods;
 import com.example.simplecopy.utils.ThemeHelper;
 import com.ferfalk.simplesearchview.SimpleSearchView;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import static com.example.simplecopy.adapters.CopyNoteAdapter.isBtnVisible;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadBoolean;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadData;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.SaveData;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_ID;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_NAME;
+import static com.example.simplecopy.utils.Constants.DONE_METHODE;
+import static com.example.simplecopy.utils.Constants.FAVORITE_NOTE;
+import static com.example.simplecopy.utils.Constants.ISFIRST;
 import static com.example.simplecopy.utils.Constants.ISLOGIN;
 import static com.example.simplecopy.utils.Constants.NOTES;
+import static com.example.simplecopy.utils.Constants.NOTE_NOTE;
+import static com.example.simplecopy.utils.Constants.TITLE_NOTE;
+import static com.example.simplecopy.utils.Constants.UID;
+import static com.example.simplecopy.utils.Constants.UID_NOTE;
 import static com.example.simplecopy.utils.Constants.USERS;
 import static com.example.simplecopy.utils.FireStoreHelperQuery.fsDelete;
+import static com.example.simplecopy.utils.HelperMethods.dismissProgressDialog;
+import static com.example.simplecopy.utils.HelperMethods.isConnected;
+import static com.example.simplecopy.utils.HelperMethods.progressDialog;
+import static com.example.simplecopy.utils.HelperMethods.showProgressDialog;
 import static com.example.simplecopy.utils.HelperMethods.vibrate;
 
 
 public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemClickListener {
     View view;
+    private static final String TAG = "NoteListFragment";
 
     // Member variables for the adapter and RecyclerView
     private RecyclerView mNumbersList;
     private CopyNoteAdapter mAdapter;
-    private NotesViewModel mainViewModel;
+    private NotesData notesData;
+    public NotesViewModel notesViewModel;
     private AppDatabase mDB;
-    private FirebaseFirestore fdb;
-    private CollectionReference noteDocuRef;
+    public FirebaseFirestore fdb;
+    public CollectionReference noteDocuRef;
     private MainActivity mainActivity;
 
     View mEmptyView;
     Button empty_btn;
 
     private boolean enableMenuItemNote;
+    private boolean enableSyncMenuItemNote;
 
     private FloatingActionButton fab;
     //FireBase auth
@@ -101,16 +125,16 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         view = inflater.inflate (R.layout.copy_notes_fragment, container, false);
         fab = getActivity ( ).findViewById (R.id.fab);
         setUpRecycleView ( );
-        mainViewModel = new ViewModelProvider (this).get (NotesViewModel.class);
+        notesViewModel = new ViewModelProvider (this).get (NotesViewModel.class);
         mDB = AppDatabase.getInstance (getContext ( ));
         firebaseAuth = FirebaseAuth.getInstance ( );
         user = firebaseAuth.getCurrentUser ( );
         fdb = FirebaseFirestore.getInstance ( );
         noteDocuRef = fdb.collection (USERS)
-                .document (LoadData (getActivity (), USER_NAME) + " " + LoadData (getActivity (), USER_ID))
+                .document (LoadData (getActivity ( ), USER_NAME) + " " + LoadData (getActivity ( ), USER_ID))
                 .collection (NOTES);
-        mainActivity =(MainActivity)this.getActivity();
-        searchView = getActivity ().findViewById(R.id.searchView);
+        mainActivity = (MainActivity) this.getActivity ( );
+        searchView = getActivity ( ).findViewById (R.id.searchView);
         setupViewModel ( );
         actionModeCallback = new ActionModeCallback ( );
         empty_btn = view.findViewById (R.id.btn_empty_note);
@@ -134,13 +158,25 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
                     mEmptyView.setVisibility (View.GONE);
                     mAdapter.setItems (notesDataList1);
                     enableMenuItemNote = true;
+                    enableSyncMenuItemNote = true;
+
+                    if (isConnected (getContext ( )) && LoadBoolean (getActivity ( ), ISLOGIN) && LoadBoolean (getActivity ( ), ISFIRST)) {
+                        saveDataIntoFireStore ();
+                    }
                 } else {
+                    if (isConnected (getContext ( )) && LoadBoolean (getActivity ( ), ISLOGIN) && LoadBoolean (getActivity ( ), ISFIRST)) {
+                        Log.d (TAG, "onChanged: is loaddddddddddd");
+                        getDataFromFireStore ( );
+                    } else {
+                        Log.d (TAG, "onChanged: nooooot");
+                    }
                     mNumbersList.setVisibility (View.GONE);
-                    if (mAdapter.getItemCount () == 0){
+                    if (mAdapter.getItemCount ( ) == 0) {
                         mEmptyView.setVisibility (View.VISIBLE);
                     } else {
                         mEmptyView.setVisibility (View.GONE);
                     }
+                    enableSyncMenuItemNote = false;
                     enableMenuItemNote = false;
                 }
             }
@@ -148,26 +184,23 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
 
         //first time set an empty value to get all data
         viewModel.filterTextAll.setValue ("");
-        searchView.getSearchEditText ().addTextChangedListener (new TextWatcher ( ) {
+        searchView.getSearchEditText ( ).addTextChangedListener (new TextWatcher ( ) {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                viewModel.setFilter (s.toString());
-                mAdapter.searchString = s.toString ();
-
+                viewModel.setFilter (s.toString ( ));
+                mAdapter.searchString = s.toString ( );
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                viewModel.setFilter (s.toString());
-                mAdapter.searchString = s.toString ();
+                viewModel.setFilter (s.toString ( ));
+                mAdapter.searchString = s.toString ( );
             }
         });
-
     }
 
     @Override
@@ -190,7 +223,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         mNumbersList.setItemAnimator (new DefaultItemAnimator ( ));
         //mNumbersList.showIfEmpty(mEmptyView);
         mNumbersList.setHasFixedSize (true);
-        mAdapter = new CopyNoteAdapter (getActivity ( ), getActivity (), this);
+        mAdapter = new CopyNoteAdapter (getActivity ( ), getActivity ( ), this);
         mAdapter.setHasStableIds (true);
         mNumbersList.setAdapter (mAdapter);
         mNumbersList.addOnScrollListener (new RecyclerView.OnScrollListener ( ) {
@@ -207,45 +240,140 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
                     fab.hide ( );
             }
         });
-
     }
 
+    public void saveDataIntoFireStore(){
+        noteDocuRef.get ( ).addOnCompleteListener (new OnCompleteListener<QuerySnapshot> ( ) {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful ( )) {
+                    if (task.getResult ( ).size ( ) > 0) {
+                        Log.d (TAG, "Collection already exists");
+                        noteDocuRef.addSnapshotListener (new EventListener<QuerySnapshot> ( ) {
+                            @Override
+                            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
+                                if (queryDocumentSnapshots.isEmpty ( )) {
+                                    mAdapter.insertAllIntoFireStore ( );
+                                }
+                            }
+                        });
+
+                    } else {
+                        Log.d (TAG, "Collection doesn't exist create a new Collection");
+                        mAdapter.insertAllIntoFireStore ( );
+                    }
+                } else {
+                    Log.d (TAG, "Error getting documents: ", task.getException ( ));
+                }
+            }
+        });
+    }
+
+    public void getDataFromFireStore() {
+        noteDocuRef
+                .addSnapshotListener (new EventListener<QuerySnapshot> ( ) {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                        Log.d (TAG, "onEvent:getDataFromFireStore");
+                        if (!queryDocumentSnapshots.isEmpty ( )) {
+                            Log.d (TAG, "onEvent: is noot empty");
+                            for (QueryDocumentSnapshot snapshot : queryDocumentSnapshots) {
+                                AppExecutors.getInstance ( ).diskIO ( ).execute (new Runnable ( ) {
+                                    @Override
+                                    public void run() {
+                                        if (mDB.NotesDao () != null) {
+                                            Log.d (TAG, "run: notes Dao nooot null");
+                                            if (mDB.NotesDao ( ).isIdExist (Integer.parseInt (String.valueOf (snapshot.get (UID_NOTE)))) && LoadBoolean (getActivity ( ), ISFIRST)) {
+                                                Log.d (TAG, "run: ids the saaame and IsFirst");
+                                                AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
+                                                    @Override
+                                                    public void run() {
+                                                        notesData = new NotesData (1000 + Integer.parseInt (String.valueOf (snapshot.get (UID_NOTE))),
+                                                                snapshot.getString (TITLE_NOTE),
+                                                                snapshot.getString (NOTE_NOTE), Integer.parseInt (String.valueOf (snapshot.get (FAVORITE_NOTE))));
+                                                        notesViewModel.insertt (notesData);
+                                                    }
+                                                });
+                                            } else if (mDB.NotesDao ( ).isIdExist (Integer.parseInt (String.valueOf (snapshot.get (UID_NOTE))))) {
+                                                Log.d (TAG, "run: ids the saaame but not First");
+                                                return;
+                                            } else if (LoadBoolean (getActivity ( ), ISFIRST)){
+                                                Log.d (TAG, "run: is Firrrst");
+                                                AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
+                                                    @Override
+                                                    public void run() {
+                                                        notesData = new NotesData (Integer.parseInt (String.valueOf (snapshot.get (UID_NOTE))),
+                                                                snapshot.getString (TITLE_NOTE),
+                                                                snapshot.getString (NOTE_NOTE), Integer.parseInt (String.valueOf (snapshot.get (FAVORITE_NOTE))));
+                                                        notesViewModel.insertt (notesData);
+                                                    }
+                                                });
+
+                                            } else {
+                                                Log.d (TAG, "run: not first and ids not the same");
+                                                return;
+                                            }
+                                        } else {
+                                            Log.d (TAG, "run: is emptyyyyy");
+                                            AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
+                                                @Override
+                                                public void run() {
+                                                    notesData = new NotesData (Integer.parseInt (String.valueOf (snapshot.get (UID_NOTE))),
+                                                            snapshot.getString (TITLE_NOTE),
+                                                            snapshot.getString (NOTE_NOTE), Integer.parseInt (String.valueOf (snapshot.get (FAVORITE_NOTE))));
+                                                    notesViewModel.insertt (notesData);
+                                                }
+                                            });
+
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
+    }
 
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate (R.menu.menu_home, menu);
         MenuItem item = menu.findItem (R.id.search);
-        searchView.setMenuItem(item);
-        searchView.setTabLayout( mainActivity.tabLayout);
+        searchView.setMenuItem (item);
+        searchView.setTabLayout (mainActivity.tabLayout);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId ( )) {
+            case R.id.sync:
+                if (isConnected (getContext ())) {
+                    syncNumberData ( );
+                }
+                break;
 
             case R.id.deletall:
                 // delete all data
                 showDeleteAllConfirmationDialog ( );
                 break;
             case R.id.lang:
-                HelperMethods.showSelectLanguageDialog (getActivity (), getContext ());
+                HelperMethods.showSelectLanguageDialog (getActivity ( ), getContext ( ));
                 break;
             case R.id.darkMode:
-                if (AppCompatDelegate.getDefaultNightMode () == AppCompatDelegate.MODE_NIGHT_YES){
-                    SharedPreferencesManger.SaveThemePref (false, getActivity ());
+                if (AppCompatDelegate.getDefaultNightMode ( ) == AppCompatDelegate.MODE_NIGHT_YES) {
+                    SharedPreferencesManger.SaveThemePref (false, getActivity ( ));
                     ThemeHelper.applyTheme (false);
                 } else {
-                    SharedPreferencesManger.SaveThemePref (true, getActivity ());
+                    SharedPreferencesManger.SaveThemePref (true, getActivity ( ));
                     ThemeHelper.applyTheme (true);
                 }
-                restartApp ();
+                restartApp ( );
                 break;
             case R.id.logout:
                 if (user != null) {
                     showLogoutDialog ( );
                 } else {
-                    SaveData (getActivity (), ISLOGIN, false);
+                    SaveData (getActivity ( ), ISLOGIN, false);
                     startActivity (new Intent (getActivity ( ), UserActivity.class));
                 }
                 return true;
@@ -262,8 +390,15 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
             item.setTitle (getResources ( ).getString (R.string.login));
         }
 
+        MenuItem syncItem = menu.findItem (R.id.sync);
+        if (enableSyncMenuItemNote) {
+            syncItem.setEnabled (true);
+        } else {
+            syncItem.setEnabled (false);
+        }
+
         MenuItem darkModeItem = menu.findItem (R.id.darkMode);
-        if (AppCompatDelegate.getDefaultNightMode () == AppCompatDelegate.MODE_NIGHT_YES) {
+        if (AppCompatDelegate.getDefaultNightMode ( ) == AppCompatDelegate.MODE_NIGHT_YES) {
             darkModeItem.setTitle (getResources ( ).getString (R.string.lightMode));
         } else {
             darkModeItem.setTitle (getResources ( ).getString (R.string.darkMode));
@@ -271,12 +406,72 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
 
         MenuItem deleteAllItemNote = menu.findItem (R.id.deletall);
         if (enableMenuItemNote) {
-            deleteAllItemNote.setEnabled(true);
+            deleteAllItemNote.setEnabled (true);
         } else {
             // disabled
-            deleteAllItemNote.setEnabled(false);
+            deleteAllItemNote.setEnabled (false);
         }
         super.onPrepareOptionsMenu (menu);
+    }
+
+    private void syncNumberData() {
+        if (progressDialog == null) {
+            showProgressDialog (getActivity ( ), getResources ( ).getString (R.string.sync));
+        } else {
+            if (!progressDialog.isShowing ( )) {
+                showProgressDialog (getActivity ( ), getResources ( ).getString (R.string.sync));
+            }
+        }
+        mAdapter.syncDataWithFireStore ( );
+        syncDataWithRoom ( );
+        final Handler handler = new Handler (Looper.getMainLooper ( ));
+        handler.postDelayed (new Runnable ( ) {
+            @Override
+            public void run() {
+                //Do something after 1000ms
+                dismissProgressDialog ( );
+            }
+        }, 1000);
+    }
+
+    private void syncDataWithRoom ( ){
+        noteDocuRef
+                .addSnapshotListener (new EventListener<QuerySnapshot> ( ) {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                        Log.d (TAG, "syncOnEvent:getDataFromFireStore");
+                        if (!queryDocumentSnapshots.isEmpty ( )) {
+                            Log.d (TAG, "syncOnEvent: is noot empty");
+                            for (QueryDocumentSnapshot snapshot : queryDocumentSnapshots) {
+                                AppExecutors.getInstance ( ).diskIO ( ).execute (new Runnable ( ) {
+                                    @Override
+                                    public void run() {
+                                        if (mDB.NotesDao () != null) {
+                                            Log.d (TAG, "syncRun: notes Dao nooot null");
+                                            if (mDB.NotesDao ( ).isIdExist (Integer.parseInt (String.valueOf (snapshot.get (UID_NOTE))))) {
+                                                return;
+                                            }else {
+                                                Log.d (TAG, "syncRun: not first and ids not the same");
+                                                AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
+                                                    @Override
+                                                    public void run() {
+                                                        notesData = new NotesData (Integer.parseInt (String.valueOf (snapshot.get (UID_NOTE))),
+                                                                snapshot.getString (TITLE_NOTE),
+                                                                snapshot.getString (NOTE_NOTE), Integer.parseInt (String.valueOf (snapshot.get (FAVORITE_NOTE))));
+                                                        notesViewModel.insertt (notesData);
+                                                    }
+                                                });
+                                            }
+                                        } else {
+                                            Log.d (TAG, "syncRun: is emptyyyyy");
+
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
     }
 
     private void showDeleteAllConfirmationDialog() {
@@ -285,8 +480,8 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         builder.setPositiveButton (R.string.delete, new DialogInterface.OnClickListener ( ) {
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked the "Delete" button, so delete the number.
-                mainViewModel.deleteAllNumbers ( );
-                mAdapter.deleteAllFS ();
+                notesViewModel.deleteAllNumbers ( );
+                mAdapter.deleteAllFS ( );
                 Toast.makeText (getActivity ( ), getString (R.string.Deleted), Toast.LENGTH_SHORT).show ( );
             }
         });
@@ -310,7 +505,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         builder.setPositiveButton (R.string.logout, new DialogInterface.OnClickListener ( ) {
             public void onClick(DialogInterface dialog, int id) {
                 firebaseAuth.signOut ( );
-                SaveData (getActivity (), ISLOGIN, false);
+                SaveData (getActivity ( ), ISLOGIN, false);
                 startActivity (new Intent (getActivity ( ), UserActivity.class));
                 getActivity ( ).finish ( );
             }
@@ -323,7 +518,6 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
                 }
             }
         });
-
         // Create and show the AlertDialog
         AlertDialog alertDialog = builder.create ( );
         alertDialog.show ( );
@@ -336,7 +530,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         builder.setPositiveButton (R.string.delete, new DialogInterface.OnClickListener ( ) {
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked the "Delete" button, so delete the Number.
-                mainViewModel.delete (notesData);
+                notesViewModel.delete (notesData);
                 String uidStr = String.valueOf (itemId);
                 fsDelete (noteDocuRef, uidStr);
                 Toast.makeText (getActivity ( ), getString (R.string.Deleted), Toast.LENGTH_SHORT).show ( );
@@ -422,9 +616,9 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
 //            HelperMethods.setSystemBarColor (getActivity ( ), R.color.colorPrimaryLight);
             isBtnVisible = false;
-            mAdapter.notifyDataSetChanged ();
-            if (fab.isShown ()){
-                fab.hide ();
+            mAdapter.notifyDataSetChanged ( );
+            if (fab.isShown ( )) {
+                fab.hide ( );
             }
 
             mode.getMenuInflater ( ).inflate (R.menu.menu_delete, menu);
@@ -452,9 +646,9 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
             mAdapter.clearSelections ( );
             actionMode.finish ( );
             isBtnVisible = true;
-            mAdapter.notifyDataSetChanged ();
-            if (!fab.isShown ()){
-                fab.show ();
+            mAdapter.notifyDataSetChanged ( );
+            if (!fab.isShown ( )) {
+                fab.show ( );
             }
             actionMode = null;
 //            HelperMethods.setSystemBarColor (getActivity ( ), R.color.colorPrimaryDark);
@@ -495,8 +689,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         alertDialog.show ( );
     }
 
-    public void restartApp()
-    {
-        getActivity ().recreate ();
+    public void restartApp() {
+        getActivity ( ).recreate ( );
     }
 }

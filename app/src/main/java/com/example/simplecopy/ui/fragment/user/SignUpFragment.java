@@ -33,6 +33,7 @@ import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.RE
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.SaveData;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_ID;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_NAME;
+import static com.example.simplecopy.utils.Constants.ISFIRST;
 import static com.example.simplecopy.utils.Constants.ISLOGIN;
 import static com.example.simplecopy.utils.HelperMethods.isConnected;
 import static com.example.simplecopy.utils.HelperMethods.progressDialog;
@@ -143,6 +144,7 @@ public class SignUpFragment extends BaseFragment {
                                 SaveData (getActivity (), USER_ID, user.getUid ());
                                 SaveData (getActivity (), USER_NAME, nickname);
                                 SaveData (getActivity (), ISLOGIN, true);
+                                SaveData (getActivity (), ISFIRST, true);
                                 Toast.makeText (getActivity (), getResources ().getString (R.string.registered)+ "\n"+ user.getEmail (), Toast.LENGTH_SHORT).show ();
                                 startActivity (new Intent (getActivity (), MainActivity.class));
                                 getActivity ().finish ();

@@ -19,8 +19,11 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -40,40 +43,66 @@ import com.example.simplecopy.adapters.CopyAdapter;
 import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.Numbers;
 import com.example.simplecopy.ui.activity.NumberEditor.NumberEditorActivity;
+import com.example.simplecopy.utils.AppExecutors;
+import com.example.simplecopy.utils.DataLoadCallback;
 import com.example.simplecopy.utils.HelperMethods;
 import com.example.simplecopy.utils.ThemeHelper;
 import com.ferfalk.simplesearchview.SimpleSearchView;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadBoolean;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadData;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.SaveData;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_ID;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_NAME;
+import static com.example.simplecopy.utils.Constants.DAILY;
+import static com.example.simplecopy.utils.Constants.DONE;
+import static com.example.simplecopy.utils.Constants.FAVORITE;
+import static com.example.simplecopy.utils.Constants.ISFIRST;
 import static com.example.simplecopy.utils.Constants.ISLOGIN;
+import static com.example.simplecopy.utils.Constants.NOTE;
+import static com.example.simplecopy.utils.Constants.NUMBER;
 import static com.example.simplecopy.utils.Constants.NUMBERS;
+import static com.example.simplecopy.utils.Constants.TITLE;
+import static com.example.simplecopy.utils.Constants.UID;
 import static com.example.simplecopy.utils.Constants.USERS;
 import static com.example.simplecopy.utils.FireStoreHelperQuery.fsDelete;
+import static com.example.simplecopy.utils.HelperMethods.dismissProgressDialog;
+import static com.example.simplecopy.utils.HelperMethods.isConnected;
+import static com.example.simplecopy.utils.HelperMethods.progressDialog;
+import static com.example.simplecopy.utils.HelperMethods.replaceFragment;
+import static com.example.simplecopy.utils.HelperMethods.showProgressDialog;
 import static com.example.simplecopy.utils.HelperMethods.vibrate;
 
 
-public class NumberListFragment extends Fragment implements CopyAdapter.ItemClickListener {
+public class NumberListFragment extends Fragment implements CopyAdapter.ItemClickListener, DataLoadCallback {
     View view;
+    private static final String TAG = "NumberListFragment";
 
     // Member variables for the adapter and RecyclerView
     private RecyclerView mNumbersList;
     private CopyAdapter mAdapter;
+    private Numbers numbers;
     private MainViewModel mainViewModel;
     private AppDatabase mDB;
     private MainActivity mainActivity;
     private boolean enableMenuItem;
+    private boolean enableSyncMenuItem;
     private FloatingActionButton fab;
     private FirebaseAuth firebaseAuth;  //FireBase auth
     private FirebaseUser user;
@@ -96,16 +125,18 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         view = inflater.inflate (R.layout.fragment_copy_number_list, container, false);
         fab = Objects.requireNonNull (getActivity ( )).findViewById (R.id.fab);
         setUpRecycleView ( );
+
         mainViewModel = new ViewModelProvider (this).get (MainViewModel.class);
+        mainActivity = (MainActivity) this.getActivity ( );
         mDB = AppDatabase.getInstance (getContext ( ));
         firebaseAuth = FirebaseAuth.getInstance ( );
         user = firebaseAuth.getCurrentUser ( );
         fdb = FirebaseFirestore.getInstance ( );
         numberDocuRef = fdb.collection (USERS)
-                .document (LoadData (getActivity (), USER_NAME) + " " + LoadData (getActivity (), USER_ID))
+                .document (LoadData (getActivity ( ), USER_NAME) + " " + LoadData (getActivity ( ), USER_ID))
                 .collection (NUMBERS);
-        mainActivity =(MainActivity)this.getActivity();
-        searchView = getActivity ().findViewById(R.id.searchView);
+
+        searchView = getActivity ( ).findViewById (R.id.searchView);
         setupViewModel ( );
         actionModeCallback = new ActionModeCallback ( );
         empty_btn = view.findViewById (R.id.btn_empty_title);
@@ -120,50 +151,72 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
 
     private void setupViewModel() {
         MainViewModel viewModel = new ViewModelProvider (this).get (MainViewModel.class);
-        viewModel.getsearchQueryForNumber ( ).observe (getViewLifecycleOwner ( ), new Observer<List<Numbers>> ( ) {
+        viewModel.getSearchQueryForNumber ( ).observe (getViewLifecycleOwner ( ), new Observer<List<Numbers>> ( ) {
             @Override
             public void onChanged(List<Numbers> numbersList1) {
-                if (numbersList1.isEmpty ( ) ) {
+                if (numbersList1.isEmpty ( )) {
+                    Log.d (TAG, "onChanged: is emptyyyyyy");
                     mNumbersList.setVisibility (View.GONE);
+                    if (isConnected (getContext ( )) && LoadBoolean (getActivity ( ), ISLOGIN) && LoadBoolean (getActivity ( ), ISFIRST)) {
+                        Log.d (TAG, "onChanged: is Connnnnnected");
+                        numberDocuRef.addSnapshotListener (new EventListener<QuerySnapshot> ( ) {
+                            @Override
+                            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                                if (!value.isEmpty ( )) {
+                                    Log.d (TAG, "onEvent: siiiize noooo 0000");
+                                    startLoading ( );
+//                                    showRetrieveDataFromFSDialog ( );
+                                    getAllDataFromFireStore ( );
+                                }
+                                Log.d (TAG, "onEvent: siiiiiize 0000");
+                            }
+                        });
 
-                    if (mAdapter.getItemCount () == 0){
+                    }
+
+                    if (mAdapter.getItemCount ( ) == 0) {
                         mEmptyView.setVisibility (View.VISIBLE);
                     } else {
                         mEmptyView.setVisibility (View.GONE);
                     }
                     enableMenuItem = false;
+                    enableSyncMenuItem = false;
 
                 } else {
                     mNumbersList.setVisibility (View.VISIBLE);
                     mEmptyView.setVisibility (View.GONE);
                     mAdapter.setItems (numbersList1);
                     enableMenuItem = true;
-                }
+                    enableSyncMenuItem = true;
+                    if (isConnected (getContext ( )) && LoadBoolean (getActivity ( ), ISLOGIN) && LoadBoolean (getActivity ( ), ISFIRST)) {
 
+
+                    }
+                }
             }
         });
 
         //first time set an empty value to get all data
         viewModel.filterTextAll.setValue ("");
-        searchView.getSearchEditText ().addTextChangedListener (new TextWatcher ( ) {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        searchView.getSearchEditText ( ).
 
-            }
+                addTextChangedListener (new TextWatcher ( ) {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                viewModel.setFilter (s.toString());
-                mAdapter.searchString = s.toString ();
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        viewModel.setFilter (s.toString ( ));
+                        mAdapter.searchString = s.toString ( );
+                    }
 
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                viewModel.setFilter (s.toString());
-                mAdapter.searchString = s.toString ();
-            }
-        });
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        viewModel.setFilter (s.toString ( ));
+                        mAdapter.searchString = s.toString ( );
+                    }
+                });
 
     }
 
@@ -186,7 +239,7 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         mNumbersList.setItemAnimator (new DefaultItemAnimator ( ));
         //mNumbersList.showIfEmpty(mEmptyView);
         mNumbersList.setHasFixedSize (true);
-        mAdapter = new CopyAdapter (getActivity ( ), getActivity (), this);
+        mAdapter = new CopyAdapter (getActivity ( ), getActivity ( ), this);
         mAdapter.setHasStableIds (true);
         mNumbersList.setAdapter (mAdapter);
         mNumbersList.addOnScrollListener (new RecyclerView.OnScrollListener ( ) {
@@ -205,40 +258,121 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         });
     }
 
+    public void saveDataIntoFireStore() {
+        numberDocuRef.get ( ).addOnCompleteListener (new OnCompleteListener<QuerySnapshot> ( ) {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful ( )) {
+                    if (task.getResult ( ).size ( ) > 0) {
+                        Log.d (TAG, "Collection already exists");
+
+                        numberDocuRef.addSnapshotListener (new EventListener<QuerySnapshot> ( ) {
+                            @Override
+                            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
+                                if (queryDocumentSnapshots.isEmpty ( )) {
+                                    mAdapter.insertAllIntoFireStore ( );
+                                    SaveData (getActivity ( ), ISFIRST, false);
+                                }
+                            }
+                        });
+                    } else {
+                        Log.d (TAG, "Collection doesn't exist create a new Collection");
+                        mAdapter.insertAllIntoFireStore ( );
+                        SaveData (getActivity ( ), ISFIRST, false);
+                    }
+                } else {
+                    Log.d (TAG, "Error getting documents: ", task.getException ( ));
+                }
+            }
+        });
+    }
+
+    public void getAllDataFromFireStore() {
+        numberDocuRef
+                .addSnapshotListener (new EventListener<QuerySnapshot> ( ) {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                        if (!queryDocumentSnapshots.isEmpty ( )) {
+                            for (QueryDocumentSnapshot snapshot : queryDocumentSnapshots) {
+                                AppExecutors.getInstance ( ).diskIO ( ).execute (new Runnable ( ) {
+                                    @Override
+                                    public void run() {
+                                        if (mDB.numbersDao ( ).isIdExist (Integer.parseInt (String.valueOf (snapshot.get (UID)))) && LoadBoolean (getActivity ( ), ISFIRST)) {
+                                            AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
+                                                @Override
+                                                public void run() {
+                                                    numbers = new Numbers (1000 + Integer.parseInt (String.valueOf (snapshot.get (UID))),
+                                                            snapshot.getString (TITLE), snapshot.getString (NUMBER),
+                                                            snapshot.getString (NOTE), Integer.parseInt (String.valueOf (snapshot.get (FAVORITE))),
+                                                            Integer.parseInt (String.valueOf (snapshot.get (DONE))),
+                                                            Integer.parseInt (String.valueOf (snapshot.get (DAILY))));
+                                                    mainViewModel.insertt (numbers);
+                                                }
+                                            });
+                                        } else if (mDB.numbersDao ( ).isIdExist (Integer.parseInt (String.valueOf (snapshot.get (UID))))) {
+                                            return;
+                                        } else {
+                                            AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
+                                                @Override
+                                                public void run() {
+                                                    numbers = new Numbers (Integer.parseInt (String.valueOf (snapshot.get (UID))),
+                                                            snapshot.getString (TITLE), snapshot.getString (NUMBER),
+                                                            snapshot.getString (NOTE), Integer.parseInt (String.valueOf (snapshot.get (FAVORITE))),
+                                                            Integer.parseInt (String.valueOf (snapshot.get (DONE))),
+                                                            Integer.parseInt (String.valueOf (snapshot.get (DAILY))));
+                                                    mainViewModel.insertt (numbers);
+                                                }
+                                            });
+
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
+    }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate (R.menu.menu_home, menu);
         MenuItem item = menu.findItem (R.id.search);
-        searchView.setMenuItem(item);
-        searchView.setTabLayout( mainActivity.tabLayout);
+        searchView.setMenuItem (item);
+        searchView.setTabLayout (mainActivity.tabLayout);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId ( )) {
 
+            case R.id.sync:
+                if (isConnected (getContext ())) {
+                    syncNumberData ( );
+                }
+                break;
+
             case R.id.deletall:
                 // delete all data
                 showDeleteAllConfirmationDialog ( );
                 break;
             case R.id.lang:
-                HelperMethods.showSelectLanguageDialog (getActivity (), getContext ());
+                HelperMethods.showSelectLanguageDialog (getActivity ( ), getContext ( ));
                 break;
             case R.id.darkMode:
-                if (AppCompatDelegate.getDefaultNightMode () == AppCompatDelegate.MODE_NIGHT_YES){
-                    SharedPreferencesManger.SaveThemePref (false, getActivity ());
+                if (AppCompatDelegate.getDefaultNightMode ( ) == AppCompatDelegate.MODE_NIGHT_YES) {
+                    SharedPreferencesManger.SaveThemePref (false, getActivity ( ));
                     ThemeHelper.applyTheme (false);
                 } else {
-                    SharedPreferencesManger.SaveThemePref (true, getActivity ());
+                    SharedPreferencesManger.SaveThemePref (true, getActivity ( ));
                     ThemeHelper.applyTheme (true);
                 }
-                restartApp ();
+                restartApp ( );
                 break;
             case R.id.logout:
                 if (user != null) {
                     showLogoutDialog ( );
                 } else {
-                    SaveData (getActivity (), ISLOGIN, false);
+                    SaveData (getActivity ( ), ISLOGIN, false);
                     startActivity (new Intent (getActivity ( ), UserActivity.class));
                 }
                 return true;
@@ -250,14 +384,21 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
     public void onPrepareOptionsMenu(@NonNull Menu menu) {
         MenuItem deleteAllItem = menu.findItem (R.id.deletall);
         if (enableMenuItem) {
-            deleteAllItem.setEnabled(true);
+            deleteAllItem.setEnabled (true);
         } else {
             // disabled
-            deleteAllItem.setEnabled(false);
+            deleteAllItem.setEnabled (false);
+        }
+
+        MenuItem syncItem = menu.findItem (R.id.sync);
+        if (enableSyncMenuItem) {
+            syncItem.setEnabled (true);
+        } else {
+            syncItem.setEnabled (false);
         }
 
         MenuItem darkModeItem = menu.findItem (R.id.darkMode);
-        if (AppCompatDelegate.getDefaultNightMode () == AppCompatDelegate.MODE_NIGHT_YES) {
+        if (AppCompatDelegate.getDefaultNightMode ( ) == AppCompatDelegate.MODE_NIGHT_YES) {
             darkModeItem.setTitle (getResources ( ).getString (R.string.lightMode));
         } else {
             darkModeItem.setTitle (getResources ( ).getString (R.string.darkMode));
@@ -272,6 +413,62 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         super.onPrepareOptionsMenu (menu);
     }
 
+    private void syncNumberData() {
+        if (progressDialog == null) {
+            showProgressDialog (getActivity ( ), getResources ( ).getString (R.string.sync));
+        } else {
+            if (!progressDialog.isShowing ( )) {
+                showProgressDialog (getActivity ( ), getResources ( ).getString (R.string.sync));
+            }
+        }
+        mAdapter.syncDataWithFireStore ( );
+        syncDataWithRoom ( );
+        final Handler handler = new Handler (Looper.getMainLooper ( ));
+        handler.postDelayed (new Runnable ( ) {
+            @Override
+            public void run() {
+                //Do something after 1000ms
+                dismissProgressDialog ( );
+            }
+        }, 1000);
+    }
+
+    private void syncDataWithRoom() {
+        numberDocuRef
+                .addSnapshotListener (new EventListener<QuerySnapshot> ( ) {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                        if (!queryDocumentSnapshots.isEmpty ( )) {
+                            for (QueryDocumentSnapshot snapshot : queryDocumentSnapshots) {
+                                AppExecutors.getInstance ( ).diskIO ( ).execute (new Runnable ( ) {
+                                    @Override
+                                    public void run() {
+                                        if (mDB.numbersDao ( ) != null) {
+                                            if (mDB.numbersDao ( ).isIdExist (Integer.parseInt (String.valueOf (snapshot.get (UID))))) {
+
+                                                return;
+                                            } else {
+                                                AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
+                                                    @Override
+                                                    public void run() {
+                                                        numbers = new Numbers (Integer.parseInt (String.valueOf (snapshot.get (UID))),
+                                                                snapshot.getString (TITLE), snapshot.getString (NUMBER),
+                                                                snapshot.getString (NOTE), Integer.parseInt (String.valueOf (snapshot.get (FAVORITE))),
+                                                                Integer.parseInt (String.valueOf (snapshot.get (DONE))),
+                                                                Integer.parseInt (String.valueOf (snapshot.get (DAILY))));
+                                                        mainViewModel.insertt (numbers);
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
+    }
+
     private void showDeleteAllConfirmationDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder (getActivity ( ));
         builder.setMessage (R.string.delete_all_dialog_msg);
@@ -279,7 +476,7 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked the "Delete All" button, so delete the All numbers.
                 mainViewModel.deleteAllNumbers ( );
-                mAdapter.deleteAllFS ();
+                mAdapter.deleteAllFS ( );
                 Toast.makeText (getActivity ( ), getString (R.string.Deleted), Toast.LENGTH_SHORT).show ( );
             }
         });
@@ -303,7 +500,7 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         builder.setPositiveButton (R.string.logout, new DialogInterface.OnClickListener ( ) {
             public void onClick(DialogInterface dialog, int id) {
                 firebaseAuth.signOut ( );
-                SaveData (getActivity (), ISLOGIN, false);
+                SaveData (getActivity ( ), ISLOGIN, false);
                 startActivity (new Intent (getActivity ( ), UserActivity.class));
                 getActivity ( ).finish ( );
             }
@@ -321,6 +518,29 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         AlertDialog alertDialog = builder.create ( );
         alertDialog.show ( );
     }
+
+
+    private void showRetrieveDataFromFSDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder (getActivity ( ));
+        builder.setMessage (R.string.retrieve_dialog_msg);
+        builder.setPositiveButton (R.string.cancel, new DialogInterface.OnClickListener ( ) {
+            public void onClick(DialogInterface dialog, int id) {
+                if (dialog != null) {
+                    dialog.dismiss ( );
+                }
+            }
+        });
+        builder.setNegativeButton (R.string.ok, new DialogInterface.OnClickListener ( ) {
+            public void onClick(DialogInterface dialog, int id) {
+                getAllDataFromFireStore ( );
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create ( );
+        alertDialog.show ( );
+    }
+
 
     @Override
     public void onNumberEdit(int itemId) {
@@ -449,6 +669,7 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
             actionMode = null;
 //            HelperMethods.setSystemBarColor (getActivity ( ), R.color.colorPrimaryDark);
         }
+
     }
 
     public void deleteSelection() {
@@ -488,8 +709,27 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         alertDialog.show ( );
     }
 
-    public void restartApp()
-    {
-        getActivity ().recreate ();
+    public void restartApp() {
+        getActivity ( ).recreate ( );
+    }
+
+    @Override
+    public void startLoading() {
+//        Log.d (TAG, "startLoading: begaaain");
+//        if (progressDialog == null) {
+//            showProgressDialog (getActivity ( ), getResources ( ).getString (R.string.wait));
+//        } else {
+//            if (!progressDialog.isShowing ( )) {
+//                showProgressDialog (getActivity ( ), getResources ( ).getString (R.string.wait));
+//            }
+//        }
+    }
+
+    @Override
+    public void loaded() {
+//        Log.d (TAG, "loaded: is sucsseeessss");
+//
+//        loadNotes ();
+//        dismissProgressDialog ( );
     }
 }

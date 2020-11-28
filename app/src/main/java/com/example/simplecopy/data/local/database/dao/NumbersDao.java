@@ -30,6 +30,9 @@ public interface NumbersDao {
     @Insert
     long insertTask(Numbers numbers);
 
+    @Insert
+    void insertTaskk(Numbers numbers);
+
     @Update(onConflict = OnConflictStrategy.REPLACE)
     void updateTask(Numbers numbers);
 
@@ -56,6 +59,9 @@ public interface NumbersDao {
 
     @Query("SELECT * FROM numbers WHERE title = :userName")
     boolean isNameExist(String userName);
+
+    @Query("SELECT * FROM numbers WHERE id = :uid")
+    boolean isIdExist(int uid);
 
     @Query("SELECT * FROM numbers WHERE title = :userName")
     int getIdAfterSave(String userName);

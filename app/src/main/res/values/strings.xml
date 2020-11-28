@@ -23,6 +23,7 @@
     <string name="DeleteAll">Delete All</string>
     <string name="Save">Save</string>
     <string name="Search">Search</string>
+    <string name="sync">sync</string>
     <string name="Error_With_Saving">Error With Saving</string>
     <string name="Saved">Saved</string>
     <string name="Error_With_Update">Error With Update</string>
@@ -43,11 +44,13 @@
     <string name="delete_note_selected_dialog_msg">Delete this Notes?</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
+    <string name="ok">Ok</string>
     <string name="editor_delete_Numbers_successful">Number deleted</string>
     <string name="editor_delete_Numbers_failed">Error with deleting</string>
     <string name="delete_all_dialog_msg">Delete All Number?</string>
     <string name="delete_all_notes_dialog_msg">Delete All Notes?</string>
     <string name="logout_dialog_msg">Are you sure you want to logout?</string>
+    <string name="retrieve_dialog_msg">Are you want restore data?</string>
     <string name="Copied">Number Is Copied</string>
     <string name="Note_Copied">Note Is Copied</string>
     <string name="Please_insert_name">Please insert a name</string>

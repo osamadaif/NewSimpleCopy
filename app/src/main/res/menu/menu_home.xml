@@ -18,6 +18,12 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView"/>
 
     <item
+        android:id="@+id/sync"
+        android:title="@string/sync"
+        android:icon="@drawable/ic_refresh"
+        app:showAsAction="ifRoom|collapseActionView"/>
+
+    <item
         android:id="@+id/lang"
         android:title="@string/lang"
         android:icon="@drawable/ic_language"

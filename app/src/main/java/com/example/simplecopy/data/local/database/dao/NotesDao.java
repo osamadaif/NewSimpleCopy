@@ -23,6 +23,9 @@ public interface NotesDao {
     @Insert
     long insertTask(NotesData notesData);
 
+    @Insert
+    void insertTaskk(NotesData notesData);
+
     @Update(onConflict = OnConflictStrategy.REPLACE)
     void updateTask(NotesData notesData);
 
@@ -46,6 +49,9 @@ public interface NotesDao {
 
     @Query("SELECT * FROM notes WHERE title = :userName")
     boolean isNameExist(String userName);
+
+    @Query("SELECT * FROM notes WHERE id = :uid")
+    boolean isIdExist(int uid);
 
 }
 

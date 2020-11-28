@@ -17,14 +17,23 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.simplecopy.utils.AppExecutors;
 import com.example.simplecopy.R;
 import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.Numbers;
+import com.example.simplecopy.utils.DataLoadCallback;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,14 +41,24 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadBoolean;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadData;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.SaveData;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_ID;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_NAME;
+import static com.example.simplecopy.utils.Constants.DAILY;
 import static com.example.simplecopy.utils.Constants.DONE;
+import static com.example.simplecopy.utils.Constants.DONE_METHODE;
 import static com.example.simplecopy.utils.Constants.FAVORITE;
+import static com.example.simplecopy.utils.Constants.ISFIRST;
+import static com.example.simplecopy.utils.Constants.NOTE;
+import static com.example.simplecopy.utils.Constants.NUMBER;
 import static com.example.simplecopy.utils.Constants.NUMBERS;
+import static com.example.simplecopy.utils.Constants.TITLE;
+import static com.example.simplecopy.utils.Constants.UID;
 import static com.example.simplecopy.utils.Constants.USERS;
 import static com.example.simplecopy.utils.FireStoreHelperQuery.fsDelete;
+import static com.example.simplecopy.utils.FireStoreHelperQuery.fsInsert;
 import static com.example.simplecopy.utils.FireStoreHelperQuery.fsUpdate;
 
 public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder> {
@@ -50,6 +69,7 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
     private Context mContext;
     private Activity activity;
     private ItemClickListener mItemClickListener;
+    private Numbers numbers;
     public String searchString = "";
     private AppDatabase mDB;
     private SparseBooleanArray selected_items;
@@ -131,14 +151,14 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
                             if (numbers.getFavorite ( ) == 0) {
                                 mDB.numbersDao ( ).insertFavorite (1, mNumberList.get (position).getId ( ));
                                 Map<String, Object> favMapP = new HashMap<> ( );
-                                favMapP.put (FAVORITE , "1");
+                                favMapP.put (FAVORITE, "1");
                                 fsUpdate (numberDocuRef, uidStr, favMapP);
                                 Log.d (TAG, "numbers checked ");
 
                             } else if (numbers.getFavorite ( ) == 1) {
                                 mDB.numbersDao ( ).insertFavorite (0, mNumberList.get (position).getId ( ));
                                 Map<String, Object> favMapM = new HashMap<> ( );
-                                favMapM.put (FAVORITE , "0");
+                                favMapM.put (FAVORITE, "0");
                                 fsUpdate (numberDocuRef, uidStr, favMapM);
                                 Log.d (TAG, "numbers unchecked ");
                             }
@@ -258,17 +278,73 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
             mPosition = position;
         }
     }
+
     public interface ItemClickListener {
         void onItemClickListener(View view, Numbers numbers, int pos, int itemId);
+
         void onNumberEdit(int itemId);
+
         void onNumberDelete(Numbers numbers, int itemId);
+
         void onItemLongClick(View view, Numbers numbers, int pos, int itemId);
     }
 
+    public void insertAllIntoFireStore() {
+        if (mNumberList.size ( ) != 0) {
+            for (int i = 0; i < mNumberList.size ( ); i++) {
+                String uidStr = String.valueOf (mNumberList.get (i).getId ( ));
+                Numbers numbers = mNumberList.get (i);
+                Map<String, Object> numbersMap = new HashMap<> ( );
+                numbersMap.put (UID, numbers.getId ( ));
+                numbersMap.put (TITLE, numbers.getTitle ( ));
+                numbersMap.put (NUMBER, numbers.getNumber ( ));
+                numbersMap.put (NOTE, numbers.getNote ( ));
+                numbersMap.put (FAVORITE, String.valueOf (numbers.getFavorite ( )));
+                numbersMap.put (DONE, String.valueOf (numbers.getDone ( )));
+                numbersMap.put (DAILY, String.valueOf (numbers.getDaily ( )));
+                fsInsert (numberDocuRef, uidStr, numbersMap);
+            }
+        }
+    }
+
+    public void syncDataWithFireStore() {
+        if (mNumberList.size ( ) != 0) {
+            for (int i = 0; i < mNumberList.size ( ); i++) {
+                String uidStr = String.valueOf (mNumberList.get (i).getId ( ));
+                Numbers numbers = mNumberList.get (i);
+                numberDocuRef.document (uidStr).get ( ).addOnCompleteListener (new OnCompleteListener<DocumentSnapshot> ( ) {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful ( )) {
+                            DocumentSnapshot document = task.getResult ( );
+                            if (document.exists ( )) {
+                                Log.d (TAG, "Document exists!");
+                            } else {
+                                Log.d (TAG, "Document does not exist!");
+                                Map<String, Object> numbersMap = new HashMap<> ( );
+                                numbersMap.put (UID, numbers.getId ( ));
+                                numbersMap.put (TITLE, numbers.getTitle ( ));
+                                numbersMap.put (NUMBER, numbers.getNumber ( ));
+                                numbersMap.put (NOTE, numbers.getNote ( ));
+                                numbersMap.put (FAVORITE, String.valueOf (numbers.getFavorite ( )));
+                                numbersMap.put (DONE, String.valueOf (numbers.getDone ( )));
+                                numbersMap.put (DAILY, String.valueOf (numbers.getDaily ( )));
+                                fsInsert (numberDocuRef, uidStr, numbersMap);
+                            }
+                        } else {
+                            Log.d (TAG, "Failed with: ", task.getException ( ));
+                        }
+                    }
+                });
+
+            }
+        }
+    }
+
     public void deleteAllFS() {
-        for (int i = 0; i < mNumberList.size ( ) ; i++) {
-            String uidStr = String.valueOf (mNumberList.get (i).getId ());
-            fsDelete (numberDocuRef,uidStr);
+        for (int i = 0; i < mNumberList.size ( ); i++) {
+            String uidStr = String.valueOf (mNumberList.get (i).getId ( ));
+            fsDelete (numberDocuRef, uidStr);
         }
     }
 
@@ -294,12 +370,11 @@ public class CopyAdapter extends RecyclerView.Adapter<CopyAdapter.CopyViewHolder
         } else {
             holder.lyt_checked.setVisibility (View.GONE);
 //            holder.mFavorite.setVisibility (View.VISIBLE);
-            holder.container.setBackgroundColor (selected_items.get(position) ? 0x00000000
+            holder.container.setBackgroundColor (selected_items.get (position) ? 0x00000000
                     : Color.TRANSPARENT);
             if (current_selected_idx == position) resetCurrentIndex ( );
         }
     }
-
 
 
     public void toggleSelection(int pos) {

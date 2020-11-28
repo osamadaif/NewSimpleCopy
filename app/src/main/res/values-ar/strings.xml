@@ -96,4 +96,7 @@
     <string name="darkMode">الوضع الداكن</string>
     <string name="lightMode">الوضع المضئ</string>
     <string name="Name_is_exist">الاسم مسجل من قبل</string>
+    <string name="retrieve_dialog_msg">هل تريد استرجاع البيانات المحفوظة ؟</string>
+    <string name="ok">حسنا</string>
+    <string name="sync">تزامن</string>
 </resources>

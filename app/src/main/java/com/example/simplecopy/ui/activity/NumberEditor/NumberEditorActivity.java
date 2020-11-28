@@ -26,6 +26,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.example.simplecopy.App;
 import com.example.simplecopy.data.local.prefs.SharedPreferencesManger;
 import com.example.simplecopy.ui.fragment.MainNumbers.MainViewModel;
 import com.example.simplecopy.utils.AppExecutors;
@@ -45,12 +46,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadBoolean;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadData;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.SaveData;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_ID;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_NAME;
 import static com.example.simplecopy.utils.Constants.DAILY;
 import static com.example.simplecopy.utils.Constants.DONE;
 import static com.example.simplecopy.utils.Constants.FAVORITE;
+import static com.example.simplecopy.utils.Constants.ISFIRST;
 import static com.example.simplecopy.utils.Constants.ISLOGIN;
 import static com.example.simplecopy.utils.Constants.NOTE;
 import static com.example.simplecopy.utils.Constants.NUMBER;
@@ -60,6 +64,7 @@ import static com.example.simplecopy.utils.Constants.UID;
 import static com.example.simplecopy.utils.Constants.USERS;
 import static com.example.simplecopy.utils.FireStoreHelperQuery.fsInsert;
 import static com.example.simplecopy.utils.FireStoreHelperQuery.fsUpdate;
+import static com.example.simplecopy.utils.HelperMethods.isConnected;
 
 
 public class NumberEditorActivity extends AppCompatActivity {
@@ -193,7 +198,11 @@ public class NumberEditorActivity extends AppCompatActivity {
                         });
 
                     } else {
-                        Log.d (TAG, "run: is false");
+                        if (isConnected (App.getContext ())){
+                            SaveData (NumberEditorActivity.this, ISFIRST, false);
+                            Log.d (TAG, "run: is false");
+                        }
+
                         try {
                             rowId = mainViewModel.insert (numbers1);
                         } catch (ExecutionException e) {

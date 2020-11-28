@@ -14,7 +14,6 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,7 +21,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -45,8 +43,6 @@ import com.example.simplecopy.data.model.Numbers;
 import com.example.simplecopy.utils.HelperMethods;
 import com.example.simplecopy.utils.ThemeHelper;
 import com.ferfalk.simplesearchview.SimpleSearchView;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -60,12 +56,10 @@ import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.Lo
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.SaveData;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_ID;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_NAME;
-import static com.example.simplecopy.utils.Constants.DAILY;
 import static com.example.simplecopy.utils.Constants.DONE;
 import static com.example.simplecopy.utils.Constants.ISLOGIN;
 import static com.example.simplecopy.utils.Constants.NUMBERS;
 import static com.example.simplecopy.utils.Constants.USERS;
-import static com.example.simplecopy.utils.FireStoreHelperQuery.fsInsert;
 import static com.example.simplecopy.utils.FireStoreHelperQuery.fsUpdate;
 
 
@@ -184,7 +178,7 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
 
     private void setupViewModel() {
         MainViewModel viewModel = new ViewModelProvider (this).get(MainViewModel.class);
-        viewModel.getsearchQueryByDaily ().observe ( getViewLifecycleOwner(), new Observer<List<Numbers>> ( ) {
+        viewModel.getSearchQueryByDaily ().observe ( getViewLifecycleOwner(), new Observer<List<Numbers>> ( ) {
             @Override
             public void onChanged(List<Numbers> numbersList1) {
                 if (numbersList1.isEmpty ()){

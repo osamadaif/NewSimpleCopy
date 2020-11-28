@@ -35,6 +35,10 @@ public class NotesRepository {
         return new insertNoteAsyncTask (notesDao).execute (notes).get ();
     }
 
+    public void insertt(NotesData notes) {
+        new insertNoteAsyncTaskk (notesDao).execute (notes);
+    }
+
 
     public void update(NotesData notes){
         new updateNumberAsyncTask (notesDao).execute (notes);
@@ -62,6 +66,20 @@ public class NotesRepository {
         protected Long doInBackground(NotesData... notes) {
             long id = notesDao.insertTask (notes[0]);
             return id;
+        }
+    }
+
+    private static class insertNoteAsyncTaskk extends AsyncTask <NotesData, Void, Void>{
+        private NotesDao notesDao;
+
+        public insertNoteAsyncTaskk(NotesDao notesDao) {
+            this.notesDao = notesDao;
+        }
+
+        @Override
+        protected Void doInBackground(NotesData... notes) {
+            notesDao.insertTaskk (notes[0]);
+            return null;
         }
     }
 

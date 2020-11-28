@@ -10,6 +10,8 @@ public class Constants {
     public static final String NUMBERS = "numbers";
     public static final String NOTES = "notes";
     public static final String ISLOGIN = "ISLOGIN";
+    public static final String ISFIRST = "ISFIRST";
+    public static final String DONE_METHODE = "DONE";
 
     // Numbers Constants
     public static final String UID = "id";

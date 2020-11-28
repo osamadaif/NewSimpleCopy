@@ -27,6 +27,9 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.SaveData;
+import static com.example.simplecopy.utils.Constants.ISFIRST;
+
 
 public class MainActivity extends AppCompatActivity  {
 
@@ -76,10 +79,10 @@ public class MainActivity extends AppCompatActivity  {
         viewPager.addOnPageChangeListener (new ViewPager.OnPageChangeListener ( ) {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
             }
             @Override
             public void onPageSelected(int position) {
+                supportInvalidateOptionsMenu();
                 switch (position) {
                     case 0:
                         fab.show ();
@@ -93,6 +96,7 @@ public class MainActivity extends AppCompatActivity  {
                         break;
 
                     case 1:
+                        SaveData (MainActivity.this, ISFIRST, false);
                         fab.show ();
                         fab.setOnClickListener(new View.OnClickListener() {
                             @Override
