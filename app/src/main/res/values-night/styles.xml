@@ -6,7 +6,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-<!--        <item name="actionModeStyle">@style/Widget.ActionMode</item>-->
+        <!--        <item name="actionModeStyle">@style/Widget.ActionMode</item>-->
         <item name="windowActionModeOverlay">true</item>
         <item name="actionModeStyle">@style/CustomActionModeStyle</item>
 
@@ -24,11 +24,19 @@
         <item name="alertDialogTheme">@style/AlertDialogTheme</item>
 
         <!-- To change the popup menu text color  -->
-<!--        <item name="android:textColor">@color/colorAccent</item>-->
+        <!--        <item name="android:textColor">@color/colorAccent</item>-->
 
         <!-- To change the background of options menu-->
         <item name="android:itemBackground">@color/colorPrimary</item>
 
+    </style>
+
+    //progressDialog Style
+    <style name="MyProgressDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:textColor">@color/clolrWhite</item>
+        <item name="android:textSize">@dimen/spacing_mlarge</item>
+        <item name="colorAccent">@color/clolrWhite</item>
+        <item name="android:background">@color/colorPrimaryLight</item>
     </style>
 
     <style name="themeCard" parent="Theme.MaterialComponents.Light">
@@ -62,7 +70,7 @@
 
     <!-- To change the hint color  -->
     <style name="myEditTextThem" parent="@style/Theme.MaterialComponents.Light.DarkActionBar.Bridge">
-<!--        <item name="colorControlNormal">#9e9e9e</item>-->
+        <!--        <item name="colorControlNormal">#9e9e9e</item>-->
         <item name="colorControlNormal">@color/colorAccent</item>
         <item name="colorControlActivated">@color/colorAccent</item>
         <item name="colorControlHighlight">@color/colorAccent</item>
@@ -70,7 +78,7 @@
 
     <!-- To change the label color -->
     <style name="TextAppearance.App.TextInputLayout" parent="@android:style/TextAppearance">
-    <item name="android:textColor">@color/colorAccent</item>
+        <item name="android:textColor">@color/colorAccent</item>
     </style>
 
     <style name="line_box" parent="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -93,7 +101,8 @@
         <item name="colorBackgroundFloating">@color/colorPrimaryDark</item>
     </style>
 
-    <style name="NegativeButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog"/>
+    <style name="NegativeButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog" />
+
     <style name="PositiveButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
         <item name="android:textColor">@color/red</item>
     </style>

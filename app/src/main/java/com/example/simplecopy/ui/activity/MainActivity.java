@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager.widget.ViewPager;
 
+import com.example.simplecopy.App;
 import com.example.simplecopy.data.local.prefs.SharedPreferencesManger;
 import com.example.simplecopy.ui.activity.NoteEditor.NoteEditorActivity;
 import com.example.simplecopy.ui.activity.NumberEditor.NumberEditorActivity;
@@ -27,8 +28,13 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadBoolean;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadData;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.SaveData;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_NAME;
 import static com.example.simplecopy.utils.Constants.ISFIRST;
+import static com.example.simplecopy.utils.Constants.ISLOGIN;
+import static com.example.simplecopy.utils.HelperMethods.isConnected;
 
 
 public class MainActivity extends AppCompatActivity  {
@@ -38,7 +44,7 @@ public class MainActivity extends AppCompatActivity  {
     private long backPressedTime;
     private Toast backToast;
 
-     public TabLayout tabLayout;
+    public TabLayout tabLayout;
     AppBarLayout appBarLayout;
     ViewPager viewPager;
     Toolbar toolbar;
@@ -58,7 +64,12 @@ public class MainActivity extends AppCompatActivity  {
         viewPager = findViewById (R.id.viewPager);
         toolbar = findViewById (R.id.toolbar);
         setSupportActionBar (toolbar);
-        getSupportActionBar().setTitle(Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.app_name) + "</font>"));
+        if (LoadBoolean (MainActivity.this , ISLOGIN)){
+            getSupportActionBar().setTitle(Html.fromHtml("<font color=\"#FFFFFF\">" + LoadData (MainActivity.this , USER_NAME) + "</font>"));
+        } else {
+            getSupportActionBar().setTitle(Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.app_name) + "</font>"));
+        }
+
 
         firebaseAuth = FirebaseAuth.getInstance ();
         invalidateOptionsMenu();
@@ -96,7 +107,10 @@ public class MainActivity extends AppCompatActivity  {
                         break;
 
                     case 1:
-                        SaveData (MainActivity.this, ISFIRST, false);
+                        if (isConnected (App.getContext ( )) && LoadBoolean (MainActivity.this , ISLOGIN)){
+                            SaveData (MainActivity.this, ISFIRST, false);
+                        }
+
                         fab.show ();
                         fab.setOnClickListener(new View.OnClickListener() {
                             @Override

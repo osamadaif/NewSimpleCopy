@@ -40,6 +40,10 @@ public class MainRepository {
         return numbersDao.searchForByDaily ("%" + query + "%");
     }
 
+    public LiveData<Integer> getTotalOFDailyRep() {
+        return numbersDao.getTotalOFDaily ();
+    }
+
     public long insert(Numbers numbers) throws ExecutionException, InterruptedException {
         return new insertNumberAsyncTask (numbersDao).execute (numbers).get ( );
     }

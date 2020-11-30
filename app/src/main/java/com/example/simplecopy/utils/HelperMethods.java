@@ -142,7 +142,7 @@ public class HelperMethods {
     public static void showProgressDialog(Activity activity, String title) {
         try {
 
-            progressDialog = new ProgressDialog (activity);
+            progressDialog = new ProgressDialog (activity, R.style.MyProgressDialog);
             progressDialog.setMessage (title);
             progressDialog.setIndeterminate (false);
             progressDialog.setCancelable (false);

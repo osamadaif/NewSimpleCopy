@@ -87,5 +87,8 @@ dependencies {
 
     //Search view new
     implementation 'com.github.Ferfalk:SimpleSearchView:0.1.6'
+
+    //Gson  library
+    implementation 'com.google.code.gson:gson:2.8.6'
 }
 apply plugin: 'com.google.gms.google-services'

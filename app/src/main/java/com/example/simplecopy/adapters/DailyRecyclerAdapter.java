@@ -40,15 +40,25 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadBoolean;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadData;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadHashMap;
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.SaveData;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_ID;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_NAME;
+import static com.example.simplecopy.ui.fragment.MainNumbers.Daily.DailyWalletListFragment.enableMenuItemRedo;
+import static com.example.simplecopy.ui.fragment.MainNumbers.Daily.DailyWalletListFragment.enableMenuItemUndo;
 import static com.example.simplecopy.utils.Constants.DAILY;
 import static com.example.simplecopy.utils.Constants.DONE;
+import static com.example.simplecopy.utils.Constants.ISLOGIN;
 import static com.example.simplecopy.utils.Constants.NUMBERS;
+import static com.example.simplecopy.utils.Constants.REDO;
 import static com.example.simplecopy.utils.Constants.TITLE_NOTE;
+import static com.example.simplecopy.utils.Constants.UID;
+import static com.example.simplecopy.utils.Constants.UNDO;
 import static com.example.simplecopy.utils.Constants.USERS;
 import static com.example.simplecopy.utils.FireStoreHelperQuery.fsUpdate;
+import static com.example.simplecopy.utils.HelperMethods.isConnected;
 
 public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdapter.DailyViewHolder> {
     private static final String TAG = DailyRecyclerAdapter.class.getSimpleName ( );
@@ -60,6 +70,9 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
     private ItemClickListener mItemClickListener;
     public String searchString = "";
     private AppDatabase mDB;
+    private Map<String, Object> undoMap;
+    private Map<String, Object> redoMap;
+
 
     private FirebaseFirestore fdb;
     private CollectionReference numberDocuRef;
@@ -111,12 +124,23 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
                                 @Override
                                 public void run() {
                                     final int dailyNumber = 0;
+                                    int oldDaily = numbers.getDaily ( );
+                                    String oldDailyString = String.valueOf (oldDaily);
+                                    undoMap = new HashMap<> ( );
+                                    undoMap.put (UID, uidStr);
+                                    undoMap.put (DAILY, oldDailyString);
                                     if (numbers.getDone ( ) == 1) {
+                                        undoMap.put (DONE, "1");
                                         mDB.numbersDao ( ).insertIfDone (0, mNumberList.get (position).getId ( ));
                                         Map<String, Object> doneMap = new HashMap<> ( );
                                         doneMap.put (DONE , "0");
                                         fsUpdate (numberDocuRef, uidStr, doneMap);
+                                    } else {
+                                        undoMap.put (DONE, "0");
                                     }
+                                    SaveData (activity, UNDO, undoMap);
+                                    enableMenuItemUndo = true;
+                                    enableMenuItemRedo = false;
                                     mDB.numbersDao ( ).insertDaily (dailyNumber, mNumberList.get (position).getId ( ));
                                     Map<String, Object> dailyeMap = new HashMap<> ( );
                                     dailyeMap.put (DAILY , "0");
@@ -205,6 +229,13 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
                                 return;
                             }
                             int oldDaily = numbers.getDaily ( );
+                            undoMap = new HashMap<> ( );
+                            String oldDailyString = String.valueOf (oldDaily);
+                            undoMap.put (UID, uidStr);
+                            undoMap.put (DAILY, oldDailyString);
+                            SaveData (activity, UNDO, undoMap);
+                            enableMenuItemUndo = true;
+                            enableMenuItemRedo = false;
                             String numbersString = holder.mAddNumber.getText ( ).toString ( ).trim ( );
                             final int dailyNumber = Integer.parseInt (numbersString);
                             //final Numbers numbers1 = new Numbers (titleString,dailyNumber);
@@ -247,7 +278,6 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
                             String numbersString = holder.mAddNumber.getText ( ).toString ( ).trim ( );
                             final int dailyNumber = Integer.parseInt (numbersString);
                             //final Numbers numbers1 = new Numbers (titleString,dailyNumber);
-
                             int finalDaily = oldDaily - dailyNumber;
                             if (finalDaily <= 0) {
                                 AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
@@ -259,7 +289,13 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
                                 });
 
                             } else {
-
+                                undoMap = new HashMap<> ( );
+                                String oldDailyString = String.valueOf (oldDaily);
+                                undoMap.put (UID, uidStr);
+                                undoMap.put (DAILY, oldDailyString);
+                                SaveData (activity, UNDO, undoMap);
+                                enableMenuItemUndo = true;
+                                enableMenuItemRedo = false;
                                 mDB.numbersDao ( ).insertDaily (finalDaily, mNumberList.get (position).getId ( ));
                                 String finalDailyStr = String.valueOf (finalDaily);
                                 Map<String, Object> dailyMinusMap = new HashMap<> ( );
@@ -296,6 +332,114 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
             }
 
         }
+    }
+
+    public void getUndo(){
+        AppExecutors.getInstance ( ).diskIO ( ).execute (new Runnable ( ) {
+            @Override
+            public void run() {
+                Log.d (TAG, "getUndo: save redo");
+                Map<String, String> undoDataMap = LoadHashMap (activity, UNDO);
+                String idRedo = (String) undoDataMap.get (UID);
+                int idRedoInt = Integer.parseInt (idRedo);
+                redoMap = new HashMap<> ( );
+                redoMap.put (UID, idRedo);
+                if (undoDataMap.get (DAILY) != null){
+                    int redoDailyNumber = mDB.numbersDao ().getDailyDB (idRedoInt);
+                    String redoDailyString = String.valueOf (redoDailyNumber);
+                    redoMap.put (DAILY, redoDailyString);
+                }
+                if (undoDataMap.get (DONE) != null){
+                    int redoDoneNumber = mDB.numbersDao ().getDoneDB (idRedoInt);
+                    redoMap.put (DONE, redoDoneNumber);
+                }
+                SaveData (activity, REDO, redoMap);
+
+                Log.d (TAG, "getUndo: retrive undo");
+                String id = undoDataMap.get (UID);
+                int idInt = Integer.parseInt (id);
+                if (undoDataMap.get (DAILY) != null){
+                    String daily = undoDataMap.get (DAILY);
+                    int dailyNumber = Integer.parseInt (daily);
+                    mDB.numbersDao ( ).insertDaily (dailyNumber, idInt);
+                    Map<String, Object> dailyMap = new HashMap<> ( );
+                    dailyMap.put (DAILY , daily);
+                    fsUpdate (numberDocuRef, id, dailyMap);
+                }
+                if (undoDataMap.get (DONE) != null){
+                    String done = undoDataMap.get (DONE);
+                    int doneNumber = Integer.parseInt (done);
+                    mDB.numbersDao ( ).insertIfDone (doneNumber, idInt);
+                    if (isConnected (activity) && LoadBoolean (activity, ISLOGIN)) {
+                        Map<String, Object> doneMap = new HashMap<> ( );
+                        doneMap.put (DONE, done);
+                        fsUpdate (numberDocuRef, id, doneMap);
+                    }
+                }
+                AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
+                    @Override
+                    public void run() {
+                        notifyDataSetChanged ( );
+                    }
+                });
+            }
+        });
+        enableMenuItemUndo = false;
+        enableMenuItemRedo = true;
+    }
+
+    public void getRedo(){
+        AppExecutors.getInstance ( ).diskIO ( ).execute (new Runnable ( ) {
+            @Override
+            public void run() {
+                Log.d (TAG, "getRedo: save undo");
+                Map<String, String> redoDataMap = LoadHashMap (activity, REDO);
+                String idUndo = redoDataMap.get (UID);
+                int idUndoInt = Integer.parseInt (idUndo);
+                undoMap = new HashMap<> ( );
+                undoMap.put (UID, idUndo);
+                if (redoDataMap.get (DAILY) != null){
+                    int undoDailyNumber = mDB.numbersDao ().getDailyDB (idUndoInt);
+                    String undoDailyString = String.valueOf (undoDailyNumber);
+                    undoMap.put (DAILY, undoDailyString);
+                }
+                if (redoDataMap.get (DONE) != null){
+                    int undoDoneNumber = mDB.numbersDao ().getDoneDB (idUndoInt);
+                    undoMap.put (DONE, undoDoneNumber);
+                }
+                SaveData (activity, UNDO, undoMap);
+
+                Log.d (TAG, "getRedo: retrive redo");
+                String id = redoDataMap.get (UID);
+                int idInt = Integer.parseInt (id);
+                if (redoDataMap.get (DAILY) != null){
+                    String daily = redoDataMap.get (DAILY);
+                    int dailyNumber = Integer.parseInt (daily);
+                    mDB.numbersDao ( ).insertDaily (dailyNumber, idInt);
+                    Map<String, Object> dailyMap = new HashMap<> ( );
+                    dailyMap.put (DAILY , daily);
+                    fsUpdate (numberDocuRef, id, dailyMap);
+                }
+                if (redoDataMap.get (DONE) != null){
+                    String done = redoDataMap.get (DONE);
+                    int doneNumber = Integer.parseInt (done);
+                    mDB.numbersDao ( ).insertIfDone (doneNumber, idInt);
+                    if (isConnected (activity) && LoadBoolean (activity, ISLOGIN)){
+                        Map<String, Object> doneMap = new HashMap<> ( );
+                        doneMap.put (DONE , done);
+                        fsUpdate (numberDocuRef, id, doneMap);
+                    }
+                }
+                AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
+                    @Override
+                    public void run() {
+                        notifyDataSetChanged ( );
+                    }
+                });
+            }
+        });
+        enableMenuItemUndo = true;
+        enableMenuItemRedo = false;
     }
 
     @Override

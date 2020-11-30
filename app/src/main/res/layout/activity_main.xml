@@ -17,7 +17,8 @@
         <FrameLayout
             android:id="@+id/toolbar_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|enterAlways|snap">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
@@ -25,12 +26,7 @@
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/colorPrimary"
                 >
-<!--                app:layout_scrollFlags="scroll|enterAlways|snap"-->
-
-
             </androidx.appcompat.widget.Toolbar>
-
-
 
             <com.ferfalk.simplesearchview.SimpleSearchView
                 android:id="@+id/searchView"
@@ -38,7 +34,7 @@
                 android:layout_height="match_parent"
                 android:background="@color/colorPrimary"
                 app:type="card"
-                app:voiceSearch="true"
+                app:voiceSearch="false"
                 tools:visibility="visible" />
         </FrameLayout>
 
@@ -55,7 +51,9 @@
             app:tabSelectedTextColor="@color/colorAccent"
             app:tabTextAppearance="@style/MyCustomTabLayout"
             android:layoutDirection="ltr"
-            app:tabTextColor="@color/clolrWhite">
+            app:tabTextColor="@color/clolrWhite"
+            app:tabGravity="fill"
+            app:tabMode="fixed">
 
         </com.google.android.material.tabs.TabLayout>
     </com.google.android.material.appbar.AppBarLayout>

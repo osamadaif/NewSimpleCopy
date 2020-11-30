@@ -25,6 +25,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.example.simplecopy.App;
 import com.example.simplecopy.data.local.prefs.SharedPreferencesManger;
+import com.example.simplecopy.ui.activity.MainActivity;
 import com.example.simplecopy.ui.activity.NumberEditor.NumberEditorActivity;
 import com.example.simplecopy.ui.fragment.MainNumbers.MainViewModel;
 import com.example.simplecopy.ui.fragment.Notes.NotesViewModel;
@@ -44,6 +45,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadBoolean;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadData;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.SaveData;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_ID;
@@ -121,6 +123,10 @@ public class NoteEditorActivity extends AppCompatActivity {
 
         if (savedInstanceState != null && savedInstanceState.containsKey (INSTANCE_Note_ID)) {
             mNoteId = savedInstanceState.getInt (INSTANCE_Note_ID, DEFAULT_Note_ID);
+        }
+
+        if (isConnected (App.getContext ( )) && LoadBoolean (NoteEditorActivity.this , ISLOGIN)){
+            SaveData (NoteEditorActivity.this, ISFIRST, false);
         }
 
         Intent intent = getIntent ( );

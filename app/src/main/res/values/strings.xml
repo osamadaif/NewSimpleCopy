@@ -108,5 +108,7 @@
     <string name="darkMode">Dark Mode</string>
     <string name="lightMode">Light Mode</string>
     <string name="Name_is_exist">this name is exist</string>
+    <string name="total_sum">Total:</string>
+    <string name="refresh">refresh</string>
 
 </resources>

@@ -28,6 +28,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.simplecopy.data.local.prefs.SharedPreferencesManger;
@@ -59,6 +61,8 @@ import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.US
 import static com.example.simplecopy.utils.Constants.DONE;
 import static com.example.simplecopy.utils.Constants.ISLOGIN;
 import static com.example.simplecopy.utils.Constants.NUMBERS;
+import static com.example.simplecopy.utils.Constants.UID;
+import static com.example.simplecopy.utils.Constants.UNDO;
 import static com.example.simplecopy.utils.Constants.USERS;
 import static com.example.simplecopy.utils.FireStoreHelperQuery.fsUpdate;
 
@@ -79,8 +83,13 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
     private FirebaseFirestore fdb;
     private CollectionReference numberDocRef;
 
+    public static boolean enableMenuItemUndo;
+    public static boolean enableMenuItemRedo;
+
     private View mEmptyView;
     Button empty_btn;
+    TextView totalTextView;
+    LinearLayout aboveRcyclerLinearLayout;
 
     private SimpleSearchView searchView;
 
@@ -107,6 +116,8 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
         mainActivity =(MainActivity)this.getActivity();
         searchView = getActivity ().findViewById(R.id.searchView);
         setupViewModel ( );
+        aboveRcyclerLinearLayout = view.findViewById (R.id.lin_lay_daily);
+        totalTextView = view.findViewById (R.id.sum_total_daily);
         empty_btn = view.findViewById (R.id.btn_empty_title);
         empty_btn.setOnClickListener (new View.OnClickListener ( ) {
             @Override
@@ -114,6 +125,7 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
                 startActivity(new Intent(getActivity (), NumberEditorActivity.class));
             }
         });
+        total ();
         return view;
     }
 
@@ -128,7 +140,6 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
         mAdapter = new DailyRecyclerAdapter(getActivity (),getActivity (), this);
         //mAdapter.setHasStableIds (true);
         mNumbersList.setAdapter (mAdapter);
-        Map<String, Object> numbersMap = new HashMap<> ( );
 
         new ItemTouchHelper (new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT ) {
             @Override
@@ -143,7 +154,8 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
                 AppExecutors.getInstance().diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
-
+                        enableMenuItemUndo = true;
+                        enableMenuItemRedo = false;
                         final int position = viewHolder.getAdapterPosition();
                         //final Numbers numbers = mNumber.get (position);
                         final List<Numbers> number = mAdapter.getItems ();
@@ -151,12 +163,14 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
                         if (number.get (position).getDaily () != 0){
                         if (number.get(position).getDone () == 0){
                             mDB.numbersDao ().insertIfDone (1, number.get (position).getId ());
+                            getUndoSwipe (uidStr, "0");
                             Map<String, Object> doneMapP = new HashMap<> ( );
                             doneMapP.put (DONE , "1");
                             fsUpdate (numberDocRef, uidStr, doneMapP);
 
                         } else if (number.get(position).getDone () == 1){
                             mDB.numbersDao ().insertIfDone (0, number.get (position).getId ());
+                            getUndoSwipe (uidStr, "1");
                             Map<String, Object> doneMapM = new HashMap<> ( );
                             doneMapM.put (DONE , "0");
                             fsUpdate (numberDocRef, uidStr, doneMapM);
@@ -175,6 +189,12 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
 
     }
 
+    private void getUndoSwipe(String uidStr, String done){
+        Map<String, Object> undoMap = new HashMap<> ( );
+        undoMap.put (UID, uidStr);
+        undoMap.put (DONE, done);
+        SaveData (getActivity (), UNDO, undoMap);
+    }
 
     private void setupViewModel() {
         MainViewModel viewModel = new ViewModelProvider (this).get(MainViewModel.class);
@@ -182,6 +202,7 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
             @Override
             public void onChanged(List<Numbers> numbersList1) {
                 if (numbersList1.isEmpty ()){
+                    aboveRcyclerLinearLayout.setVisibility (View.GONE);
                     mNumbersList.setVisibility (View.GONE);
                     if (mAdapter.getItemCount () == 0){
                         mEmptyView.setVisibility (View.VISIBLE);
@@ -190,9 +211,11 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
                     }
 
                 }else {
+                    aboveRcyclerLinearLayout.setVisibility (View.VISIBLE);
                     mNumbersList.setVisibility (View.VISIBLE);
                     mEmptyView.setVisibility (View.GONE);
                     mAdapter.setItems (numbersList1);
+
 
                 }
             }
@@ -238,11 +261,38 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
         final MenuItem item = menu.findItem (R.id.searchDaily);
         searchView.setMenuItem(item);
         searchView.setTabLayout( mainActivity.tabLayout);
+        searchView.setOnSearchViewListener (new SimpleSearchView.SearchViewListener ( ) {
+            @Override
+            public void onSearchViewShown() {
+
+            }
+
+            @Override
+            public void onSearchViewClosed() {
+                mainActivity.tabLayout.setVisibility (View.VISIBLE);
+            }
+
+            @Override
+            public void onSearchViewShownAnimation() {
+
+            }
+
+            @Override
+            public void onSearchViewClosedAnimation() {
+                mainActivity.tabLayout.setVisibility (View.VISIBLE);
+            }
+        });
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId ()){
+            case R.id.undoDaily:
+                mAdapter.getUndo ();
+                break;
+            case R.id.redoDaily:
+                mAdapter.getRedo ();
+                break;
             case R.id.lang_daily:
                 HelperMethods.showSelectLanguageDialog (getActivity (), getContext ());
                 break;
@@ -262,6 +312,7 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
                 } else {
                     SaveData (getActivity (), ISLOGIN, false);
                     startActivity (new Intent (getActivity (), UserActivity.class));
+                    getActivity ().finish ();
                 }
 
         }
@@ -270,6 +321,26 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
 
     @Override
     public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        MenuItem undoItem = menu.findItem (R.id.undoDaily);
+        getActivity ().invalidateOptionsMenu ( );
+        if (enableMenuItemUndo) {
+            undoItem.setEnabled (true);
+            undoItem.setIcon (R.drawable.ic_undo_white);
+        } else {
+            undoItem.setEnabled (false);
+            undoItem.setIcon (R.drawable.ic_undo_false);
+        }
+
+        MenuItem redoItem = menu.findItem (R.id.redoDaily);
+        getActivity ().invalidateOptionsMenu ( );
+        if (enableMenuItemRedo) {
+            redoItem.setEnabled (true);
+            redoItem.setIcon (R.drawable.ic_redo_white);
+        } else {
+            redoItem.setEnabled (false);
+            redoItem.setIcon (R.drawable.ic_redo_false);
+        }
+
         MenuItem darkModeItem = menu.findItem (R.id.darkMode_daily);
         if (AppCompatDelegate.getDefaultNightMode () == AppCompatDelegate.MODE_NIGHT_YES) {
             darkModeItem.setTitle (getResources ( ).getString (R.string.lightMode));
@@ -284,6 +355,19 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
             item.setTitle (getResources ().getString (R.string.login));
         }
         super.onPrepareOptionsMenu (menu);
+    }
+
+    private void total(){
+        mainViewModel.getTotalOFDailyVM ( ).observe (getViewLifecycleOwner ( ), new Observer<Integer> ( ) {
+            @Override
+            public void onChanged(Integer integer) {
+                if (integer == null){
+                    totalTextView.setText ("0");
+                }
+                mainViewModel.getTotalOFDailyVM ().removeObservers(mainActivity);
+                totalTextView.setText (String.valueOf (integer));
+            }
+        });
     }
 
     private void showLogoutDialog() {

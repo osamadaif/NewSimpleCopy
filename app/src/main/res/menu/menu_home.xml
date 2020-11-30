@@ -19,7 +19,7 @@
 
     <item
         android:id="@+id/sync"
-        android:title="@string/sync"
+        android:title="@string/refresh"
         android:icon="@drawable/ic_refresh"
         app:showAsAction="ifRoom|collapseActionView"/>
 

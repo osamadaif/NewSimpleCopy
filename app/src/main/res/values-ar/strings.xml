@@ -99,4 +99,6 @@
     <string name="retrieve_dialog_msg">هل تريد استرجاع البيانات المحفوظة ؟</string>
     <string name="ok">حسنا</string>
     <string name="sync">تزامن</string>
+    <string name="total_sum">المجموع :</string>
+    <string name="refresh">تحديث</string>
 </resources>

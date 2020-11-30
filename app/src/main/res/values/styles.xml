@@ -29,6 +29,14 @@
         <item name="android:itemBackground">@color/colorPrimary</item>
     </style>
 
+    //progressDialog Style
+    <style name="MyProgressDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:textColor">@color/colorAccent</item>
+        <item name="android:textSize">@dimen/spacing_mlarge</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:background">@color/clolrWhite</item>
+    </style>
+
     <style name="themeCard" parent="Theme.MaterialComponents.Light">
     </style>
 

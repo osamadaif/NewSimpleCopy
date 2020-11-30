@@ -44,7 +44,6 @@ import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.Numbers;
 import com.example.simplecopy.ui.activity.NumberEditor.NumberEditorActivity;
 import com.example.simplecopy.utils.AppExecutors;
-import com.example.simplecopy.utils.DataLoadCallback;
 import com.example.simplecopy.utils.HelperMethods;
 import com.example.simplecopy.utils.ThemeHelper;
 import com.ferfalk.simplesearchview.SimpleSearchView;
@@ -54,7 +53,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -90,7 +88,7 @@ import static com.example.simplecopy.utils.HelperMethods.showProgressDialog;
 import static com.example.simplecopy.utils.HelperMethods.vibrate;
 
 
-public class NumberListFragment extends Fragment implements CopyAdapter.ItemClickListener, DataLoadCallback {
+public class NumberListFragment extends Fragment implements CopyAdapter.ItemClickListener {
     View view;
     private static final String TAG = "NumberListFragment";
 
@@ -164,7 +162,6 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
                             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                                 if (!value.isEmpty ( )) {
                                     Log.d (TAG, "onEvent: siiiize noooo 0000");
-                                    startLoading ( );
 //                                    showRetrieveDataFromFSDialog ( );
                                     getAllDataFromFireStore ( );
                                 }
@@ -346,7 +343,7 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         switch (item.getItemId ( )) {
 
             case R.id.sync:
-                if (isConnected (getContext ())) {
+                if (isConnected (getContext ()) && LoadBoolean (getActivity ( ), ISLOGIN)) {
                     syncNumberData ( );
                 }
                 break;
@@ -374,6 +371,7 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
                 } else {
                     SaveData (getActivity ( ), ISLOGIN, false);
                     startActivity (new Intent (getActivity ( ), UserActivity.class));
+                    getActivity ().finish ();
                 }
                 return true;
         }
@@ -393,8 +391,10 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         MenuItem syncItem = menu.findItem (R.id.sync);
         if (enableSyncMenuItem) {
             syncItem.setEnabled (true);
+            syncItem.setIcon (R.drawable.ic_refresh);
         } else {
             syncItem.setEnabled (false);
+            syncItem.setIcon (R.drawable.ic_refresh_false);
         }
 
         MenuItem darkModeItem = menu.findItem (R.id.darkMode);
@@ -415,10 +415,10 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
 
     private void syncNumberData() {
         if (progressDialog == null) {
-            showProgressDialog (getActivity ( ), getResources ( ).getString (R.string.sync));
+            showProgressDialog (getActivity ( ), getResources ( ).getString (R.string.refresh));
         } else {
             if (!progressDialog.isShowing ( )) {
-                showProgressDialog (getActivity ( ), getResources ( ).getString (R.string.sync));
+                showProgressDialog (getActivity ( ), getResources ( ).getString (R.string.refresh));
             }
         }
         mAdapter.syncDataWithFireStore ( );
@@ -443,11 +443,11 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
                                 AppExecutors.getInstance ( ).diskIO ( ).execute (new Runnable ( ) {
                                     @Override
                                     public void run() {
-                                        if (mDB.numbersDao ( ) != null) {
+                                        if (mDB.numbersDao ( ) != null && queryDocumentSnapshots != null) {
                                             if (mDB.numbersDao ( ).isIdExist (Integer.parseInt (String.valueOf (snapshot.get (UID))))) {
 
                                                 return;
-                                            } else {
+                                            } else{
                                                 AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
                                                     @Override
                                                     public void run() {
@@ -478,6 +478,7 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
                 mainViewModel.deleteAllNumbers ( );
                 mAdapter.deleteAllFS ( );
                 Toast.makeText (getActivity ( ), getString (R.string.Deleted), Toast.LENGTH_SHORT).show ( );
+                enableSyncMenuItem = false;
             }
         });
         builder.setNegativeButton (R.string.cancel, new DialogInterface.OnClickListener ( ) {
@@ -518,29 +519,6 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         AlertDialog alertDialog = builder.create ( );
         alertDialog.show ( );
     }
-
-
-    private void showRetrieveDataFromFSDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder (getActivity ( ));
-        builder.setMessage (R.string.retrieve_dialog_msg);
-        builder.setPositiveButton (R.string.cancel, new DialogInterface.OnClickListener ( ) {
-            public void onClick(DialogInterface dialog, int id) {
-                if (dialog != null) {
-                    dialog.dismiss ( );
-                }
-            }
-        });
-        builder.setNegativeButton (R.string.ok, new DialogInterface.OnClickListener ( ) {
-            public void onClick(DialogInterface dialog, int id) {
-                getAllDataFromFireStore ( );
-            }
-        });
-
-        // Create and show the AlertDialog
-        AlertDialog alertDialog = builder.create ( );
-        alertDialog.show ( );
-    }
-
 
     @Override
     public void onNumberEdit(int itemId) {
@@ -672,19 +650,6 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
 
     }
 
-    public void deleteSelection() {
-        List<Integer> selectedItemPositions = mAdapter.getSelectedItems ( );
-        List<Integer> selectedItemIDs = new ArrayList<> ( );
-        for (int x : selectedItemPositions) {
-            int selectedId = mAdapter.getId (x);
-            selectedItemIDs.add (selectedId);
-
-            String uidStr = String.valueOf (selectedId);
-            fsDelete (numberDocuRef, uidStr);
-        }
-        mAdapter.removeSelected (selectedItemIDs);
-        mAdapter.notifyDataSetChanged ( );
-    }
 
     private void showDeleteSelectedConfirmationDialog() {
 
@@ -709,27 +674,23 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         alertDialog.show ( );
     }
 
+
+    public void deleteSelection() {
+        List<Integer> selectedItemPositions = mAdapter.getSelectedItems ( );
+        List<Integer> selectedItemIDs = new ArrayList<> ( );
+        for (int x : selectedItemPositions) {
+            int selectedId = mAdapter.getId (x);
+            selectedItemIDs.add (selectedId);
+
+            String uidStr = String.valueOf (selectedId);
+            fsDelete (numberDocuRef, uidStr);
+        }
+        mAdapter.removeSelected (selectedItemIDs);
+        mAdapter.notifyDataSetChanged ( );
+    }
+
     public void restartApp() {
         getActivity ( ).recreate ( );
     }
 
-    @Override
-    public void startLoading() {
-//        Log.d (TAG, "startLoading: begaaain");
-//        if (progressDialog == null) {
-//            showProgressDialog (getActivity ( ), getResources ( ).getString (R.string.wait));
-//        } else {
-//            if (!progressDialog.isShowing ( )) {
-//                showProgressDialog (getActivity ( ), getResources ( ).getString (R.string.wait));
-//            }
-//        }
-    }
-
-    @Override
-    public void loaded() {
-//        Log.d (TAG, "loaded: is sucsseeessss");
-//
-//        loadNotes ();
-//        dismissProgressDialog ( );
-    }
 }

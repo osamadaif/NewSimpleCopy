@@ -161,7 +161,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
                     enableSyncMenuItemNote = true;
 
                     if (isConnected (getContext ( )) && LoadBoolean (getActivity ( ), ISLOGIN) && LoadBoolean (getActivity ( ), ISFIRST)) {
-                        saveDataIntoFireStore ();
+                        saveDataIntoFireStore ( );
                     }
                 } else {
                     if (isConnected (getContext ( )) && LoadBoolean (getActivity ( ), ISLOGIN) && LoadBoolean (getActivity ( ), ISFIRST)) {
@@ -242,7 +242,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         });
     }
 
-    public void saveDataIntoFireStore(){
+    public void saveDataIntoFireStore() {
         noteDocuRef.get ( ).addOnCompleteListener (new OnCompleteListener<QuerySnapshot> ( ) {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -252,9 +252,10 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
                         noteDocuRef.addSnapshotListener (new EventListener<QuerySnapshot> ( ) {
                             @Override
                             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException error) {
-                                if (queryDocumentSnapshots.isEmpty ( )) {
-                                    mAdapter.insertAllIntoFireStore ( );
-                                }
+                                if (queryDocumentSnapshots != null)
+                                    if (queryDocumentSnapshots.isEmpty ( )) {
+                                        mAdapter.insertAllIntoFireStore ( );
+                                    }
                             }
                         });
 
@@ -281,7 +282,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
                                 AppExecutors.getInstance ( ).diskIO ( ).execute (new Runnable ( ) {
                                     @Override
                                     public void run() {
-                                        if (mDB.NotesDao () != null) {
+                                        if (mDB.NotesDao ( ) != null) {
                                             Log.d (TAG, "run: notes Dao nooot null");
                                             if (mDB.NotesDao ( ).isIdExist (Integer.parseInt (String.valueOf (snapshot.get (UID_NOTE)))) && LoadBoolean (getActivity ( ), ISFIRST)) {
                                                 Log.d (TAG, "run: ids the saaame and IsFirst");
@@ -297,7 +298,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
                                             } else if (mDB.NotesDao ( ).isIdExist (Integer.parseInt (String.valueOf (snapshot.get (UID_NOTE))))) {
                                                 Log.d (TAG, "run: ids the saaame but not First");
                                                 return;
-                                            } else if (LoadBoolean (getActivity ( ), ISFIRST)){
+                                            } else if (LoadBoolean (getActivity ( ), ISFIRST)) {
                                                 Log.d (TAG, "run: is Firrrst");
                                                 AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
                                                     @Override
@@ -347,7 +348,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId ( )) {
             case R.id.sync:
-                if (isConnected (getContext ())) {
+                if (isConnected (getContext ( )) && LoadBoolean (getActivity ( ), ISLOGIN)) {
                     syncNumberData ( );
                 }
                 break;
@@ -375,6 +376,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
                 } else {
                     SaveData (getActivity ( ), ISLOGIN, false);
                     startActivity (new Intent (getActivity ( ), UserActivity.class));
+                    getActivity ( ).finish ( );
                 }
                 return true;
         }
@@ -393,8 +395,10 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         MenuItem syncItem = menu.findItem (R.id.sync);
         if (enableSyncMenuItemNote) {
             syncItem.setEnabled (true);
+            syncItem.setIcon (R.drawable.ic_refresh);
         } else {
             syncItem.setEnabled (false);
+            syncItem.setIcon (R.drawable.ic_refresh_false);
         }
 
         MenuItem darkModeItem = menu.findItem (R.id.darkMode);
@@ -416,10 +420,10 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
 
     private void syncNumberData() {
         if (progressDialog == null) {
-            showProgressDialog (getActivity ( ), getResources ( ).getString (R.string.sync));
+            showProgressDialog (getActivity ( ), getResources ( ).getString (R.string.refresh));
         } else {
             if (!progressDialog.isShowing ( )) {
-                showProgressDialog (getActivity ( ), getResources ( ).getString (R.string.sync));
+                showProgressDialog (getActivity ( ), getResources ( ).getString (R.string.refresh));
             }
         }
         mAdapter.syncDataWithFireStore ( );
@@ -434,7 +438,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         }, 1000);
     }
 
-    private void syncDataWithRoom ( ){
+    private void syncDataWithRoom() {
         noteDocuRef
                 .addSnapshotListener (new EventListener<QuerySnapshot> ( ) {
                     @Override
@@ -446,11 +450,11 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
                                 AppExecutors.getInstance ( ).diskIO ( ).execute (new Runnable ( ) {
                                     @Override
                                     public void run() {
-                                        if (mDB.NotesDao () != null) {
+                                        if (mDB.NotesDao ( ) != null) {
                                             Log.d (TAG, "syncRun: notes Dao nooot null");
                                             if (mDB.NotesDao ( ).isIdExist (Integer.parseInt (String.valueOf (snapshot.get (UID_NOTE))))) {
                                                 return;
-                                            }else {
+                                            } else {
                                                 Log.d (TAG, "syncRun: not first and ids not the same");
                                                 AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
                                                     @Override
@@ -483,6 +487,7 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
                 notesViewModel.deleteAllNumbers ( );
                 mAdapter.deleteAllFS ( );
                 Toast.makeText (getActivity ( ), getString (R.string.Deleted), Toast.LENGTH_SHORT).show ( );
+                enableSyncMenuItemNote = false;
             }
         });
         builder.setNegativeButton (R.string.cancel, new DialogInterface.OnClickListener ( ) {

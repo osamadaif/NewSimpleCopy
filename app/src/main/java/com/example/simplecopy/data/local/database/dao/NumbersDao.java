@@ -27,6 +27,9 @@ public interface NumbersDao {
     @Query ("SELECT * FROM numbers WHERE title LIKE :searchQuery OR number LIKE :searchQuery ORDER BY CASE WHEN daily = 0 THEN 1 ELSE 0 END, done, daily DESC")
     LiveData<List<Numbers>> searchForByDaily (String searchQuery);
 
+    @Query("SELECT SUM(daily) FROM numbers WHERE done = 0")
+    LiveData<Integer> getTotalOFDaily();
+
     @Insert
     long insertTask(Numbers numbers);
 
@@ -51,8 +54,14 @@ public interface NumbersDao {
     @Query("UPDATE numbers SET daily = :value WHERE id = :itemId")
     void insertDaily(int value, int itemId);
 
+    @Query("SELECT daily FROM numbers WHERE id = :itemId")
+    int getDailyDB(int itemId);
+
     @Query("UPDATE numbers SET done = :value WHERE id = :itemId")
     void insertIfDone(int value, int itemId);
+
+    @Query("SELECT done FROM numbers WHERE id = :itemId")
+    int getDoneDB(int itemId);
 
     @Query ("DELETE FROM numbers WHERE id IN (:ids)")
     void deleteItemByIds(List<Integer> ids);

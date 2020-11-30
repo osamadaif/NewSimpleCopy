@@ -12,6 +12,9 @@ public class Constants {
     public static final String ISLOGIN = "ISLOGIN";
     public static final String ISFIRST = "ISFIRST";
     public static final String DONE_METHODE = "DONE";
+    public static final String UNDO = "UNDO";
+    public static final String REDO = "REDO";
+
 
     // Numbers Constants
     public static final String UID = "id";

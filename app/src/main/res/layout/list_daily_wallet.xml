@@ -6,9 +6,9 @@
     android:layout_marginStart="8dp"
     android:layout_marginTop="4dp"
     android:layout_marginEnd="8dp"
+    android:layout_marginBottom="1dp"
     android:orientation="vertical"
     android:theme="@style/Theme.MaterialComponents.Light.DarkActionBar.Bridge"
-    android:background="?attr/primarySurfaceColor"
     app:cardCornerRadius="10dp"
     app:cardElevation="3dp"
 
@@ -141,29 +141,6 @@
                     />
             </com.google.android.material.textfield.TextInputLayout>
 
-<!--            <com.google.android.material.textfield.TextInputLayout-->
-<!--                style="@style/line_box"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_weight="2"-->
-<!--                android:textColorHint="@color/colorAccent"-->
-<!--                app:hintTextAppearance="@style/HintText"-->
-<!--                android:layout_marginBottom="10dp"-->
-<!--                app:endIconMode="clear_text"-->
-<!--                app:endIconTint="@color/colorPrimaryLight">-->
-
-<!--                <com.google.android.material.textfield.TextInputEditText-->
-<!--                    android:id="@+id/edit_daily"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_gravity="center"-->
-<!--                    android:hint="@string/value"-->
-<!--                    android:inputType="number"-->
-<!--                    android:maxLength="7"-->
-<!--                    android:textColor="@color/colorAccent"-->
-<!--                    android:textSize="21sp" />-->
-<!--            </com.google.android.material.textfield.TextInputLayout>-->
-
         </LinearLayout>
 
 
@@ -172,7 +149,6 @@
 
 </com.google.android.material.card.MaterialCardView>
 
-    <!--    app:hintTextAppearance="@style/TextAppearance.App.TextInputLayout"-->
 
 
     <!--    android:theme="@style/myEditTextThem"-->

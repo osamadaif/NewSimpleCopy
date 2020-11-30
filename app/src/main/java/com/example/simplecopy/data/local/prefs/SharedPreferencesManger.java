@@ -4,6 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.List;
+
 
 public class SharedPreferencesManger {
 
@@ -70,16 +77,45 @@ public class SharedPreferencesManger {
         return sharedPreferences.getBoolean ("themePref", false);
     }
 
-//    public static void SaveData(Activity activity, String data_Key, Object data_Value) {
-//        setSharedPreferences (activity);
-//        if (sharedPreferences != null) {
-//            SharedPreferences.Editor editor = sharedPreferences.edit ( );
-//            Gson gson = new Gson ( );
-//            String StringData = gson.toJson (data_Value);
-//            editor.putString (data_Key, StringData);
-//            editor.apply ( );
-//        }
-//    }
+    public static void SaveData(Activity activity, String data_Key, Object data_Value) {
+        setSharedPreferences (activity);
+        if (sharedPreferences != null) {
+            SharedPreferences.Editor editor = sharedPreferences.edit ( );
+            Gson gson = new Gson ( );
+            String StringData = gson.toJson (data_Value);
+            editor.putString (data_Key, StringData);
+            editor.apply ( );
+        }
+    }
+
+    public static void SaveData(Activity activity, String data_Key, HashMap<String, String> jsonMap) {
+        setSharedPreferences (activity);
+        if (sharedPreferences != null) {
+            SharedPreferences.Editor editor = sharedPreferences.edit ( );
+            Gson gson = new Gson ( );
+            String jsonString = gson.toJson (jsonMap);
+            editor.putString (data_Key, jsonString);
+            editor.apply ( );
+        }
+    }
+
+    public static HashMap<String, String> LoadHashMap (Activity activity, String data_Key) {
+        setSharedPreferences (activity);
+
+//        String defValue = new Gson ().toJson(new HashMap<String, List<String>>());
+//        String json = sharedPreferences.getString(data_Key, defValue);
+//        TypeToken<HashMap<String,List<String>>> token = new TypeToken<HashMap<String,List<String>>>() {};
+//        HashMap<String,List<String>> retrievedMap = new Gson().fromJson(json,token.getType());
+
+
+        //get from shared prefs
+        Gson gson = new Gson ( );
+        String storedHashMapString = sharedPreferences.getString(data_Key, data_Key);
+        Type type = new TypeToken<HashMap<String, String>>(){}.getType();
+        HashMap<String, String> retrievedMap = gson.fromJson(storedHashMapString, type);
+
+        return retrievedMap;
+    }
 
     public static String LoadData(Activity activity, String data_Key) {
         setSharedPreferences (activity);

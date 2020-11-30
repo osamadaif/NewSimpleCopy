@@ -28,6 +28,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.example.simplecopy.App;
 import com.example.simplecopy.data.local.prefs.SharedPreferencesManger;
+import com.example.simplecopy.ui.activity.MainActivity;
 import com.example.simplecopy.ui.fragment.MainNumbers.MainViewModel;
 import com.example.simplecopy.utils.AppExecutors;
 import com.example.simplecopy.R;
@@ -125,6 +126,10 @@ public class NumberEditorActivity extends AppCompatActivity {
 
         if (savedInstanceState != null && savedInstanceState.containsKey (INSTANCE_NUMBER_ID)) {
             mNumberId = savedInstanceState.getInt (INSTANCE_NUMBER_ID, DEFAULT_NUMBER_ID);
+        }
+
+        if (isConnected (App.getContext ( )) && LoadBoolean (NumberEditorActivity.this , ISLOGIN)){
+            SaveData (NumberEditorActivity.this, ISFIRST, false);
         }
 
         Intent intent = getIntent ( );

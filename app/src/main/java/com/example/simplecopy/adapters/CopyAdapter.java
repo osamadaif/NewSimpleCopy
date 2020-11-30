@@ -17,23 +17,17 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.simplecopy.utils.AppExecutors;
 import com.example.simplecopy.R;
 import com.example.simplecopy.data.local.database.AppDatabase;
 import com.example.simplecopy.data.model.Numbers;
-import com.example.simplecopy.utils.DataLoadCallback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,16 +35,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadBoolean;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.LoadData;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.SaveData;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_ID;
 import static com.example.simplecopy.data.local.prefs.SharedPreferencesManger.USER_NAME;
 import static com.example.simplecopy.utils.Constants.DAILY;
 import static com.example.simplecopy.utils.Constants.DONE;
-import static com.example.simplecopy.utils.Constants.DONE_METHODE;
 import static com.example.simplecopy.utils.Constants.FAVORITE;
-import static com.example.simplecopy.utils.Constants.ISFIRST;
 import static com.example.simplecopy.utils.Constants.NOTE;
 import static com.example.simplecopy.utils.Constants.NUMBER;
 import static com.example.simplecopy.utils.Constants.NUMBERS;
