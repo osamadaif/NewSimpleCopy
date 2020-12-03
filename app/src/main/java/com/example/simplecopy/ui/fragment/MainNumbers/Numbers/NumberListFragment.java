@@ -12,6 +12,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -107,6 +108,7 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
     private FirebaseFirestore fdb;
     private CollectionReference numberDocuRef;
     private SimpleSearchView searchView;
+
     private ActionModeCallback actionModeCallback;
     public static ActionMode actionMode;
     View mEmptyView;
@@ -123,7 +125,6 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         view = inflater.inflate (R.layout.fragment_copy_number_list, container, false);
         fab = Objects.requireNonNull (getActivity ( )).findViewById (R.id.fab);
         setUpRecycleView ( );
-
         mainViewModel = new ViewModelProvider (this).get (MainViewModel.class);
         mainActivity = (MainActivity) this.getActivity ( );
         mDB = AppDatabase.getInstance (getContext ( ));
@@ -193,27 +194,25 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
             }
         });
 
-        //first time set an empty value to get all data
-        viewModel.filterTextAll.setValue ("");
-        searchView.getSearchEditText ( ).
 
-                addTextChangedListener (new TextWatcher ( ) {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                    }
+        mainViewModel.filterTextAll.setValue ("");
+        searchView.getSearchEditText ( ).addTextChangedListener (new TextWatcher ( ) {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        viewModel.setFilter (s.toString ( ));
-                        mAdapter.searchString = s.toString ( );
-                    }
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                viewModel.setFilter (s.toString ( ));
+                mAdapter.searchString = s.toString ( );
+            }
 
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                        viewModel.setFilter (s.toString ( ));
-                        mAdapter.searchString = s.toString ( );
-                    }
-                });
+            @Override
+            public void afterTextChanged(Editable s) {
+                viewModel.setFilter (s.toString ( ));
+                mAdapter.searchString = s.toString ( );
+            }
+        });
 
     }
 
@@ -335,7 +334,6 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         inflater.inflate (R.menu.menu_home, menu);
         MenuItem item = menu.findItem (R.id.search);
         searchView.setMenuItem (item);
-        searchView.setTabLayout (mainActivity.tabLayout);
     }
 
     @Override
@@ -343,7 +341,7 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
         switch (item.getItemId ( )) {
 
             case R.id.sync:
-                if (isConnected (getContext ()) && LoadBoolean (getActivity ( ), ISLOGIN)) {
+                if (isConnected (getContext ( )) && LoadBoolean (getActivity ( ), ISLOGIN)) {
                     syncNumberData ( );
                 }
                 break;
@@ -371,7 +369,7 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
                 } else {
                     SaveData (getActivity ( ), ISLOGIN, false);
                     startActivity (new Intent (getActivity ( ), UserActivity.class));
-                    getActivity ().finish ();
+                    getActivity ( ).finish ( );
                 }
                 return true;
         }
@@ -447,7 +445,7 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
                                             if (mDB.numbersDao ( ).isIdExist (Integer.parseInt (String.valueOf (snapshot.get (UID))))) {
 
                                                 return;
-                                            } else{
+                                            } else {
                                                 AppExecutors.getInstance ( ).mainThread ( ).execute (new Runnable ( ) {
                                                     @Override
                                                     public void run() {

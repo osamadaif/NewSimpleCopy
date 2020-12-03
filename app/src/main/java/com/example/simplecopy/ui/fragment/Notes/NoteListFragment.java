@@ -26,6 +26,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -182,8 +183,8 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
             }
         });
 
-        //first time set an empty value to get all data
-        viewModel.filterTextAll.setValue ("");
+
+        notesViewModel.filterTextAll.setValue ("");
         searchView.getSearchEditText ( ).addTextChangedListener (new TextWatcher ( ) {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -341,7 +342,6 @@ public class NoteListFragment extends Fragment implements CopyNoteAdapter.ItemCl
         inflater.inflate (R.menu.menu_home, menu);
         MenuItem item = menu.findItem (R.id.search);
         searchView.setMenuItem (item);
-        searchView.setTabLayout (mainActivity.tabLayout);
     }
 
     @Override

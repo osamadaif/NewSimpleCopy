@@ -83,20 +83,6 @@
                 android:textColor="@color/red"
                 android:textSize="21sp" />
 
-            <!--        <Button-->
-            <!--            android:id="@+id/btn_Enter"-->
-            <!--            android:layout_width="wrap_content"-->
-            <!--            android:layout_height="wrap_content"-->
-            <!--            android:text="@string/enter"-->
-            <!--            android:textSize="20sp"-->
-            <!--            android:textColor="@color/clolrWhite"-->
-
-            <!--            android:layout_marginEnd="10dp"-->
-            <!--            android:background="@drawable/btn_background"-->
-            <!--            android:textAppearance="@style/TextAppearance.AppCompat.Small"-->
-            <!--            android:layout_gravity="center" />-->
-
-
             <ImageView
                 android:id="@+id/btn_minus"
                 android:layout_width="17pt"

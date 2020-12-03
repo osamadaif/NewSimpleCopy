@@ -140,6 +140,7 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
                                     }
                                     SaveData (activity, UNDO, undoMap);
                                     enableMenuItemUndo = true;
+                                    activity.invalidateOptionsMenu ( );
                                     enableMenuItemRedo = false;
                                     mDB.numbersDao ( ).insertDaily (dailyNumber, mNumberList.get (position).getId ( ));
                                     Map<String, Object> dailyeMap = new HashMap<> ( );
@@ -235,6 +236,7 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
                             undoMap.put (DAILY, oldDailyString);
                             SaveData (activity, UNDO, undoMap);
                             enableMenuItemUndo = true;
+                            activity.invalidateOptionsMenu ( );
                             enableMenuItemRedo = false;
                             String numbersString = holder.mAddNumber.getText ( ).toString ( ).trim ( );
                             final int dailyNumber = Integer.parseInt (numbersString);
@@ -295,6 +297,7 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
                                 undoMap.put (DAILY, oldDailyString);
                                 SaveData (activity, UNDO, undoMap);
                                 enableMenuItemUndo = true;
+                                activity.invalidateOptionsMenu ( );
                                 enableMenuItemRedo = false;
                                 mDB.numbersDao ( ).insertDaily (finalDaily, mNumberList.get (position).getId ( ));
                                 String finalDailyStr = String.valueOf (finalDaily);
@@ -386,6 +389,7 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
         });
         enableMenuItemUndo = false;
         enableMenuItemRedo = true;
+        activity.invalidateOptionsMenu ( );
     }
 
     public void getRedo(){
@@ -439,6 +443,7 @@ public class DailyRecyclerAdapter extends RecyclerView.Adapter<DailyRecyclerAdap
             }
         });
         enableMenuItemUndo = true;
+        activity.invalidateOptionsMenu ( );
         enableMenuItemRedo = false;
     }
 

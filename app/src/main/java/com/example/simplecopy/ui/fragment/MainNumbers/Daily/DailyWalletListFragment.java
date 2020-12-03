@@ -1,16 +1,19 @@
 package com.example.simplecopy.ui.fragment.MainNumbers.Daily;
 
+import android.app.SearchManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Point;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -27,6 +30,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -45,6 +49,7 @@ import com.example.simplecopy.data.model.Numbers;
 import com.example.simplecopy.utils.HelperMethods;
 import com.example.simplecopy.utils.ThemeHelper;
 import com.ferfalk.simplesearchview.SimpleSearchView;
+import com.ferfalk.simplesearchview.utils.DimensUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -92,6 +97,7 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
     LinearLayout aboveRcyclerLinearLayout;
 
     private SimpleSearchView searchView;
+    public static final int EXTRA_REVEAL_CENTER_PADDING = 40;
 
     // Required empty public constructor
     public DailyWalletListFragment() {
@@ -104,8 +110,9 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
 
         // Inflate the layout for this fragment
         view = inflater.inflate (R.layout.fragment_daily__wallet, container, false);
-        mainViewModel = new ViewModelProvider (this).get (MainViewModel.class);
         setUpRecycleView ();
+        mainViewModel = new ViewModelProvider (this).get (MainViewModel.class);
+        mainActivity =(MainActivity)this.getActivity();
         mDB = AppDatabase.getInstance (getContext ());
         firebaseAuth = FirebaseAuth.getInstance ();
         user = firebaseAuth.getCurrentUser ();
@@ -113,8 +120,7 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
         numberDocRef = fdb.collection (USERS)
                 .document (LoadData (getActivity (), USER_NAME) + " " + LoadData (getActivity (), USER_ID))
                 .collection (NUMBERS);
-        mainActivity =(MainActivity)this.getActivity();
-        searchView = getActivity ().findViewById(R.id.searchView);
+        searchView = getActivity ( ).findViewById (R.id.searchView);
         setupViewModel ( );
         aboveRcyclerLinearLayout = view.findViewById (R.id.lin_lay_daily);
         totalTextView = view.findViewById (R.id.sum_total_daily);
@@ -155,6 +161,7 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
                     @Override
                     public void run() {
                         enableMenuItemUndo = true;
+                        getActivity ().invalidateOptionsMenu ( );
                         enableMenuItemRedo = false;
                         final int position = viewHolder.getAdapterPosition();
                         //final Numbers numbers = mNumber.get (position);
@@ -220,9 +227,9 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
                 }
             }
         });
-                //first time set an empty value to get all data
-                viewModel.filterTextAll.setValue ("");
-                searchView.getSearchEditText ().addTextChangedListener (new TextWatcher ( ) {
+
+        mainViewModel.filterTextAll.setValue ("");
+        searchView.getSearchEditText ().addTextChangedListener (new TextWatcher ( ) {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -258,28 +265,22 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate (R.menu.menu_daily, menu);
-        final MenuItem item = menu.findItem (R.id.searchDaily);
+         MenuItem item = menu.findItem (R.id.searchDaily);
         searchView.setMenuItem(item);
-        searchView.setTabLayout( mainActivity.tabLayout);
-        searchView.setOnSearchViewListener (new SimpleSearchView.SearchViewListener ( ) {
+//        searchView.setTabLayout( mainActivity.tabLayout);
+        // Adding padding to the animation because of the hidden menu item
+        Point revealCenter = searchView.getRevealAnimationCenter();
+        revealCenter.x -= DimensUtils.convertDpToPx (EXTRA_REVEAL_CENTER_PADDING, getActivity ());
+        searchView.setOnFocusChangeListener (new View.OnFocusChangeListener ( ) {
             @Override
-            public void onSearchViewShown() {
-
-            }
-
-            @Override
-            public void onSearchViewClosed() {
-                mainActivity.tabLayout.setVisibility (View.VISIBLE);
-            }
-
-            @Override
-            public void onSearchViewShownAnimation() {
-
-            }
-
-            @Override
-            public void onSearchViewClosedAnimation() {
-                mainActivity.tabLayout.setVisibility (View.VISIBLE);
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+//                    showInputMethod();
+                    InputMethodManager imm = (InputMethodManager) getActivity ().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (imm != null) {
+                        imm.showSoftInput(view.findFocus(), 0);
+                    }
+                }
             }
         });
     }
@@ -322,8 +323,9 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
     @Override
     public void onPrepareOptionsMenu(@NonNull Menu menu) {
         MenuItem undoItem = menu.findItem (R.id.undoDaily);
-        getActivity ().invalidateOptionsMenu ( );
+
         if (enableMenuItemUndo) {
+//            getActivity ().invalidateOptionsMenu ( );
             undoItem.setEnabled (true);
             undoItem.setIcon (R.drawable.ic_undo_white);
         } else {
@@ -332,8 +334,9 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
         }
 
         MenuItem redoItem = menu.findItem (R.id.redoDaily);
-        getActivity ().invalidateOptionsMenu ( );
         if (enableMenuItemRedo) {
+
+//            getActivity ().invalidateOptionsMenu ( );
             redoItem.setEnabled (true);
             redoItem.setIcon (R.drawable.ic_redo_white);
         } else {

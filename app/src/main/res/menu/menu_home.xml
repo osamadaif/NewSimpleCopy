@@ -5,6 +5,12 @@
     tools:context=".ui.activity.MainActivity">
 
     <item
+        android:id="@+id/sync"
+        android:title="@string/refresh"
+        android:icon="@drawable/ic_refresh"
+        app:showAsAction="ifRoom|collapseActionView"/>
+
+    <item
         android:id="@+id/deletall"
         android:title="@string/DeleteAll"
         android:icon="@drawable/delete_all"
@@ -14,13 +20,6 @@
         android:id="@+id/search"
         android:title="@string/Search"
         android:icon="@drawable/ic_search"
-        app:showAsAction="ifRoom|collapseActionView"
-        app:actionViewClass="androidx.appcompat.widget.SearchView"/>
-
-    <item
-        android:id="@+id/sync"
-        android:title="@string/refresh"
-        android:icon="@drawable/ic_refresh"
         app:showAsAction="ifRoom|collapseActionView"/>
 
     <item
@@ -39,12 +38,5 @@
         android:title="@string/logout"
         app:showAsAction="never"/>
 
-
-
-<!--    <item-->
-<!--        android:id="@+id/settings"-->
-<!--        android:title="@string/Settings"-->
-<!--        android:icon="@drawable/ic_settings"-->
-<!--        app:showAsAction="never"/>-->
 
 </menu>

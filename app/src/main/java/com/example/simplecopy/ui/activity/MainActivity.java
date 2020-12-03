@@ -59,10 +59,13 @@ public class MainActivity extends AppCompatActivity  {
         HelperMethods.changeLang(this, SharedPreferencesManger.onLoadLang(this));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        tabLayout = findViewById (R.id.tabLayout);
+
         appBarLayout = findViewById (R.id.appbar_id);
         viewPager = findViewById (R.id.viewPager);
         toolbar = findViewById (R.id.toolbar);
+        searchView = findViewById(R.id.searchView);
+        tabLayout = findViewById (R.id.tabLayout);
+        searchView.setTabLayout( tabLayout);
         setSupportActionBar (toolbar);
         if (LoadBoolean (MainActivity.this , ISLOGIN)){
             getSupportActionBar().setTitle(Html.fromHtml("<font color=\"#FFFFFF\">" + LoadData (MainActivity.this , USER_NAME) + "</font>"));
@@ -70,13 +73,11 @@ public class MainActivity extends AppCompatActivity  {
             getSupportActionBar().setTitle(Html.fromHtml("<font color=\"#FFFFFF\">" + getString(R.string.app_name) + "</font>"));
         }
 
-
         firebaseAuth = FirebaseAuth.getInstance ();
-        invalidateOptionsMenu();
 
         setupViewPager (viewPager);
         tabLayout.setupWithViewPager (viewPager);
-        searchView = findViewById(R.id.searchView);
+
         fab =  findViewById(R.id.fab);
         if (tabLayout.getSelectedTabPosition() == 0) {
             fab.setOnClickListener(new View.OnClickListener() {
