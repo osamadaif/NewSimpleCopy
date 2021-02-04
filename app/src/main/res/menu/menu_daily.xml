@@ -4,17 +4,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".ui.activity.MainActivity">
 
-    <item
-        android:id="@+id/undoDaily"
-        android:icon="@drawable/ic_undo_false"
-        android:title="@string/undo"
-        app:showAsAction="always" />
+<!--    <item-->
+<!--        android:id="@+id/undoDaily"-->
+<!--        android:icon="@drawable/ic_undo_false"-->
+<!--        android:title="@string/undo"-->
+<!--        app:showAsAction="always" />-->
 
-    <item
-        android:id="@+id/redoDaily"
-        android:icon="@drawable/ic_redo_false"
-        android:title="@string/redo"
-        app:showAsAction="always" />
+<!--    <item-->
+<!--        android:id="@+id/redoDaily"-->
+<!--        android:icon="@drawable/ic_redo_false"-->
+<!--        android:title="@string/redo"-->
+<!--        app:showAsAction="always" />-->
 
     <item
         android:id="@+id/searchDaily"

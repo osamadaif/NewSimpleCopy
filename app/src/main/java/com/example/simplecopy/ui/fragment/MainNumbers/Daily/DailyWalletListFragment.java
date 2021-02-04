@@ -88,8 +88,8 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
     private FirebaseFirestore fdb;
     private CollectionReference numberDocRef;
 
-    public static boolean enableMenuItemUndo;
-    public static boolean enableMenuItemRedo;
+//    public static boolean enableMenuItemUndo;
+//    public static boolean enableMenuItemRedo;
 
     private View mEmptyView;
     Button empty_btn;
@@ -160,9 +160,9 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
                 AppExecutors.getInstance().diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
-                        enableMenuItemUndo = true;
+//                        enableMenuItemUndo = true;
                         getActivity ().invalidateOptionsMenu ( );
-                        enableMenuItemRedo = false;
+//                        enableMenuItemRedo = false;
                         final int position = viewHolder.getAdapterPosition();
                         //final Numbers numbers = mNumber.get (position);
                         final List<Numbers> number = mAdapter.getItems ();
@@ -288,12 +288,12 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId ()){
-            case R.id.undoDaily:
-                mAdapter.getUndo ();
-                break;
-            case R.id.redoDaily:
-                mAdapter.getRedo ();
-                break;
+//            case R.id.undoDaily:
+//                mAdapter.getUndo ();
+//                break;
+//            case R.id.redoDaily:
+//                mAdapter.getRedo ();
+//                break;
             case R.id.lang_daily:
                 HelperMethods.showSelectLanguageDialog (getActivity (), getContext ());
                 break;
@@ -322,27 +322,27 @@ public class DailyWalletListFragment extends Fragment implements DailyRecyclerAd
 
     @Override
     public void onPrepareOptionsMenu(@NonNull Menu menu) {
-        MenuItem undoItem = menu.findItem (R.id.undoDaily);
+//        MenuItem undoItem = menu.findItem (R.id.undoDaily);
 
-        if (enableMenuItemUndo) {
-//            getActivity ().invalidateOptionsMenu ( );
-            undoItem.setEnabled (true);
-            undoItem.setIcon (R.drawable.ic_undo_white);
-        } else {
-            undoItem.setEnabled (false);
-            undoItem.setIcon (R.drawable.ic_undo_false);
-        }
-
-        MenuItem redoItem = menu.findItem (R.id.redoDaily);
-        if (enableMenuItemRedo) {
-
-//            getActivity ().invalidateOptionsMenu ( );
-            redoItem.setEnabled (true);
-            redoItem.setIcon (R.drawable.ic_redo_white);
-        } else {
-            redoItem.setEnabled (false);
-            redoItem.setIcon (R.drawable.ic_redo_false);
-        }
+//        if (enableMenuItemUndo) {
+////            getActivity ().invalidateOptionsMenu ( );
+//            undoItem.setEnabled (true);
+//            undoItem.setIcon (R.drawable.ic_undo_white);
+//        } else {
+//            undoItem.setEnabled (false);
+//            undoItem.setIcon (R.drawable.ic_undo_false);
+//        }
+//
+//        MenuItem redoItem = menu.findItem (R.id.redoDaily);
+//        if (enableMenuItemRedo) {
+//
+////            getActivity ().invalidateOptionsMenu ( );
+//            redoItem.setEnabled (true);
+//            redoItem.setIcon (R.drawable.ic_redo_white);
+//        } else {
+//            redoItem.setEnabled (false);
+//            redoItem.setIcon (R.drawable.ic_redo_false);
+//        }
 
         MenuItem darkModeItem = menu.findItem (R.id.darkMode_daily);
         if (AppCompatDelegate.getDefaultNightMode () == AppCompatDelegate.MODE_NIGHT_YES) {

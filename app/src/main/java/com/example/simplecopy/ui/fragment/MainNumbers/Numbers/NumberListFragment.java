@@ -123,7 +123,7 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate (R.layout.fragment_copy_number_list, container, false);
-        fab = Objects.requireNonNull (getActivity ( )).findViewById (R.id.fab);
+        fab = requireActivity().findViewById (R.id.fab);
         setUpRecycleView ( );
         mainViewModel = new ViewModelProvider (this).get (MainViewModel.class);
         mainActivity = (MainActivity) this.getActivity ( );
@@ -586,7 +586,7 @@ public class NumberListFragment extends Fragment implements CopyAdapter.ItemClic
             view.setHapticFeedbackEnabled (true);
 
             vibrate (view);
-            actionMode = (Objects.requireNonNull (getActivity ( ))).startActionMode (actionModeCallback);
+            actionMode = requireActivity().startActionMode (actionModeCallback);
         }
         toggleSelection (position);
     }
